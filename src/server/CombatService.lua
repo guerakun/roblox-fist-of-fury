@@ -1,3 +1,4 @@
+local Destruction = require(script.Parent.DestructionService)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -230,6 +231,9 @@ local function performAttack(player, action, data)
 	task.delay(attack.Windup, function()
 		if records[player] ~= data or player.Character ~= model or data.downed or data.respawning or now() < data.stunnedUntil then return end
 		doHitbox(player, attack, direction)
+		if action == "Heavy" or action == "Special" then
+			Destruction.BreakNearby(r.Position + Vector3.new(direction * attack.Range / 2, 0, 0), math.clamp(attack.Width, 8, 14), direction)
+		end
 	end)
 end
 local allowedActions = {Light = true, Heavy = true, Special = true, Dash = true, Block = true, Recovery = true, Jump = true, SelectCharacter = true, Restart = true}

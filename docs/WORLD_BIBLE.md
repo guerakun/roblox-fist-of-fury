@@ -36,7 +36,7 @@ Palette: blue-black architecture, desaturated pavement, cyan guidance, amber hum
 
 Architecture uses foundation trim, roof cornices, facade pilasters, mullions, office windows, shop canopies, signage, and distinct rooftop heights. Three perceived depth layers are pavement/curb, shopfronts and skyline. No real anime frame, poster or soundtrack is embedded in the builder. All current typography and geometric set dressing are authored locally.
 
-Road joints, crossing stripes, restrained wet reflections, bollards, benches, vending machines and utility boxes support the scale. Decorative objects remain anchored and generally non-colliding to protect combat movement. Vending machine bodies and utility boxes expose `Destructible`, `Health`, and `PropKind` attributes and a `Destructible` collection tag. These are hooks; their child-free decorative parts require a destruction integration pass before these props can be marketed as fully destructible.
+Road joints, crossing stripes, restrained wet reflections, bollards, benches, vending machines and utility boxes support the scale. Decorative objects remain anchored and generally non-colliding to protect combat movement. There are 21 complete destructible Model assemblies: five vending machines, nine utility boxes, six benches and one traffic signal. Each assembly owns all of its decorative pieces and exposes `Destructible`, `Health`, `PropKind` and `Broken` attributes plus a `Destructible` collection tag. `DestructionService.BreakNearby(position, radius, direction)` is a server-only API for accepted heavy/special hits. It hides the complete assembly, disables collision/query, emits up to four harmless fragments, and restores the original state after 20 seconds. There is a hard cap of 30 concurrent debris pieces and each expires in 1.5 seconds. Structural roads, gates, rails and buildings are never tagged. The metadata Health value is descriptive; this API breaks a selected prop immediately rather than implementing gradual prop damage. Root integration and runtime tests must verify the actual heavy/special trigger.
 
 ## Toolbox integration and asset policy
 
@@ -51,7 +51,7 @@ For character additions retain Naruto, Luffy and Tanjiro as the requested themat
 - Verify the first 30 seconds communicates attack, dodge, direction and cooperative objective without a wall of tutorial text.
 - Playtest moving and attacking simultaneously, launch recovery, enemy collision clusters, simultaneous ability effects and teammate rescue conditions.
 - Validate on a representative mobile device; thousands of simple Parts still need measured frame-time and memory budgets. Consider replacing repeated facade details with reusable MeshParts after the composition is approved.
-- Add spatial sound, polished animation blending, authored character silhouettes, boss camera beats, civilian story interactions, and responsive destructible dressing before describing the result as comparable to Jujutsu Shenanigans.
+- Add spatial sound, polished animation blending, authored character silhouettes, boss camera beats, civilian story interactions, and a multiplayer-verified destructible response before describing the result as comparable to Jujutsu Shenanigans.
 - Preserve ideas that are deferred in this document or the project backlog with status. Do not delete the rescue story or roster intention just because implementation is staged.
 
 ## Deferred expansions, preserved

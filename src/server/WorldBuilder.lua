@@ -54,6 +54,17 @@ function WorldBuilder.Build()
 		local l = Instance.new("PointLight"); l.Color = color; l.Brightness = brightness
 		l.Range = range; l.Shadows = false; l.Parent = host
 	end
+	local function destructible(name, kind, health)
+		local assembly = Instance.new("Model")
+		assembly.Name = name
+		assembly:SetAttribute("Destructible", true)
+		assembly:SetAttribute("PropKind", kind)
+		assembly:SetAttribute("Health", health)
+		assembly:SetAttribute("Broken", false)
+		assembly.Parent = details
+		CollectionService:AddTag(assembly, "Destructible")
+		return assembly
+	end
 	local function beam(name, a, b, thickness, color, parent)
 		local p = part(name, Vector3.new(thickness, thickness, (a-b).Magnitude), (a+b)/2, color, parent, Enum.Material.Metal)
 		p.CFrame = CFrame.lookAt((a+b)/2, b); return p
@@ -173,10 +184,11 @@ function WorldBuilder.Build()
 		pointLight(light, color, 1.5, 28)
 	end
 	for x = 8, 532, 43 do lamp(x, x < 180 and C.cyan or x < 360 and C.amber or C.white) end
-	part("TrafficSignalPost", Vector3.new(.45, 12, .45), Vector3.new(95, 6, -15), C.silver, details, Enum.Material.Metal)
-	part("TrafficSignalBox", Vector3.new(2.2, 5.5, 1.1), Vector3.new(95, 12, -15), C.ink)
+	local traffic = destructible("CrossingSignalAssembly", "TrafficSignal", 35)
+	traffic.PrimaryPart = part("TrafficSignalPost", Vector3.new(.45, 12, .45), Vector3.new(95, 6, -15), C.silver, traffic, Enum.Material.Metal)
+	part("TrafficSignalBox", Vector3.new(2.2, 5.5, 1.1), Vector3.new(95, 12, -15), C.ink, traffic)
 	for i, color in ipairs({C.red,C.amber,C.cyan}) do
-		local bulb = glow("TrafficBulb",Vector3.new(1.1,1.1,.3),Vector3.new(95,14-i*1.4,-14.3),color)
+		local bulb = glow("TrafficBulb",Vector3.new(1.1,1.1,.3),Vector3.new(95,14-i*1.4,-14.3),color,traffic)
 		bulb.Shape = Enum.PartType.Ball
 	end
 
@@ -244,31 +256,30 @@ function WorldBuilder.Build()
 	end
 	sign("CurtainSeal","帳\nBREAK THE SEAL",510,18,-18.6,17,9,C.ink,C.red)
 
-	-- Street dressing stays outside the main central combat lane, with destructible metadata.
+	-- Whole assemblies break/restore together; structural floor and gates are never tagged.
 	local function vending(x, accent)
-		local body = part("VendingMachine",Vector3.new(3.4,6,2.2),Vector3.new(x,3,-12.1),C.blue)
-		body:SetAttribute("Destructible",true); body:SetAttribute("Health",40); body:SetAttribute("PropKind","Vending")
-		CollectionService:AddTag(body,"Destructible")
-		part("VendingGlass",Vector3.new(2.7,3.4,.18),Vector3.new(x,3.8,-10.9),C.ink)
+		local assembly = destructible("VendingAssembly_"..x, "Vending", 40)
+		assembly.PrimaryPart = part("VendingMachine",Vector3.new(3.4,6,2.2),Vector3.new(x,3,-12.1),C.blue,assembly)
+		part("VendingGlass",Vector3.new(2.7,3.4,.18),Vector3.new(x,3.8,-10.9),C.ink,assembly)
 		for y = 2.7, 4.8, 1 do
 			for dx = -.8, .8, .8 do
-				glow("DrinkBottle",Vector3.new(.4,.65,.2),Vector3.new(x+dx,y,-10.7),accent)
+				glow("DrinkBottle",Vector3.new(.4,.65,.2),Vector3.new(x+dx,y,-10.7),accent,assembly)
 			end
 		end
-		part("VendingSlot",Vector3.new(1.8,.5,.2),Vector3.new(x,1,-10.8),C.ink)
+		part("VendingSlot",Vector3.new(1.8,.5,.2),Vector3.new(x,1,-10.8),C.ink,assembly)
 	end
 	for _, x in ipairs({33,129,215,303,426}) do vending(x,x%2==0 and C.cyan or C.amber) end
 	for _, x in ipairs({25,115,166,203,281,336,380,443,528}) do
-		local prop = part("StreetUtilityBox",Vector3.new(2,2.8,1.7),Vector3.new(x,1.4,11.8),C.concrete)
-		prop:SetAttribute("Destructible",true); prop:SetAttribute("Health",25); prop:SetAttribute("PropKind","Utility")
-		CollectionService:AddTag(prop,"Destructible")
-		for y = 1, 2.1, .3 do part("UtilityVent",Vector3.new(1.4,.09,.1),Vector3.new(x,y,12.7),C.ink) end
-		glow("UtilityIndicator",Vector3.new(.18,.18,.1),Vector3.new(x+.55,2.45,12.7),C.amber)
+		local assembly = destructible("UtilityAssembly_"..x, "Utility", 25)
+		assembly.PrimaryPart = part("StreetUtilityBox",Vector3.new(2,2.8,1.7),Vector3.new(x,1.4,11.8),C.concrete,assembly)
+		for y = 1, 2.1, .3 do part("UtilityVent",Vector3.new(1.4,.09,.1),Vector3.new(x,y,12.7),C.ink,assembly) end
+		glow("UtilityIndicator",Vector3.new(.18,.18,.1),Vector3.new(x+.55,2.45,12.7),C.amber,assembly)
 	end
 	for _, x in ipairs({44,151,246,323,412,480}) do
-		part("BenchSeat",Vector3.new(6,.35,1.7),Vector3.new(x,1.5,-12.2),C.concrete)
-		part("BenchBack",Vector3.new(6,1.3,.25),Vector3.new(x,2.2,-12.9),C.blue)
-		for _, dx in ipairs({-2,2}) do part("BenchLeg",Vector3.new(.25,1.4,1.4),Vector3.new(x+dx,.7,-12.2),C.silver) end
+		local assembly = destructible("BenchAssembly_"..x, "Bench", 25)
+		assembly.PrimaryPart = part("BenchSeat",Vector3.new(6,.35,1.7),Vector3.new(x,1.5,-12.2),C.concrete,assembly)
+		part("BenchBack",Vector3.new(6,1.3,.25),Vector3.new(x,2.2,-12.9),C.blue,assembly)
+		for _, dx in ipairs({-2,2}) do part("BenchLeg",Vector3.new(.25,1.4,1.4),Vector3.new(x+dx,.7,-12.2),C.silver,assembly) end
 	end
 	for x = 5, 530, 17 do
 		local wet = part("RainReflection",Vector3.new(random:NextNumber(2,6),.012,random:NextNumber(.3,1.2)),Vector3.new(x,.015,random:NextNumber(-10,10)),x<180 and C.cyan or x<360 and C.amber or C.purple,streets,Enum.Material.Glass)

@@ -272,8 +272,14 @@ end
 local function send(action: string, held: boolean?)
     if UserInputService:GetFocusedTextBox() then return end
     if action == "Jump" then
+        if snapshot.downed or snapshot.blocking or localBlocking or ending.Visible then return end
         if humanoid and humanoid.Health > 0 then
-            if humanoid.FloorMaterial ~= Enum.Material.Air then humanoid.Jump = true
+            local character = humanoid.Parent
+            if character and (character:GetAttribute("Downed") or character:GetAttribute("Blocking")) then return end
+            if humanoid.FloorMaterial ~= Enum.Material.Air then
+                humanoid.Jump = true
+                -- Explicit transition survives the disabled default PlayerModule clearing Jump.
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
             else actionRemote:FireServer("Recovery", {direction = facing}) end
         end
         return
@@ -381,6 +387,159 @@ local function burst(position: Vector3, color: Color3, heavy: boolean, direction
         Debris:AddItem(streak, 0.3)
     end
 end
+-- Distinct cosmetic specials. Every piece is anchored/non-queryable and has bounded lifetime.
+-- A single temporary render connection animates up to eight overlapping specials.
+local specialEffects: {any} = {}
+local specialConnection: RBXScriptConnection? = nil
+local function startSpecial(position: Vector3, hero: string, direction: number): boolean
+    if #specialEffects >= 8 or activeEffects >= 24 then return false end
+    if hero ~= "Naruto" and hero ~= "Luffy" and hero ~= "Tanjiro" then return false end
+    direction = direction >= 0 and 1 or -1
+    local windup, reach = 0.22, 15
+    if hero == "Luffy" then windup, reach = 0.38, 23
+    elseif hero == "Tanjiro" then windup, reach = 0.18, 12 end
+    -- Match current balancing without making imported visual code part of damage execution.
+    local shared = package:FindFirstChild("Shared")
+    local configModule = shared and shared:FindFirstChild("Config")
+    if configModule and configModule:IsA("ModuleScript") then
+        local ok, config = pcall(require, configModule)
+        local spec = ok and config.Characters and config.Characters[hero]
+        if spec then windup = spec.Special.Windup; reach = spec.Special.Range end
+    end
+    local holder = Instance.new("Folder")
+    holder.Name = hero .. "Special"
+    holder.Parent = effectsFolder
+    local lifetime = windup + 0.62
+    Debris:AddItem(holder, lifetime + 0.1)
+    activeEffects += 1
+    local origin = position + Vector3.new(0, 0.65, 1.25)
+    local function piece(color: Color3, size: Vector3, shape: Enum.PartType?): BasePart
+        local part = particlePart(origin, color, size)
+        if shape then part.Shape = shape end
+        part.Parent = holder
+        return part
+    end
+    local function trail(part: BasePart, color: Color3, width: number, duration: number)
+        local a = make("Attachment", {Position = Vector3.new(0, width * 0.5, 0)}, part)
+        local b = make("Attachment", {Position = Vector3.new(0, -width * 0.5, 0)}, part)
+        make("Trail", {Attachment0 = a, Attachment1 = b, Color = ColorSequence.new(color, COLORS.text),
+            Lifetime = duration, MinLength = 0.04, LightEmission = 1, FaceCamera = true,
+            Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.12), NumberSequenceKeypoint.new(1, 1)})}, part)
+    end
+    local update: (number) -> ()
+    if hero == "Naruto" then
+        local core = piece(Color3.fromRGB(212, 252, 255), Vector3.one * 0.5, Enum.PartType.Ball)
+        local shell = piece(Color3.fromRGB(58, 200, 255), Vector3.one * 0.8, Enum.PartType.Ball)
+        shell.Transparency = 0.65
+        local satellites = {}
+        for index = 1, 4 do
+            local dot = piece(COLORS.cyan, Vector3.one * 0.18, Enum.PartType.Ball)
+            trail(dot, Color3.fromRGB(69, 213, 255), 0.2, 0.2)
+            satellites[index] = dot
+        end
+        trail(core, Color3.fromRGB(118, 231, 255), 1.2, 0.13)
+        update = function(t)
+            local charging = math.clamp(t / windup, 0, 1)
+            local strike = math.clamp((t - windup) / 0.13, 0, 1)
+            local fade = math.clamp((t - windup - 0.2) / 0.35, 0, 1)
+            local center = origin + Vector3.new(direction * (2.4 + reach * strike), 0.2, 0)
+            local radius = 0.3 + charging * 1.1 + strike * 0.45
+            core.Position = center; core.Size = Vector3.one * radius * 1.1; core.Transparency = fade
+            shell.Position = center; shell.Size = Vector3.one * radius * 2.15; shell.Transparency = 0.65 + fade * 0.35
+            for index, dot in ipairs(satellites) do
+                local theta = t * 31 + index * math.pi * 0.5
+                dot.Position = center + Vector3.new(math.sin(theta * 0.5) * radius * 0.45, math.cos(theta) * radius, math.sin(theta) * radius)
+                dot.Transparency = fade
+            end
+        end
+    elseif hero == "Luffy" then
+        local skin = Color3.fromRGB(242, 181, 137)
+        local fist = piece(skin, Vector3.new(1.65, 1.55, 1.5), Enum.PartType.Ball)
+        fist.Material = Enum.Material.SmoothPlastic
+        local arm = piece(skin, Vector3.new(0.75, 0.75, 1))
+        arm.Material = Enum.Material.SmoothPlastic
+        local cuff = piece(Color3.fromRGB(226, 53, 64), Vector3.new(1.0, 1.0, 0.7))
+        local speedLines = {}
+        for index = 1, 4 do speedLines[index] = piece(Color3.fromRGB(255, 236, 201), Vector3.new(0.08, 0.08, 1)) end
+        trail(fist, COLORS.orange, 0.8, 0.09)
+        update = function(t)
+            local charge = math.clamp(t / windup, 0, 1)
+            local strikeAge = t - windup
+            local extension = math.clamp(strikeAge / 0.085, 0, 1)
+            local recoil = math.clamp((strikeAge - 0.13) / 0.2, 0, 1)
+            local fade = math.clamp((strikeAge - 0.29) / 0.18, 0, 1)
+            local shoulder = origin + Vector3.new(direction * 0.75, 0, 0)
+            local distance = strikeAge < 0 and (1.5 - charge * 2.6) or (1.5 + (reach - 1.5) * extension * (1 - recoil))
+            local endpoint = shoulder + Vector3.new(direction * distance, 0.16 + math.sin(charge * math.pi) * 0.2, 0)
+            fist.Position = endpoint; fist.Transparency = fade
+            fist.Size = Vector3.one * (1.5 + extension * (1 - recoil) * 0.75)
+            local length = math.max(0.1, (endpoint - shoulder).Magnitude)
+            arm.Size = Vector3.new(0.63, 0.63, length)
+            arm.CFrame = CFrame.lookAt((shoulder + endpoint) / 2, endpoint)
+            arm.Transparency = fade
+            cuff.CFrame = CFrame.lookAt(endpoint - Vector3.new(direction * 0.8, 0, 0), endpoint)
+            cuff.Transparency = fade
+            for index, line in ipairs(speedLines) do
+                local offset = Vector3.new(0, (index - 2.5) * 0.55, 0.6)
+                line.Size = Vector3.new(0.06, 0.06, math.max(0.1, length * 0.6))
+                line.CFrame = CFrame.lookAt((shoulder + endpoint) / 2 + offset, endpoint + offset)
+                line.Transparency = strikeAge >= 0 and math.clamp(0.4 + recoil * 0.6, 0, 1) or 1
+            end
+        end
+    else
+        local blade = piece(Color3.fromRGB(210, 255, 252), Vector3.new(0.13, 3.8, 0.16))
+        trail(blade, Color3.fromRGB(68, 228, 221), 0.8, 0.17)
+        local water, foam = {}, {}
+        for index = 1, 16 do
+            water[index] = piece(Color3.fromRGB(31, 195, 206), Vector3.new(0.3, 0.45, 1))
+            foam[index] = piece(Color3.fromRGB(213, 255, 251), Vector3.new(0.09, 0.11, 1))
+        end
+        update = function(t)
+            local charge = math.clamp(t / windup, 0, 1)
+            local sweep = math.clamp((t - windup) / 0.17, 0, 1)
+            local fade = math.clamp((t - windup - 0.16) / 0.36, 0, 1)
+            local bladeAngle = math.rad(-40 + charge * 55 + sweep * 165)
+            blade.CFrame = CFrame.new(origin + Vector3.new(direction * (1.6 + sweep * 2), 0.8, 0)) * CFrame.Angles(0, 0, direction * bladeAngle)
+            blade.Transparency = fade
+            for index = 1, 16 do
+                local fraction = (index - 1) / 16
+                local theta0 = math.rad(-75 + fraction * 150)
+                local theta1 = math.rad(-75 + (index / 16) * 150)
+                local radius = 1.2 + reach * sweep
+                local a = origin + Vector3.new(direction * math.cos(theta0) * radius, math.sin(theta0) * (2.1 + sweep * 1.0), math.sin(theta0) * sweep * 4)
+                local b = origin + Vector3.new(direction * math.cos(theta1) * radius, math.sin(theta1) * (2.1 + sweep * 1.0), math.sin(theta1) * sweep * 4)
+                local edge = water[index]
+                edge.Size = Vector3.new(0.3 + sweep * 0.3, 0.42, math.max(0.1, (b - a).Magnitude + 0.12))
+                edge.CFrame = CFrame.lookAt((a + b) / 2, b)
+                edge.Transparency = (t < windup or fraction > sweep) and 1 or math.clamp(0.2 + fade * 0.8, 0, 1)
+                local white = foam[index]
+                white.Size = Vector3.new(0.1, 0.12, math.max(0.1, (b - a).Magnitude))
+                white.CFrame = edge.CFrame + Vector3.new(0, 0.23, 0.12)
+                white.Transparency = edge.Transparency
+            end
+        end
+    end
+    table.insert(specialEffects, {start = os.clock(), duration = lifetime, windup = windup, position = position, struck = false, holder = holder, update = update})
+    if not specialConnection then
+        specialConnection = RunService.RenderStepped:Connect(function()
+            local now = os.clock()
+            for index = #specialEffects, 1, -1 do
+                local effect = specialEffects[index]
+                local age = now - effect.start
+                if age >= effect.windup and not effect.struck then
+                    effect.struck = true
+                    combatSound("Attack", effect.position)
+                    if root and (root.Position - effect.position).Magnitude < 65 then cameraKick = math.max(cameraKick, 0.68) end
+                end
+                if age >= effect.duration or not effect.holder.Parent then
+                    effect.holder:Destroy(); table.remove(specialEffects, index); activeEffects -= 1
+                else effect.update(age) end
+            end
+            if #specialEffects == 0 and specialConnection then specialConnection:Disconnect(); specialConnection = nil end
+        end)
+    end
+    return true
+end
 local function importedEffect(kind: string, position: Vector3): boolean
     local template = asset("VFX", kind)
     if not template or activeEffects >= 24 then return false end
@@ -466,7 +625,9 @@ fxRemote.OnClientEvent:Connect(function(event: any)
     elseif kind == "Victory" then toast("THE CURTAIN IS BROKEN", COLORS.cyan) end
     if typeof(event.position) ~= "Vector3" then return end
     local position = event.position
-    if kind == "Hit" or kind == "Attack" or kind == "Dash" then combatSound(kind, position) end
+    local distinctSpecial = kind == "Attack" and event.action == "Special"
+    if distinctSpecial then distinctSpecial = startSpecial(position, event.hero, tonumber(event.direction) or 1) end
+    if not distinctSpecial and (kind == "Hit" or kind == "Attack" or kind == "Dash") then combatSound(kind, position) end
     local color = HERO_COLORS[event.hero] or (event.enemy and COLORS.red or COLORS.cyan)
     if kind == "BossPhase" then
         toast("SIGNAL EATER / OVERLOAD", COLORS.red)
@@ -487,8 +648,8 @@ fxRemote.OnClientEvent:Connect(function(event: any)
     end
     local heavy = event.heavy == true or event.action == "Heavy" or event.action == "Special" or kind == "KO"
     if kind == "Hit" or kind == "KO" or kind == "Attack" or kind == "Special" or kind == "Dash" or kind == "Recovery" then
-        if not importedEffect(kind, position) then burst(position, color, heavy, tonumber(event.direction) or 1) end
-        if root and (root.Position - position).Magnitude < 65 then cameraKick = math.max(cameraKick, heavy and 0.75 or 0.24) end
+        if not distinctSpecial and not importedEffect(kind, position) then burst(position, color, heavy, tonumber(event.direction) or 1) end
+        if not distinctSpecial and root and (root.Position - position).Magnitude < 65 then cameraKick = math.max(cameraKick, heavy and 0.75 or 0.24) end
     end
     if kind == "Hit" and type(event.damage) == "number" and activeEffects < 24 then damageNumber(position, event.damage, heavy) end
 end)

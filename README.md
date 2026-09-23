@@ -26,7 +26,7 @@ rojo serve default.project.json
 Connect the Studio Rojo plugin to the local server for editing. The project uses server-authoritative combat and no runtime HTTP dependencies. Source animations are serialized R6 keyframes; no private animation IDs are required.
 
 ## What is implemented
-Three authored districts, enemy waves and boss, differentiated hero kits and silhouettes, server hit validation, percent knockback, stock respawns, party wipe/retry, bounded lane movement, follow camera, responsive HUD, touch/gamepad bindings, enemy warnings, client impact effects, and actual reviewed Toolbox animation/VFX/hitbox ingredients.
+Three authored districts, enemy waves and boss, differentiated hero kits and silhouettes, server hit validation, percent knockback, stock respawns, party wipe/retry, bounded lane movement, follow camera, responsive HUD, touch/gamepad bindings, enemy warnings, distinct hero specials, 21 breakable street props with bounded debris and restoration, client impact effects, and actual reviewed Toolbox animation/VFX/hitbox ingredients.
 
 ## Project memory
 - [Design brief and decisions](docs/DESIGN.md)

@@ -6,8 +6,8 @@ Startup without runtime errors; playable three-stage route; percent changes only
 ## Quality target: Jujutsu Shenanigans
 Reference responsiveness, readable ability identity, animation/VFX/sound layering and satisfying destruction. The prototype is not at parity. Required production passes:
 1. Two-to-four-client tests under 100–200ms latency and disconnect/late-join cases.
-2. Authored ability choreography (Rasengan-like spiral contact, elastic stretch, directional water arc); aerial chains and enemy hit-react/ragdoll recovery.
-3. Environment destruction using tagged authored prop assemblies, bounded debris and deterministic resets.
+2. Further ability choreography beyond the implemented spiral orb, elastic arm and water arc; aerial chains and enemy hit-react/ragdoll recovery.
+3. Expand the implemented 21-prop destruction system; verify simultaneous breaks and resets on multiple clients under latency.
 4. Mesh/texture pass for character faces, hair and clothing; curse enemy silhouettes and boss multi-phase attacks.
 5. Combat audio mix, music commissioned/licensed for the game, environment ambience.
 6. Mobile/tablet/controller usability sessions and measured frame-time budgets.

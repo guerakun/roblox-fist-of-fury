@@ -1,7 +1,7 @@
 # Validation record — 2026-09-23
 
 ## Completed in Roblox Studio
-- Edit-time build: 2,141 authored city descendants. All three district gates and continuous lane generated.
+- Edit-time build: 2,162 authored city descendants after prop grouping. All three district gates and continuous lane generated.
 - Rojo 7.7.0 builds `default.project.json` successfully.
 - Integrated play starts without game-script console errors after enemy-container initialization fix.
 - `tests/StudioSmoke.lua`: PASS world, increasing percent knockback, weight resistance, NaN direction fallback, blast boundaries, imported Toolbox clips, sanitized VFX and all three R6 hero rigs.
@@ -23,3 +23,13 @@ Use [Roblox's Server & Clients mode](https://create.roblox.com/docs/studio/testi
 
 ## Two-client observation
 Player1 and Player2 simultaneously present in a separate local server. Screenshot in docs/media/coop-studio.jpg shows both replicated fighters, enemy warnings and HUD. Both players accrued enemy damage and lost stocks; no client console errors were returned. This is a smoke test of real client replication, not a completed co-op campaign or latency certification.
+
+## Final polish verification
+- Actual Space input: root Y 3.00 to peak 11.20. Explicit Humanoid jump transition fixes the input bug.
+- Actual client Heavy request broke UtilityAssembly_115 after server windup.
+- Destruction stress: all 21 props hidden completely, 30 debris cap respected, every fragment non-collidable/non-touchable/non-queryable. Zero fragments after 2 seconds; all 21 assemblies restored after 21 seconds. This is server testing, not a new two-client destruction test.
+- NarutoSpecial, LuffySpecial and TanjiroSpecial instantiated from cosmetic FX events without script errors.
+- Automated client action driver defeated all first-district waves in 55 seconds using normal attack requests, no forced KOs: 3 stocks, 18% damage, Advance state. Actual D movement subsequently reached the rally and advanced to district 2. This is not a human-input full campaign.
+- One-desktop sample: 3,311 frames; mean 16.666 ms; maximum 42.815 ms. Not a mobile/latency/production certification.
+- Updated Rojo build passed. Runtime-only harnesses discarded before final editable-place save.
+- Independent combat-agent review of the final client/world changes found no material blocking bugs; no new multiplayer verification claimed.

@@ -50,3 +50,15 @@ The source implementation should not be labeled on par with Jujutsu Shenanigans 
 5. Review camera kick, touch thumb-pad placement, UI text size, and color-independent combat readability with players.
 
 Current limitations: no rebinding/settings menu, no reduced-motion switch, no dedicated portrait-phone layout, no per-player offscreen indicator, and no split-screen camera. HUD scales for landscape; a real device pass remains necessary. Camera party fit has a finite zoom limit and does not guarantee framing a squad intentionally spread across an entire district.
+
+## Hero special presentation
+
+Each server-confirmed Special attack now has a distinct client effect with a charging phase followed by a release at the configured windup:
+
+- **Naruto / Spiral Burst:** a growing cyan-white sphere with four rotating trail satellites surges forward, then dissipates.
+- **Luffy / Elastic Cannon:** a visible skin-colored fist draws back, extends on a long elastic arm, and recoils. Red cuff and cream speed lines keep its silhouette readable.
+- **Tanjiro / Tidal Arc:** a bright blade trail releases a sweeping teal crescent with white foam edges, then fades.
+
+These are authored procedural visual effects layered onto imported Toolbox combat animation/audio. They are not additional imported Toolbox assets. Special character animation still reuses the imported Heavy clip; bespoke skeletal specials remain a quality milestone.
+
+The effect scheduler caps concurrent hero specials at eight, uses one temporary render connection, and removes all parts in approximately one second. Parts are anchored, non-colliding, and non-queryable. Release sound and camera kick happen after windup. The visuals do not create hitboxes, move characters, apply damage, or freeze simulation; authoritative server attacks remain unchanged. Visual travel is stylized and is not a simulated projectile collision test.
