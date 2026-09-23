@@ -1,0 +1,11 @@
+{
+  "name": "CurtainBreak",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {"Nightfall": {"$className":"Folder","Shared":{"$path":"src/shared"},"Assets":{"$className":"Folder","VFX":{"$className":"Folder"},"Animations":{"$className":"Folder"}},"Remotes":{"$className":"Folder","Action":{"$className":"RemoteEvent"},"State":{"$className":"RemoteEvent"},"FX":{"$className":"RemoteEvent"}}}},
+    "ServerScriptService": {"NightfallServer":{"$path":"src/server"}},
+    "StarterPlayer": {"$properties":{"CharacterWalkSpeed":22,"CharacterJumpPower":52,"CharacterUseJumpPower":true},"StarterPlayerScripts":{"NightfallClient":{"$path":"src/client"}}},
+    "Workspace":{"$properties":{"Gravity":150,"StreamingEnabled":false}},
+    "SoundService":{"$properties":{"RespectFilteringEnabled":true}}
+  }
+}

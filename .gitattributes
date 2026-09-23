@@ -1,0 +1,6 @@
+* text=auto
+*.lua text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.rbxl binary
+*.jpg binary

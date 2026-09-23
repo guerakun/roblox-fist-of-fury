@@ -1,0 +1,7 @@
+build/
+*.rbxl.lock
+*.rbxlx.lock
+.DS_Store
+node_modules/
+tools/bin/
+*.log
