@@ -1,0 +1,265 @@
+{
+  "sourceCommit": "9f29012",
+  "runs": 5,
+  "clears": 5,
+  "meanSeconds": 398.56189759997653,
+  "meanStocksLost": 2.8,
+  "meanDamageTaken": 830.4,
+  "pooledIdleTicks": 795,
+  "pooledEligibleTicks": 8299,
+  "pooledIdleRatio": 0.09579467405711531,
+  "pooledFlankedWindows": 108,
+  "pooledFlankWindows": 112,
+  "pooledFlankRatio": 0.9642857142857143,
+  "serverAcceptedHits": 351,
+  "hitObservationCoverageComplete": true,
+  "capViolations": 0,
+  "actionDiversityByKind": {
+    "FurnaceHound": {
+      "eligible": 2,
+      "passed": 2,
+      "minDistinct": 4
+    },
+    "KilnSovereign": {
+      "eligible": 1,
+      "passed": 1,
+      "minDistinct": 4
+    },
+    "LastConductor": {
+      "eligible": 1,
+      "passed": 1,
+      "minDistinct": 5
+    },
+    "SirenMarshal": {
+      "eligible": 2,
+      "passed": 2,
+      "minDistinct": 5
+    },
+    "Executioner": {
+      "eligible": 1,
+      "passed": 1,
+      "minDistinct": 3
+    }
+  },
+  "frustum": {
+    "frustumAuditedHits": 351,
+    "frustumOutside": 0,
+    "frustumInvalidViewportHits": 0
+  },
+  "completeMetrics": {
+    "serverAcceptedHits": true,
+    "stocksLost": true,
+    "idleTicks": true,
+    "eligibleTicks": true,
+    "flankedWindows": true,
+    "flankWindows": true,
+    "capViolations": true,
+    "frustumAuditedHits": true,
+    "frustumOutside": true,
+    "frustumInvalidViewportHits": true
+  },
+  "frustumFixturesValid": true,
+  "rows": [
+    {
+      "file": "m2-final-1101.json",
+      "seed": 1101,
+      "clear": true,
+      "outcome": "Victory",
+      "seconds": 430.9641433999641,
+      "stocksLost": 4,
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 1,
+        "3": 2
+      },
+      "damageTaken": 991,
+      "idleTicks": 146,
+      "eligibleTicks": 1734,
+      "flankedWindows": 20,
+      "flankWindows": 20,
+      "capViolations": 0,
+      "minWindup": 0.4,
+      "serverAcceptedHits": 80,
+      "frustumFixture": {
+        "inside": true,
+        "height": 879,
+        "outside": false,
+        "passed": true,
+        "width": 2508
+      },
+      "frustumAuditedHits": 80,
+      "frustumOutside": 0,
+      "frustumInvalidViewportHits": 0,
+      "diversityByKind": {
+        "FurnaceHound": {
+          "eligible": 1,
+          "passed": 1,
+          "minDistinct": 4
+        }
+      }
+    },
+    {
+      "file": "m2-final-1102.json",
+      "seed": 1102,
+      "clear": true,
+      "outcome": "Victory",
+      "seconds": 404.08119019994047,
+      "stocksLost": 3,
+      "stocksLostByDistrict": {
+        "1": 0,
+        "2": 1,
+        "3": 2
+      },
+      "damageTaken": 946,
+      "idleTicks": 182,
+      "eligibleTicks": 1750,
+      "flankedWindows": 24,
+      "flankWindows": 25,
+      "capViolations": 0,
+      "minWindup": 0.4,
+      "serverAcceptedHits": 79,
+      "frustumFixture": {
+        "inside": true,
+        "height": 879,
+        "outside": false,
+        "passed": true,
+        "width": 2508
+      },
+      "frustumAuditedHits": 79,
+      "frustumOutside": 0,
+      "frustumInvalidViewportHits": 0,
+      "diversityByKind": {
+        "KilnSovereign": {
+          "eligible": 1,
+          "passed": 1,
+          "minDistinct": 4
+        },
+        "LastConductor": {
+          "eligible": 1,
+          "passed": 1,
+          "minDistinct": 5
+        }
+      }
+    },
+    {
+      "file": "m2-final-1103.json",
+      "seed": 1103,
+      "clear": true,
+      "outcome": "Victory",
+      "seconds": 382.1833104999969,
+      "stocksLost": 2,
+      "stocksLostByDistrict": {
+        "1": 0,
+        "2": 1,
+        "3": 1
+      },
+      "damageTaken": 683,
+      "idleTicks": 162,
+      "eligibleTicks": 1438,
+      "flankedWindows": 21,
+      "flankWindows": 22,
+      "capViolations": 0,
+      "minWindup": 0.4,
+      "serverAcceptedHits": 59,
+      "frustumFixture": {
+        "inside": true,
+        "height": 879,
+        "outside": false,
+        "passed": true,
+        "width": 2508
+      },
+      "frustumAuditedHits": 59,
+      "frustumOutside": 0,
+      "frustumInvalidViewportHits": 0,
+      "diversityByKind": {
+        "SirenMarshal": {
+          "eligible": 1,
+          "passed": 1,
+          "minDistinct": 5
+        },
+        "FurnaceHound": {
+          "eligible": 1,
+          "passed": 1,
+          "minDistinct": 5
+        }
+      }
+    },
+    {
+      "file": "m2-final-1104.json",
+      "seed": 1104,
+      "clear": true,
+      "outcome": "Victory",
+      "seconds": 395.580994799966,
+      "stocksLost": 3,
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "damageTaken": 840,
+      "idleTicks": 146,
+      "eligibleTicks": 1709,
+      "flankedWindows": 21,
+      "flankWindows": 21,
+      "capViolations": 0,
+      "minWindup": 0.4,
+      "serverAcceptedHits": 71,
+      "frustumFixture": {
+        "inside": true,
+        "height": 879,
+        "outside": false,
+        "passed": true,
+        "width": 2508
+      },
+      "frustumAuditedHits": 71,
+      "frustumOutside": 0,
+      "frustumInvalidViewportHits": 0,
+      "diversityByKind": {
+        "Executioner": {
+          "eligible": 1,
+          "passed": 1,
+          "minDistinct": 3
+        }
+      }
+    },
+    {
+      "file": "m2-final-1105.json",
+      "seed": 1105,
+      "clear": true,
+      "outcome": "Victory",
+      "seconds": 379.9998491000151,
+      "stocksLost": 2,
+      "stocksLostByDistrict": {
+        "1": 0,
+        "2": 1,
+        "3": 1
+      },
+      "damageTaken": 692,
+      "idleTicks": 159,
+      "eligibleTicks": 1668,
+      "flankedWindows": 22,
+      "flankWindows": 24,
+      "capViolations": 0,
+      "minWindup": 0.4,
+      "serverAcceptedHits": 62,
+      "frustumFixture": {
+        "inside": true,
+        "height": 879,
+        "outside": false,
+        "passed": true,
+        "width": 2508
+      },
+      "frustumAuditedHits": 62,
+      "frustumOutside": 0,
+      "frustumInvalidViewportHits": 0,
+      "diversityByKind": {
+        "SirenMarshal": {
+          "eligible": 1,
+          "passed": 1,
+          "minDistinct": 5
+        }
+      }
+    }
+  ],
+  "limit": "Bot campaigns only. Missing/zero eligible archetype windows are inconclusive; no human/device acceptance implied."
+}

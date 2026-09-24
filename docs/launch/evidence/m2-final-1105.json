@@ -1,0 +1,993 @@
+{
+  "frustum": {
+    "measurement": "attacker position projected through victim camera at Hit receipt",
+    "events": [
+      {
+        "visible": true,
+        "x": 1310.2552490234375,
+        "received": 1790242498.737227,
+        "y": 418.6096496582031,
+        "height": 879,
+        "depth": 64.1037368774414,
+        "serverTime": 1790242498.699039,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1199.222412109375,
+        "received": 1790242510.299599,
+        "y": 394.0693359375,
+        "height": 879,
+        "depth": 65.58596801757812,
+        "serverTime": 1790242510.264789,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1195.702880859375,
+        "received": 1790242515.26673,
+        "y": 400.4945068359375,
+        "height": 879,
+        "depth": 64.42662048339844,
+        "serverTime": 1790242515.232338,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1293.6446533203125,
+        "received": 1790242528.798567,
+        "y": 481.14227294921875,
+        "height": 879,
+        "depth": 55.46976089477539,
+        "serverTime": 1790242528.765205,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1360.5677490234375,
+        "received": 1790242529.26602,
+        "y": 481.14227294921875,
+        "height": 879,
+        "depth": 55.46976089477539,
+        "serverTime": 1790242529.231236,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1407.5364990234375,
+        "received": 1790242546.699077,
+        "y": 569.6010131835938,
+        "height": 879,
+        "depth": 46.25665283203125,
+        "serverTime": 1790242546.663591,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1152.1915283203125,
+        "received": 1790242547.333528,
+        "y": 546.2337646484375,
+        "height": 879,
+        "depth": 47.35430908203125,
+        "serverTime": 1790242547.297613,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1150.020751953125,
+        "received": 1790242548.349665,
+        "y": 546.2337646484375,
+        "height": 879,
+        "depth": 47.35430908203125,
+        "serverTime": 1790242548.31347,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1015.5806884765625,
+        "received": 1790242554.182038,
+        "y": 539.8364868164062,
+        "height": 879,
+        "depth": 49.615596771240234,
+        "serverTime": 1790242554.146009,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1310.2674560546875,
+        "received": 1790242573.512661,
+        "y": 396.4050598144531,
+        "height": 879,
+        "depth": 63.22332763671875,
+        "serverTime": 1790242573.479768,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1406.521728515625,
+        "received": 1790242576.48065,
+        "y": 382.28179931640625,
+        "height": 879,
+        "depth": 65.80949401855469,
+        "serverTime": 1790242576.446314,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1557.5157470703125,
+        "received": 1790242581.683866,
+        "y": 391.3656311035156,
+        "height": 879,
+        "depth": 64.59508514404297,
+        "serverTime": 1790242581.662523,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1291.322265625,
+        "received": 1790242584.048773,
+        "y": 481.8570861816406,
+        "height": 879,
+        "depth": 55.3806266784668,
+        "serverTime": 1790242584.012298,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1583.0498046875,
+        "received": 1790242592.478347,
+        "y": 513.5259399414062,
+        "height": 879,
+        "depth": 51.70008087158203,
+        "serverTime": 1790242592.445174,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1297.994384765625,
+        "received": 1790242599.963428,
+        "y": 391.0012512207031,
+        "height": 879,
+        "depth": 64.18846130371094,
+        "serverTime": 1790242599.944277,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 977.439697265625,
+        "received": 1790242613.847282,
+        "y": 418.634765625,
+        "height": 879,
+        "depth": 64.555419921875,
+        "serverTime": 1790242613.810308,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 973.8231201171875,
+        "received": 1790242614.680383,
+        "y": 447.5091857910156,
+        "height": 879,
+        "depth": 60.01456069946289,
+        "serverTime": 1790242614.660315,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1212.7183837890625,
+        "received": 1790242624.549437,
+        "y": 471.5653381347656,
+        "height": 879,
+        "depth": 57.09262466430664,
+        "serverTime": 1790242624.509732,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1010.1207275390625,
+        "received": 1790242636.177699,
+        "y": 474.7677001953125,
+        "height": 879,
+        "depth": 53.55022048950195,
+        "serverTime": 1790242636.144183,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1179.8594970703125,
+        "received": 1790242638.460671,
+        "y": 477.1998596191406,
+        "height": 879,
+        "depth": 53.59510040283203,
+        "serverTime": 1790242638.427013,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1298.435791015625,
+        "received": 1790242640.8785,
+        "y": 449.0572814941406,
+        "height": 879,
+        "depth": 57.25564193725586,
+        "serverTime": 1790242640.843661,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1367.7064208984375,
+        "received": 1790242643.294532,
+        "y": 431.05242919921875,
+        "height": 879,
+        "depth": 59.87183380126953,
+        "serverTime": 1790242643.276628,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1176.9427490234375,
+        "received": 1790242653.147088,
+        "y": 412.1476135253906,
+        "height": 879,
+        "depth": 65.67176818847656,
+        "serverTime": 1790242653.109287,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1219.9246826171875,
+        "received": 1790242654.43126,
+        "y": 404.080322265625,
+        "height": 879,
+        "depth": 64.27122497558594,
+        "serverTime": 1790242654.392187,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1152.288818359375,
+        "received": 1790242657.277662,
+        "y": 401.56640625,
+        "height": 879,
+        "depth": 64.71443176269531,
+        "serverTime": 1790242657.243197,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1105.8389892578125,
+        "received": 1790242657.893134,
+        "y": 431.50250244140625,
+        "height": 879,
+        "depth": 62.44969940185547,
+        "serverTime": 1790242657.859376,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1232.36572265625,
+        "received": 1790242660.71066,
+        "y": 412.5436706542969,
+        "height": 879,
+        "depth": 62.82273864746094,
+        "serverTime": 1790242660.675597,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1224.63232421875,
+        "received": 1790242663.593583,
+        "y": 412.6038818359375,
+        "height": 879,
+        "depth": 65.56800842285156,
+        "serverTime": 1790242663.559778,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1334.33544921875,
+        "received": 1790242677.959224,
+        "y": 411.02398681640625,
+        "height": 879,
+        "depth": 64.29817199707031,
+        "serverTime": 1790242677.942722,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1317.9261474609375,
+        "received": 1790242678.992652,
+        "y": 411.9295654296875,
+        "height": 879,
+        "depth": 64.31779479980469,
+        "serverTime": 1790242678.958491,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1206.978271484375,
+        "received": 1790242680.443621,
+        "y": 421.4248046875,
+        "height": 879,
+        "depth": 61.82392501831055,
+        "serverTime": 1790242680.4075,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1251.91064453125,
+        "received": 1790242683.559842,
+        "y": 463.4796447753906,
+        "height": 879,
+        "depth": 55.72731399536133,
+        "serverTime": 1790242683.524641,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1287.72314453125,
+        "received": 1790242685.926685,
+        "y": 436.2268371582031,
+        "height": 879,
+        "depth": 60.39574432373047,
+        "serverTime": 1790242685.908287,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1287.8497314453125,
+        "received": 1790242686.94276,
+        "y": 436.2704162597656,
+        "height": 879,
+        "depth": 60.396636962890625,
+        "serverTime": 1790242686.908507,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1347.706298828125,
+        "received": 1790242693.50969,
+        "y": 460.0900573730469,
+        "height": 879,
+        "depth": 57.818702697753906,
+        "serverTime": 1790242693.475418,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1311.2235107421875,
+        "received": 1790242693.976625,
+        "y": 473.54644775390625,
+        "height": 879,
+        "depth": 55.23930358886719,
+        "serverTime": 1790242693.941543,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1303.905517578125,
+        "received": 1790242694.992697,
+        "y": 473.54644775390625,
+        "height": 879,
+        "depth": 55.23930358886719,
+        "serverTime": 1790242694.957805,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1317.6309814453125,
+        "received": 1790242707.241302,
+        "y": 391.29254150390625,
+        "height": 879,
+        "depth": 63.15351867675781,
+        "serverTime": 1790242707.207366,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1328.4859619140625,
+        "received": 1790242715.561711,
+        "y": 410.49078369140625,
+        "height": 879,
+        "depth": 59.90717315673828,
+        "serverTime": 1790242715.523788,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1273.44580078125,
+        "received": 1790242722.861472,
+        "y": 439.0633239746094,
+        "height": 879,
+        "depth": 61.275291442871094,
+        "serverTime": 1790242722.823439,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1252.26123046875,
+        "received": 1790242742.458318,
+        "y": 511.852294921875,
+        "height": 879,
+        "depth": 50.05027389526367,
+        "serverTime": 1790242742.439378,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1220.9349365234375,
+        "received": 1790242747.039876,
+        "y": 427.05609130859375,
+        "height": 879,
+        "depth": 60.943363189697266,
+        "serverTime": 1790242747.005566,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1085.0909423828125,
+        "received": 1790242778.455895,
+        "y": 530.262939453125,
+        "height": 879,
+        "depth": 47.11168670654297,
+        "serverTime": 1790242778.420815,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1336.9224853515625,
+        "received": 1790242779.455987,
+        "y": 550.8646850585938,
+        "height": 879,
+        "depth": 47.94329071044922,
+        "serverTime": 1790242779.438064,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1246.8658447265625,
+        "received": 1790242790.272499,
+        "y": 404.59130859375,
+        "height": 879,
+        "depth": 64.65518951416016,
+        "serverTime": 1790242790.237984,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1311.038330078125,
+        "received": 1790242791.504582,
+        "y": 400.82452392578125,
+        "height": 879,
+        "depth": 66.28105163574219,
+        "serverTime": 1790242791.469861,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1303.2587890625,
+        "received": 1790242792.521631,
+        "y": 400.82452392578125,
+        "height": 879,
+        "depth": 66.28105163574219,
+        "serverTime": 1790242792.486939,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1245.414306640625,
+        "received": 1790242796.088841,
+        "y": 434.5018005371094,
+        "height": 879,
+        "depth": 59.78997039794922,
+        "serverTime": 1790242796.053354,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1324.872802734375,
+        "received": 1790242803.457183,
+        "y": 416.7945861816406,
+        "height": 879,
+        "depth": 65.60118865966797,
+        "serverTime": 1790242803.420174,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1376.7608642578125,
+        "received": 1790242808.838953,
+        "y": 416.7945861816406,
+        "height": 879,
+        "depth": 65.60118865966797,
+        "serverTime": 1790242808.80372,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1300.475341796875,
+        "received": 1790242816.904983,
+        "y": 376.6817626953125,
+        "height": 879,
+        "depth": 64.33342742919922,
+        "serverTime": 1790242816.869692,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1320.377197265625,
+        "received": 1790242819.855459,
+        "y": 392.18780517578125,
+        "height": 879,
+        "depth": 61.5247917175293,
+        "serverTime": 1790242819.820131,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1311.140380859375,
+        "received": 1790242829.121811,
+        "y": 414.5750427246094,
+        "height": 879,
+        "depth": 57.8767204284668,
+        "serverTime": 1790242829.085836,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1300.7418212890625,
+        "received": 1790242832.138047,
+        "y": 415.0011291503906,
+        "height": 879,
+        "depth": 57.81148147583008,
+        "serverTime": 1790242832.102884,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1280.1519775390625,
+        "received": 1790242835.78996,
+        "y": 453.092041015625,
+        "height": 879,
+        "depth": 59.20929718017578,
+        "serverTime": 1790242835.769398,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1354.264892578125,
+        "received": 1790242837.741054,
+        "y": 407.5641174316406,
+        "height": 879,
+        "depth": 58.97176742553711,
+        "serverTime": 1790242837.70293,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1290.7723388671875,
+        "received": 1790242841.818782,
+        "y": 504.6593933105469,
+        "height": 879,
+        "depth": 52.68028259277344,
+        "serverTime": 1790242841.784774,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1522.538330078125,
+        "received": 1790242845.688208,
+        "y": 465.2104187011719,
+        "height": 879,
+        "depth": 51.03264617919922,
+        "serverTime": 1790242845.651849,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1395.42431640625,
+        "received": 1790242848.370317,
+        "y": 473.3770751953125,
+        "height": 879,
+        "depth": 50.07756042480469,
+        "serverTime": 1790242848.335076,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1298.3311767578125,
+        "received": 1790242851.452112,
+        "y": 459.991455078125,
+        "height": 879,
+        "depth": 51.66231918334961,
+        "serverTime": 1790242851.418154,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1313.721923828125,
+        "received": 1790242854.785892,
+        "y": 466.58380126953125,
+        "height": 879,
+        "depth": 50.86948776245117,
+        "serverTime": 1790242854.75059,
+        "width": 2508
+      },
+      {
+        "visible": true,
+        "x": 1192.9827880859375,
+        "received": 1790242857.91932,
+        "y": 461.7750244140625,
+        "height": 879,
+        "depth": 51.44538879394531,
+        "serverTime": 1790242857.884184,
+        "width": 2508
+      }
+    ],
+    "schema": 1,
+    "fixture": {
+      "inside": true,
+      "height": 879,
+      "outside": false,
+      "passed": true,
+      "width": 2508
+    },
+    "outside": 0,
+    "invalidViewportHits": 0,
+    "hits": 62
+  },
+  "bot": {
+    "telemetry": {
+      "windupPeak": 2,
+      "encounters": {
+        "3:2": {
+          "stocks": 0,
+          "damage": 25.254000000000005,
+          "hits": 2
+        },
+        "2:2": {
+          "stocks": 0,
+          "damage": 120.19800000000001,
+          "hits": 10
+        },
+        "1:4": {
+          "stocks": 0,
+          "damage": 87.584,
+          "hits": 6
+        },
+        "2:4": {
+          "stocks": 0,
+          "damage": 44.85,
+          "hits": 3
+        },
+        "3:4": {
+          "stocks": 1,
+          "damage": 182.69360000000003,
+          "hits": 12
+        },
+        "1:1": {
+          "stocks": 0,
+          "damage": 10.120000000000001,
+          "hits": 1
+        },
+        "2:1": {
+          "stocks": 0,
+          "damage": 16.192,
+          "hits": 3
+        },
+        "1:3": {
+          "stocks": 0,
+          "damage": 19.642000000000003,
+          "hits": 4
+        },
+        "2:3": {
+          "stocks": 1,
+          "damage": 66.05600000000001,
+          "hits": 9
+        },
+        "3:3": {
+          "stocks": 0,
+          "damage": 58.144000000000005,
+          "hits": 6
+        },
+        "3:1": {
+          "stocks": 0,
+          "damage": 30.912000000000006,
+          "hits": 2
+        },
+        "1:2": {
+          "stocks": 0,
+          "damage": 31.188000000000002,
+          "hits": 4
+        }
+      },
+      "windups": 174,
+      "aiPeakSeconds": 0.00045409996528178453,
+      "flankedWindows": 22,
+      "serverBoundsRejected": 0,
+      "flankWindows": 24,
+      "stage": 3,
+      "outcome": "Victory",
+      "idleRatio": 0.09532374100719425,
+      "capViolations": 0,
+      "damage": {
+        "Player1": 692.8336
+      },
+      "actions": {
+        "Warden": {
+          "WardenKick": 10
+        },
+        "Husk": {
+          "HuskJumpKick": 28,
+          "HuskJab": 31
+        },
+        "Brute": {
+          "BruteFlop": 7,
+          "BruteSwing": 3
+        },
+        "Strider": {
+          "StriderJab": 6,
+          "StriderSlide": 4
+        },
+        "Grappler": {
+          "GrapplerGrab": 6,
+          "GrapplerThrow": 5
+        },
+        "Executioner": {
+          "CrossingSweep": 1,
+          "Feint": 1,
+          "Cleaver": 4,
+          "CrossroadRuin": 1
+        },
+        "FurnaceHound": {
+          "Pounce": 2,
+          "CinderTrail": 2,
+          "Bite": 5
+        },
+        "PlatformWidow": {
+          "TicketCut": 5,
+          "WidowSpiral": 1,
+          "RailLunge": 3,
+          "Feint": 1,
+          "PlatformMark": 1
+        },
+        "KilnSovereign": {
+          "CoreMeltdown": 1,
+          "SlagPunch": 6,
+          "FurnaceVent": 2,
+          "ForgeCrush": 3,
+          "TwinVent": 2
+        },
+        "SirenMarshal": {
+          "Cleaver": 5,
+          "AlarmRing": 2,
+          "Feint": 1,
+          "SirenLine": 3,
+          "AlarmCollapse": 1,
+          "SplitAlarm": 3
+        },
+        "Pitcher": {
+          "PitcherThrow": 2,
+          "PitcherShove": 1
+        },
+        "Leaper": {
+          "LeaperJab": 2,
+          "LeaperVaultKick": 4
+        },
+        "LastConductor": {
+          "FinalDeparture": 1,
+          "GhostTrain": 3,
+          "DepartureCross": 1,
+          "BellStrike": 4
+        }
+      },
+      "idleGruntTicks": 159,
+      "stocks": {
+        "Player1": {
+          "2": 1,
+          "3": 1
+        }
+      },
+      "aiPeakMs": 0.45409996528178453,
+      "flankRatio": 0.9166666666666666,
+      "started": 1790242475.783312,
+      "elapsed": 383.8012309074402,
+      "cameraFrustum": "not measured",
+      "aiSeconds": 0.21151249820832163,
+      "aiSamples": 2972,
+      "hits": {
+        "Player1": 62
+      },
+      "wave": 4,
+      "minWindup": 0.4,
+      "eligibleGruntTicks": 1668,
+      "aiMeanMs": 0.07116840451154832,
+      "actionDiversity": {
+        "byKind": {
+          "SirenMarshal": {
+            "eligible": 1,
+            "passed": 1,
+            "minDistinct": 5
+          }
+        },
+        "pendingWindows": 0,
+        "windowSeconds": 30,
+        "policy": "10Hz sampled proximity within 28 studs; actual attacks/block/evade/retreat/grab/throw; partial windows ineligible",
+        "windows": [
+          {
+            "actions": [
+              "AlarmRing",
+              "Cleaver",
+              "Feint",
+              "SirenLine",
+              "SplitAlarm"
+            ],
+            "start": 1790242566.647611,
+            "duration": 30,
+            "passed": true,
+            "kind": "SirenMarshal"
+          }
+        ],
+        "partialWindows": 50
+      },
+      "schema": 1,
+      "rank": "not implemented"
+    },
+    "damageTaken": 692,
+    "outcome": "Victory",
+    "runStats": {
+      "kills": 39,
+      "damageDealt": 3849,
+      "duration": 383,
+      "damageTaken": 692,
+      "coinsEarned": 690
+    },
+    "stocksLostByDistrict": {
+      "1": 0,
+      "2": 1,
+      "3": 1
+    },
+    "clear": true,
+    "seconds": 379.9998491000151,
+    "done": true,
+    "stage": 3,
+    "schema": 1,
+    "wallSeconds": 385.6677767999936,
+    "wave": 4,
+    "choices": {
+      "Mistake": 58,
+      "Jump": 5,
+      "Special": 39,
+      "Heavy": 100,
+      "telegraphs": 191,
+      "Dash": 8,
+      "Block": 24,
+      "recognized": 149,
+      "Light": 202
+    },
+    "seed": 1105,
+    "scheduledReactionMean": 0.25034036770981527,
+    "reactionMean": 0.2585134617398312,
+    "transitions": [
+      {
+        "state": "1:0:Waiting",
+        "seconds": 1.3527426000218838
+      },
+      {
+        "state": "1:0:Intermission",
+        "seconds": 1.572413699934259
+      },
+      {
+        "state": "1:1:Combat",
+        "seconds": 5.669154400005937
+      },
+      {
+        "state": "1:1:Intermission",
+        "seconds": 29.400478799943812
+      },
+      {
+        "state": "1:2:Combat",
+        "seconds": 33.4694901999319
+      },
+      {
+        "state": "1:2:Intermission",
+        "seconds": 59.848904700018466
+      },
+      {
+        "state": "1:3:Combat",
+        "seconds": 64.8839086999651
+      },
+      {
+        "state": "1:3:Intermission",
+        "seconds": 87.18060970003717
+      },
+      {
+        "state": "1:4:Combat",
+        "seconds": 91.19903749995865
+      },
+      {
+        "state": "1:4:Advance",
+        "seconds": 131.39598279993515
+      },
+      {
+        "state": "2:0:Intermission",
+        "seconds": 133.46255830000155
+      },
+      {
+        "state": "2:1:Combat",
+        "seconds": 137.46444409992546
+      },
+      {
+        "state": "2:1:Intermission",
+        "seconds": 155.14530490001198
+      },
+      {
+        "state": "2:2:Combat",
+        "seconds": 159.21375200001057
+      },
+      {
+        "state": "2:2:Intermission",
+        "seconds": 194.4941700999625
+      },
+      {
+        "state": "2:3:Combat",
+        "seconds": 199.5118265999481
+      },
+      {
+        "state": "2:3:Intermission",
+        "seconds": 224.84290129994042
+      },
+      {
+        "state": "2:3:Traverse",
+        "seconds": 228.89162949996535
+      },
+      {
+        "state": "2:4:Combat",
+        "seconds": 229.76083139993716
+      },
+      {
+        "state": "2:4:Advance",
+        "seconds": 258.4074049999472
+      },
+      {
+        "state": "3:0:Intermission",
+        "seconds": 259.77507410000544
+      },
+      {
+        "state": "3:1:Combat",
+        "seconds": 263.7931720999768
+      },
+      {
+        "state": "3:1:Intermission",
+        "seconds": 280.0724487999687
+      },
+      {
+        "state": "3:2:Combat",
+        "seconds": 284.1090973999817
+      },
+      {
+        "state": "3:2:Intermission",
+        "seconds": 307.18918650003616
+      },
+      {
+        "state": "3:3:Combat",
+        "seconds": 312.27351470000576
+      },
+      {
+        "state": "3:3:Intermission",
+        "seconds": 335.70625799999107
+      },
+      {
+        "state": "3:4:Combat",
+        "seconds": 339.7245888999896
+      },
+      {
+        "state": "3:4:Victory",
+        "seconds": 385.353035200038
+      }
+    ],
+    "rank": "not implemented"
+  },
+  "sourceCommit": "9f29012",
+  "botPolicyCommit": "b21b807",
+  "auditCommit": "a129630"
+}
