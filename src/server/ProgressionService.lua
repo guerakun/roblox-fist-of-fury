@@ -10,6 +10,18 @@ local Heat = require(ReplicatedStorage.Nightfall.Shared.HeatConfig)
 local RewardPolicy = require(script.Parent.RewardPolicy)
 local DistrictLedger = require(script.Parent.DistrictLedger)
 local RewardBook = require(script.Parent.CampaignRewardBook).new(DistrictLedger, RewardPolicy)
+local AchievementConfig=require(ReplicatedStorage.Nightfall.Shared.AchievementConfig)
+local AchievementPolicy=require(script.Parent.AchievementPolicy)
+local achievementService=require(script.Parent.AchievementService).new({
+    Has=function(userId,badgeId)
+        assert(not RunService:IsStudio(),'External badges are disabled in Studio')
+        return game:GetService('BadgeService'):UserHasBadgeAsync(userId,badgeId)
+    end,
+    Award=function(userId,badgeId)
+        assert(not RunService:IsStudio(),'External badges are disabled in Studio')
+        return game:GetService('BadgeService'):AwardBadgeAsync(userId,badgeId)
+    end,
+},AchievementConfig.Badges)
 local rewardObserver
 local flushPending
 local campaignSessions = {}
@@ -65,7 +77,7 @@ function Progression.GetSnapshot(player)
     end
     local data = profile.data
     return {kind = "Snapshot", loading = false, status = profile.mode, saveWarning = profile.reason,
-        coins = data.coins, xp = data.xp, clears = data.clears, owned = data.owned, claimed = data.claimed,
+        coins = data.coins, xp = data.xp, clears = data.clears, completedTiers=data.completedTiers, achievements=data.achievements, owned = data.owned, claimed = data.claimed,
         premiumClaimed = data.premiumClaimed, trail = data.trail, title = data.title, boon = data.boon,
         premium = record.premium == true, passId = Config.ChapterPassId, salesEnabled = Config.SalesEnabled and Config.ChapterPassId > 0 and profile.mode == "Saved",
         canEquipBoon = SAFE_STATES[runStatus] == true, purchaseAllowed = PURCHASE_STATES[runStatus] == true, stage = stageIndex}
@@ -164,6 +176,31 @@ function Progression.AwardEncounterClear(participants, stage, kind, rewardKey)
         end
     end
 end
+local function earnedAchievements(player,ledger,result)
+    local record=records[player]
+    if ledgerFor(player,result.campaignId)~=ledger or paymentState(record) then return end
+    local data=record.profile.data
+    local full=ledger:FullParticipation()
+    for _,item in pairs(ledger.stages) do
+        if item.result and item.result.difficulty~=result.difficulty then full=false end
+    end
+    local rules=Heat.Rules(result.heat)
+    if not rules then return end
+    local dirty=false
+    data.completedTiers=data.completedTiers or {}
+    data.achievements=data.achievements or {}
+    if result.stage==3 and full and not data.completedTiers[result.difficulty] then
+        data.completedTiers[result.difficulty]=true dirty=true
+    end
+    for _,key in ipairs(AchievementPolicy.Evaluate(result,rules.points,full))do
+        if not data.achievements[key] then data.achievements[key]=true dirty=true end
+        if (key=='Heat5' or key=='Heat10' or key=='Heat15') and not data.owned[key] then data.owned[key]=true dirty=true end
+        if not RunService:IsStudio() and AchievementConfig.Badges[key].BadgeId>0 then
+            task.spawn(function()achievementService:Award(player.UserId,key)end)
+        end
+    end
+    if dirty then changed(player) end
+end
 function Progression.AwardDistrict(player,result)
     if type(result)~='table' then return false end
     local ledger=ledgerFor(player,result.campaignId)
@@ -185,6 +222,7 @@ function Progression.AwardDistrict(player,result)
     if currentState then return ledger:Receipt(result.stage,currentState) end
     local receipt,newlyPaid=ledger:PayDistrict(record.profile.data,result.stage)
     if newlyPaid then paid(player,receipt,'DistrictRank') end
+    earnedAchievements(player,ledger,frozen)
     return ledger:Receipt(result.stage,paymentState(record))
 end
 function Progression.GetDistrictReceipt(player,resultId)
@@ -353,6 +391,7 @@ function Progression.Init()
         local record = records[player]
         records[player] = nil
         campaignSessions[player]=nil
+        achievementService:Forget(player.UserId)
         if record and record.profile then
             inFlightLifecycle += 1
             store:Release(record.profile)

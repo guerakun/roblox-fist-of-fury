@@ -14,6 +14,9 @@ P.Boons = {
     {Id = "Haste", Name = "HASTE", XP = 400, Description = "+2 movement speed. Reposition around telegraphs.", MoveSpeedBonus = 2},
 }
 P.Cosmetics = {
+    {Id = "Heat5", Name = "EMBER CONTRACTOR", Kind = "Title", Price = 0, TrackOnly = true, Color = Color3.fromRGB(255,196,102)},
+    {Id = "Heat10", Name = "INFERNO CONTRACTOR", Kind = "Title", Price = 0, TrackOnly = true, Color = Color3.fromRGB(255,135,100)},
+    {Id = "Heat15", Name = "CURTAIN INFERNO", Kind = "Title", Price = 0, TrackOnly = true, Color = Color3.fromRGB(214,136,255)},
     {Id = "None", Name = "CLEAN SILHOUETTE", Kind = "Trail", Price = 0, Color = Color3.fromRGB(180,200,220)},
     {Id = "BlueHour", Name = "BLUE HOUR", Kind = "Trail", Price = 150, Color = Color3.fromRGB(91,220,255)},
     {Id = "Ember", Name = "EMBER LINE", Kind = "Trail", Price = 250, Color = Color3.fromRGB(255,149,66)},

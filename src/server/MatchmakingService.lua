@@ -1,5 +1,6 @@
 -- Server-only party/queue state machine. Adapter supplies atomic records and transport.
 -- No client table is accepted as a roster, match, price, reward, or teleport destination.
+local Heat=require(game.ReplicatedStorage.Nightfall.Shared.HeatConfig)
 local Service={}
 Service.__index=Service
 local function copy(v) if type(v)~='table' then return v end local r={} for k,x in pairs(v) do r[k]=copy(x) end return r end
@@ -80,9 +81,7 @@ end
 function Service:Queue(leader,difficulty,heat,mode,expectedRevision)
     local allowed={Normal=true,Hard=true,Nightmare=true}
     assert(allowed[difficulty],'invalid difficulty')
-    assert(type(heat)=='table' and #heat<=6,'invalid heat')
-    -- Unlock/Heat validity is checked by the hub's server-owned configuration/profile gate.
-    local normalized={} for _,id in ipairs(heat) do assert(type(id)=='string' and #id<=32,'invalid heat id') table.insert(normalized,id) end table.sort(normalized)
+    local normalized=assert(Heat.Normalize(heat),'invalid heat')
     local p=assert(self:PartyFor(leader),'party missing')
     local queued=self.a:Update('Party:'..p.id,function(old)
         if not old or old.leader~=leader or old.status~='Idle' or #old.members<1 or #old.members>4 or (expectedRevision and old.revision~=expectedRevision)then return old end
@@ -167,7 +166,8 @@ function Service:Step(difficulty)
         return nil,'waiting'
     end
     local id=self.guid()
-    local match={id=id,status='Building',created=t,difficulty=difficulty,heat=copy(first.heat),members={},parties={},serverByMember={}}
+    local rules=assert(Heat.Rules(first.heat),'invalid queued Heat')
+    local match={id=id,status='Building',created=t,difficulty=difficulty,heat=copy(rules.ids),heatPoints=rules.points,heatRewardPercent=rules.rewardPercent,members={},parties={},serverByMember={}}
     for _,p in ipairs(selected) do
         table.insert(match.parties,{id=p.id,leader=p.leader,members=copy(p.members),revision=p.revision})
         for _,uid in ipairs(p.members) do table.insert(match.members,uid) match.serverByMember[tostring(uid)]=p.server end
@@ -211,6 +211,9 @@ function Service:ValidateJoin(userId,matchId,privateServerId)
     local m=self.a:Get('Match:'..matchId)
     if not m or m.status~='Ready' or self.clock()-m.created>self.ttl or not contains(m.members,userId) then return nil,'not a member of an active match' end
     if privateServerId~=m.privateServerId then return nil,'wrong reserved server' end
+    local rules=Heat.Rules(m.heat)
+    if not rules or not ({Normal=true,Hard=true,Nightmare=true})[m.difficulty]then return nil,'invalid match options' end
+    m=copy(m);m.heat=rules.ids;m.heatPoints=rules.points;m.heatRewardPercent=rules.rewardPercent
     return m
 end
 return Service

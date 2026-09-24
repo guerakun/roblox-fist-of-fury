@@ -3,6 +3,7 @@
 local HttpService = game:GetService("HttpService")
 local Config = require(game.ReplicatedStorage.Nightfall.Shared.ProgressionConfig)
 local Heroes = require(game.ReplicatedStorage.Nightfall.Shared.Config)
+local AchievementConfig = require(game.ReplicatedStorage.Nightfall.Shared.AchievementConfig)
 local ProfileStore = {}
 ProfileStore.__index = ProfileStore
 local LEASE_SECONDS = 180
@@ -18,7 +19,7 @@ local function integer(value, cap)
 end
 function ProfileStore.Default()
     return {version = Config.SchemaVersion, hero = "Gale", coins = 0, xp = 0, clears = 0,
-        owned = {None = true}, claimed = {}, premiumClaimed = {}, trail = "None", title = "None", boon = "Guardian"}
+        owned = {None = true}, claimed = {}, premiumClaimed = {}, completedTiers = {}, achievements = {}, trail = "None", title = "None", boon = "Guardian"}
 end
 function ProfileStore.Sanitize(raw)
     local data = ProfileStore.Default()
@@ -27,6 +28,12 @@ function ProfileStore.Sanitize(raw)
     data.coins = integer(raw.coins, 100000000)
     data.xp = integer(raw.xp, 100000000)
     data.clears = integer(raw.clears, 10000000)
+    if type(raw.completedTiers)=='table' then
+        for _,id in ipairs({'Normal','Hard','Nightmare'})do if raw.completedTiers[id]==true then data.completedTiers[id]=true end end
+    end
+    if type(raw.achievements)=='table' then
+        for id in pairs(AchievementConfig.Badges)do if raw.achievements[id]==true then data.achievements[id]=true end end
+    end
     if type(raw.owned) == "table" then
         for id, owned in pairs(raw.owned) do if type(id) == "string" and owned == true and Config.FindCosmetic(id) then data.owned[id] = true end end
     end

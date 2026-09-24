@@ -94,7 +94,7 @@
     "WO-3.2": {
       "owner": "combat",
       "status": "WIP saved; actual multiplayer test failed; corrected fixture not rerun",
-      "evidence": "Earlier pure Survival39 and ReviveControl22 cases PASS. First actual2client SurvivalQA failed Registered enemy KO. Latest explicit checkpoint/bounded visibility retry and cancellation changes unverified; narrow-touch overlap and client HUD test unresolved. Agents interrupted by usage limits before final review.",
+      "evidence": "Earlier pure Survival39 and ReviveControl22 cases PASS. First actual2client SurvivalQA failed Registered enemy KO. Latest explicit checkpoint/bounded visibility retry and cancellation changes unverified; narrow-touch overlap and client HUD test unresolved. Agents interrupted by usage limits before final review. WIP checkpoint c7ac36e pushed.",
       "next": "Fresh Studio sync; rerun SurvivalRuntimeAI with companion client; fix touch layout; run ReviveHUDClient; independent final review before closure"
     },
     "WO-3.3": {
@@ -118,7 +118,7 @@
     "WO-3.6": {
       "owner": "root",
       "status": "partial WIP saved; integration and review unverified; Heat disabled",
-      "evidence": "Heat pure16 cases previously PASS. New admission/profile unlock/achievement wiring and AchievementPolicy/Service/spec source saved; latest code not runtime tested or independently approved. Badge IDs all0; external calls disabled in Studio. Combat Heat effects absent.",
+      "evidence": "Heat pure16 cases previously PASS. New admission/profile unlock/achievement wiring and AchievementPolicy/Service/spec source saved; latest code not runtime tested or independently approved. Badge IDs all0; external calls disabled in Studio. Combat Heat effects absent. Morning save: IP gate PASS165 files and git diff --check PASS; source hygiene only, not runtime acceptance.",
       "next": "Run Achievements specs and review full-run/Heat consistency; integrate immutable run options and all effects/UI only after WO3.3; test server authority and unlocks"
     },
     "WO-3.7": {

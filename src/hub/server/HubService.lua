@@ -2,6 +2,7 @@ local H={}
 local Players=game.Players
 local Shared=game.ReplicatedStorage.Nightfall.Shared
 local Config=require(Shared.Config)
+local Heat=require(Shared.HeatConfig)
 local Places=require(Shared.PlaceIds)
 local ProfileConfig=require(Shared.ProgressionConfig)
 local ProfileStore=require(script.Parent.ProfileStore)
@@ -23,9 +24,8 @@ local recovering={} local restoring={}
 local recoverMember
 local function report(p,message)if p.Parent then messages[p]=message end end
 local function unlocked(p,difficulty)
-    if difficulty=='Normal'then return true end
-    local profile=profiles[p]local tiers=profile and profile.data.completedTiers or {}
-    return difficulty=='Hard' and tiers.Normal==true or difficulty=='Nightmare' and tiers.Hard==true
+    local profile=profiles[p]
+    return Heat.Unlocked(profile and profile.data.completedTiers,difficulty)
 end
 local function snapshot(p)
     local raw=partySnapshots:Get(p.UserId)local party
@@ -147,8 +147,7 @@ local function request(p,action,payload)
         elseif action=='Cancel'then assert(service:Cancel(p.UserId),'Only the leader can cancel a queued deployment.')
         elseif action=='Queue'then
             local difficulty=payload.difficulty or 'Normal'local heat=payload.heat or{}
-            assert(type(heat)=='table' and #heat<=6,'Invalid contract selection.')
-            local seen={}for _,id in ipairs(heat)do assert(type(id)=='string' and Config.HeatContracts and Config.HeatContracts[id] and not seen[id],'Contract unavailable.')seen[id]=true end
+            heat=assert(Heat.Normalize(heat),'Invalid contract selection.')
             local party=assert(service:PartyFor(p.UserId),'Party unavailable.')assert(party.leader==p.UserId,'Only the party leader can deploy.')
             for _,uid in ipairs(party.members)do local member=Players:GetPlayerByUserId(uid)assert(member and unlocked(member,difficulty),'Every member must be here and have this difficulty unlocked.')assert(store:CanMutate(profiles[member]),'Every member needs a loaded, writable save session before deployment.')end
             assert(service:Queue(p.UserId,difficulty,heat,payload.mode,party.revision),'Queue unavailable.')report(p,'Deployment queued.')

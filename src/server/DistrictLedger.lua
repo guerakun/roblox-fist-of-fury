@@ -72,7 +72,7 @@ function Ledger:Complete(result,heatPercent)
     if not bonus then return nil,'invalid reward policy' end
     s.result=frozen({id=result.id,campaignId=result.campaignId,stage=result.stage,rank=result.rank,
         difficulty=result.difficulty,score=result.score,duration=result.duration,parTime=result.parTime,
-        damageTaken=result.damageTaken,heat=copy(result.heat),heatPercent=heatPercent})
+        damageTaken=result.damageTaken,bossDamageTaken=finite(result.bossDamageTaken) and result.bossDamageTaken or nil,heat=copy(result.heat),heatPercent=heatPercent})
     s.bonus=frozen(copy(bonus))
     return s.result,s.bonus
 end
