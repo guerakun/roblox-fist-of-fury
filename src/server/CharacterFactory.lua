@@ -1,12 +1,13 @@
--- Original R6 hero silhouettes, faces, and garment detail. Reviewed mesh references stay in CharacterArt.
+-- Original native-part hero silhouettes and face art; no external character assets.
 -- Only the seven canonical body parts participate in hit queries; all ornament is cosmetic.
 local Factory = {}
 local CharacterArt = require(game.ReplicatedStorage.Nightfall.Shared.CharacterArt)
 local function rgb(r, g, b) return Color3.fromRGB(r, g, b) end
 function Factory.Create(hero)
+    local art = CharacterArt[hero] or CharacterArt.Gale
     local model = Instance.new("Model")
     model.Name = hero
-    local skin = rgb(239, 192, 157)
+    local skin = art.Skin
     local ink = rgb(28, 25, 32)
     local function part(name, size, color, position)
         local p = Instance.new("Part")
@@ -18,15 +19,15 @@ function Factory.Create(hero)
     end
     local root = part("HumanoidRootPart", Vector3.new(2, 2, 1), skin, Vector3.new(0, 3, 0))
     root.Transparency, root.Massless = 1, false
-    local torso = part("Torso", Vector3.new(2, 2, 1), hero == "Gale" and rgb(246, 133, 36) or hero == "Piston" and rgb(175, 35, 47) or rgb(22, 36, 42), Vector3.new(0, 3, 0))
+    local torso = part("Torso", Vector3.new(2, 2, 1), art.Outfit, Vector3.new(0, 3, 0))
     torso.CanCollide = true
     local head = part("Head", Vector3.new(2, 1, 1), skin, Vector3.new(0, 4.5, 0))
     local headMesh = Instance.new("SpecialMesh")
     headMesh.MeshType, headMesh.Scale, headMesh.Parent = Enum.MeshType.Head, Vector3.new(1.05, 1.05, 1.05), head
-    local armColor = hero == "Piston" and skin or hero == "Gale" and rgb(28, 37, 63) or rgb(26, 41, 44)
+    local armColor = art.Outfit
     local ra = part("Right Arm", Vector3.new(1, 2, 1), armColor, Vector3.new(1.5, 3, 0))
     local la = part("Left Arm", Vector3.new(1, 2, 1), armColor, Vector3.new(-1.5, 3, 0))
-    local legColor = hero == "Piston" and rgb(49, 83, 141) or hero == "Gale" and rgb(239, 123, 30) or rgb(24, 32, 43)
+    local legColor = art.Legs
     local rl = part("Right Leg", Vector3.new(1, 2, 1), legColor, Vector3.new(.5, 1, 0))
     local ll = part("Left Leg", Vector3.new(1, 2, 1), legColor, Vector3.new(-.5, 1, 0))
     local function joint(name, p0, p1, c0, c1)
@@ -70,162 +71,124 @@ function Factory.Create(hero)
         end
         return frame
     end
-    local function checkedSurface(name, body, face, columns, rows)
-        local gui = surface(name, body, face)
-        for row = 0, rows - 1 do
-            for column = 0, columns - 1 do
-                shape(gui, "WovenCheck", column * 256 / columns, row * 256 / rows, 256 / columns, 256 / rows,
-                    (row + column) % 2 == 0 and rgb(42, 148, 104) or rgb(20, 36, 35))
-            end
-        end
-        shape(gui, "HemStitch", 0, 248, 256, 5, rgb(16, 31, 29))
-        return gui
-    end
-
-    -- Authored vector face panels: whites, iris rims, pupils, glints, lids and character marks.
-    -- The transparent face carrier does not enlarge damage bounds and is naturally occluded by hair.
+    -- Original vector expressions; the transparent carrier never participates in queries.
     local faceCarrier = detail("AuthoredFace", Vector3.new(1.56, .84, .018), skin, head, CFrame.new(0, -.045, -.546))
     faceCarrier.Transparency = 1
-    local face = surface("OriginalAnimeFace", faceCarrier, Enum.NormalId.Front, Vector2.new(512, 320))
-    face.LightInfluence, face.Brightness = .05, 1.2
-    local irisColor = hero == "Gale" and rgb(48, 140, 215) or hero == "Piston" and rgb(45, 38, 35) or rgb(155, 55, 70)
-    local eyeHeight = hero == "Piston" and 70 or hero == "Tide" and 61 or 51
+    local face = surface(art.FaceId, faceCarrier, Enum.NormalId.Front, Vector2.new(512, 320))
+    face.LightInfluence, face.Brightness = .05, 1.1
     for _, side in ipairs({-1, 1}) do
         local x = side < 0 and 114 or 313
-        local slant = hero == "Piston" and side * -2 or side * -8
-        local eye = shape(face, "EyeContour", x, 111, 91, eyeHeight, ink, 19, slant)
+        local eye = shape(face, "EyeContour", x, 112, 91, 53, ink, 19, side * -4)
         eye.ClipsDescendants = true
-        shape(eye, "EyeWhite", 3, 4, 85, eyeHeight - 9, rgb(255, 248, 235), 17)
-        local iris = shape(eye, "IrisRim", 26, 6, 42, eyeHeight - 8, ink, 21)
-        shape(iris, "IrisColor", 4, 3, 34, eyeHeight - 13, irisColor, 16)
-        shape(iris, "Pupil", 15, 5, 13, math.max(20, eyeHeight - 18), rgb(16, 22, 29), 7)
-        shape(iris, "EyeGlint", 9, 6, 9, 11, rgb(255, 255, 251), 5)
-        shape(eye, "UpperLid", 0, -1, 91, hero == "Gale" and 10 or 7, ink, 4)
-        shape(face, "LowerLid", x + 7, 113 + eyeHeight, 78, 4, rgb(172, 110, 89), 2, slant)
-        shape(face, "ExpressionBrow", x - 3, hero == "Piston" and 88 or 87, 95, hero == "Tide" and 13 or 10, hero == "Gale" and rgb(116, 79, 26) or ink, 4, side * -10)
+        shape(eye, "EyeWhite", 3, 4, 85, 44, rgb(249, 246, 231), 17)
+        local iris = shape(eye, "Iris", 28, 5, 39, 44, art.Iris, 20)
+        shape(iris, "Pupil", 15, 5, 12, 34, ink, 6)
+        shape(iris, "Glint", 8, 5, 9, 10, rgb(255, 255, 251), 5)
+        shape(face, "Brow", x - 2, 91, 94, 9, art.Hair, 4, side * -7)
     end
-    shape(face, "NoseContour", 252, 189, 7, 26, rgb(172, 112, 84), 4, -11)
-    shape(face, "NoseHighlight", 260, 194, 3, 15, rgb(253, 214, 176), 2)
-    if hero == "Piston" then
-        local grin = shape(face, "GrinOutline", 213, 242, 89, 29, rgb(88, 43, 37), 14)
-        shape(grin, "SmileTeeth", 5, 3, 79, 14, rgb(255, 247, 225), 6)
-        shape(face, "UnderEyeScar", 326, 197, 63, 5, rgb(117, 60, 52), 2, -5)
-        for index = 0, 2 do shape(face, "ScarStitch", 333 + index * 20, 191, 4, 15, rgb(117, 60, 52), 1, 8) end
+    shape(face, "Nose", 252, 184, 7, 26, skin:Lerp(ink, .24), 4, -9)
+    shape(face, "Smile", 223, 240, 67, 5, skin:Lerp(ink, .55), 3, hero == "Piston" and -7 or 0)
+    if hero == "Gale" then
+        shape(face, "BrowNotch", 143, 86, 5, 18, skin, 1, -7)
+    elseif hero == "Piston" then
+        for _, x in ipairs({119, 144, 169, 344, 369, 394}) do
+            shape(face, "Freckle", x, 191 + x % 3 * 7, 5, 5, skin:Lerp(ink, .3), 3)
+        end
     else
-        shape(face, "MouthLine", 222, 247, 67, 5, rgb(108, 55, 47), 3, hero == "Gale" and -3 or 0)
-        shape(face, "LowerLip", 238, 258, 36, 3, rgb(203, 145, 117), 2)
+        shape(face, "BeautyDot", 351, 194, 7, 7, rgb(113, 78, 76), 4)
+    end
+    for _, side in ipairs({-1, 1}) do
+        detail("Ear", Vector3.new(.14, .25, .16), skin, head, CFrame.new(side * .87, -.08, -.025), Enum.PartType.Ball)
+    end
+    for _, leg in ipairs({rl, ll}) do
+        detail("WorkBoot", Vector3.new(1.05, .44, 1.13), rgb(25, 29, 38), leg, CFrame.new(0, -.79, -.035))
+        detail("BootSole", Vector3.new(1.08, .10, 1.16), rgb(74, 80, 87), leg, CFrame.new(0, -.96, -.045))
     end
     if hero == "Gale" then
-        for _, side in ipairs({-1, 1}) do
-            for index = 0, 2 do
-                shape(face, "WhiskerMark", side < 0 and 39 or 410, 186 + index * 22, 64, 4,
-                    rgb(124, 82, 59), 2, side * (6 + index * 3))
+        -- Low swept undercut, asymmetrical silver-teal silhouette, no imported mesh.
+        detail("Undercut", Vector3.new(1.62, .22, 1.04), rgb(55, 85, 93), head, CFrame.new(0, .38, .08))
+        for i = 0, 4 do
+            detail("SweptHair", Vector3.new(.46, .27, 1.08), art.Hair, head,
+                CFrame.new(-.58 + i * .27, .53 + i * .025, .045) * CFrame.Angles(0, -.08, -.19), Enum.PartType.Ball)
+        end
+        detail("SideSweep", Vector3.new(.76, .18, .23), art.Hair, head, CFrame.new(.3, .38, -.48) * CFrame.Angles(0, 0, -.2), Enum.PartType.Ball)
+        detail("CroppedHem", Vector3.new(2.04, .20, 1.05), rgb(26, 34, 43), torso, CFrame.new(0, -.56, 0))
+        detail("Underlayer", Vector3.new(1.99, .35, 1.01), rgb(93, 117, 125), torso, CFrame.new(0, -.81, 0))
+        detail("OffsetZip", Vector3.new(.055, 1.4, .06), art.Accent, torso, CFrame.new(.26, .2, -.53))
+        detail("ShortCollar", Vector3.new(2.03, .18, 1.03), rgb(68, 88, 97), torso, CFrame.new(0, .9, 0))
+        for side, arm in ipairs({la, ra}) do
+            detail("ShoulderPiping", Vector3.new(.08, .88, 1.025), art.Accent, arm, CFrame.new(side == 1 and -.43 or .43, .45, 0))
+            detail("ForearmWrap", Vector3.new(1.04, .55, 1.04), rgb(79, 107, 117), arm, CFrame.new(0, -.48, 0))
+            detail("Fingers", Vector3.new(.99, .23, 1.01), skin, arm, CFrame.new(0, -.91, 0))
+            for i = 1, 2 do
+                local ribbon = detail("WindRibbon", Vector3.new(.12, .72 + i * .12, .045), art.Hair, arm,
+                    CFrame.new((i - 1.5) * .23, -.54, .7 + i * .10) * CFrame.Angles(.7, 0, (i - 1.5) * .3))
+                ribbon.Transparency = .18
             end
         end
-    elseif hero == "Tide" then
-        local scarColor = rgb(132, 59, 51)
-        shape(face, "ForeheadScarA", 120, 12, 28, 46, scarColor, 5, -17)
-        shape(face, "ForeheadScarB", 139, 38, 26, 43, scarColor, 5, 23)
-        shape(face, "ForeheadScarC", 118, 60, 24, 25, scarColor, 4, -12)
-        shape(face, "ScarHighlight", 125, 27, 7, 24, rgb(178, 97, 78), 2, -17)
-    end
-    detail("NoseContour", Vector3.new(.075, .105, .068), rgb(226, 171, 135), head, CFrame.new(0, -.12, -.571), Enum.PartType.Ball)
-    for _, side in ipairs({-1, 1}) do detail("EarContour", Vector3.new(.14, .25, .16), skin, head, CFrame.new(side * .87, -.08, -.025), Enum.PartType.Ball) end
-
-    for _, leg in ipairs({rl, ll}) do
-        if hero == "Piston" then
-            detail("Shin", Vector3.new(1.025, 1.08, 1.025), skin, leg, CFrame.new(0, -.46, 0))
-            detail("SandalSole", Vector3.new(1.06, .13, 1.11), rgb(103, 67, 40), leg, CFrame.new(0, -.93, -.02))
-            detail("SandalStrap", Vector3.new(.87, .095, .13), rgb(126, 79, 40), leg, CFrame.new(0, -.72, -.535))
-        else
-            detail("Boot", Vector3.new(1.03, .38, 1.08), rgb(21, 28, 37), leg, CFrame.new(0, -.81, -.03))
-        end
-    end
-    if hero == "Gale" then
-        detail("JacketPanel", Vector3.new(1.3, 1.45, .08), rgb(26, 36, 62), torso, CFrame.new(0, .25, -.53))
-        detail("Zip", Vector3.new(.055, 1.9, .09), rgb(220, 220, 210), torso, CFrame.new(0, 0, -.58))
-        detail("ZipPull", Vector3.new(.10, .16, .035), rgb(187, 196, 203), torso, CFrame.new(.045, .56, -.64))
-        detail("RaisedCollar", Vector3.new(2.07, .24, 1.03), rgb(26, 36, 62), torso, CFrame.new(0, .89, 0))
-        for _, arm in ipairs({ra, la}) do
-            detail("OrangeSleeve", Vector3.new(1.02, .78, 1.02), rgb(238, 128, 38), arm, CFrame.new(0, .2, 0))
-            detail("SleeveCuff", Vector3.new(1.04, .17, 1.04), rgb(24, 32, 49), arm, CFrame.new(0, -.77, 0))
-            detail("Hand", Vector3.new(1.015, .27, 1.015), skin, arm, CFrame.new(0, -.9, 0))
-        end
-        local back = surface("JacketBackSeams", torso, Enum.NormalId.Back)
-        shape(back, "ShoulderYoke", 0, 0, 256, 59, rgb(30, 42, 63))
-        shape(back, "CenterSeam", 126, 60, 4, 185, rgb(201, 94, 28))
-        shape(back, "Hem", 0, 242, 256, 10, rgb(29, 41, 61))
-        shape(back, "BackCrestRing", 94, 95, 68, 68, rgb(151, 46, 41), 34)
-        shape(back, "BackCrestInset", 105, 106, 46, 46, rgb(240, 130, 39), 23)
-        shape(back, "BackCrestCore", 119, 120, 18, 18, rgb(151, 46, 41), 9)
-        shape(back, "BackCrestTail", 143, 144, 27, 9, rgb(151, 46, 41), 4, 36)
-        for _, side in ipairs({-1, 1}) do detail("HeadbandRibbon", Vector3.new(.16, .51, .055), rgb(26, 37, 53), head, CFrame.new(side * .17, -.03, .57) * CFrame.Angles(0, 0, side * .26)) end
-        if not CharacterArt[hero] then
-            detail("Headband", Vector3.new(1.65, .28, 1.05), rgb(23, 34, 53), head, CFrame.new(0, .27, 0))
-            detail("MetalPlate", Vector3.new(.83, .24, .07), rgb(164, 187, 203), head, CFrame.new(0, .27, -.56))
-            for index = -3, 3 do detail("GoldenSpike", Vector3.new(.32, .6, .68), rgb(255, 199, 41), head, CFrame.new(index * .2, .75 - math.abs(index) * .025, .06) * CFrame.Angles(0, 0, -index * .15)) end
-        end
+        local back = surface("CourierSeams", torso, Enum.NormalId.Back)
+        shape(back, "AmberSeam", 25, 57, 205, 5, art.Accent, 2, -9)
+        shape(back, "RouteTab", 183, 83, 35, 62, rgb(83, 125, 132), 4)
     elseif hero == "Piston" then
-        detail("OpenVest", Vector3.new(.83, 1.72, .07), skin, torso, CFrame.new(0, .05, -.54))
-        detail("Sash", Vector3.new(2.07, .28, 1.07), rgb(246, 192, 46), torso, CFrame.new(0, -.78, 0))
-        for _, angle in ipairs({-.68, .68}) do detail("ChestScar", Vector3.new(.60, .058, .025), rgb(162, 89, 68), torso, CFrame.new(0, .16, -.59) * CFrame.Angles(0, 0, angle)) end
-        for index = 0, 2 do detail("VestButton", Vector3.new(.095, .095, .035), rgb(233, 177, 61), torso, CFrame.new(-.49, .46 - index * .43, -.56), Enum.PartType.Ball) end
-        local back = surface("VestBackSeams", torso, Enum.NormalId.Back)
-        shape(back, "ShoulderSeam", 8, 33, 240, 4, rgb(131, 31, 39))
-        shape(back, "CenterSeam", 126, 36, 4, 186, rgb(134, 29, 37))
-        shape(back, "VestHem", 4, 228, 248, 5, rgb(120, 29, 37))
-        shape(back, "NeckOpening", 85, 0, 86, 26, skin, 13)
-        for _, faceId in ipairs({Enum.NormalId.Left, Enum.NormalId.Right}) do
-            local side = surface("VestSideSeam", torso, faceId)
-            shape(side, "Stitch", 126, 45, 5, 192, rgb(126, 28, 37))
+        -- Rounded curls and welding lenses identify a mechanic before the gauntlet silhouette.
+        for i = 0, 8 do
+            local angle = i * math.pi * 2 / 9
+            detail("Curl", Vector3.new(.53, .43, .51), art.Hair, head,
+                CFrame.new(math.cos(angle) * .62, .49 + (i % 2) * .10, math.sin(angle) * .32 + .06), Enum.PartType.Ball)
         end
-        if not CharacterArt[hero] then
-            detail("HatBrim", Vector3.new(.16, 2.6, 2.6), rgb(222, 177, 91), head, CFrame.new(0, .66, .02) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
-            detail("HatCrown", Vector3.new(.48, 1.65, 1.65), rgb(222, 177, 91), head, CFrame.new(0, .94, .02) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
-            detail("HatRibbon", Vector3.new(.16, 1.7, 1.7), rgb(180, 35, 43), head, CFrame.new(0, .75, .02) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
+        detail("CrownCurl", Vector3.new(.81, .44, .65), art.Hair, head, CFrame.new(0, .69, .06), Enum.PartType.Ball)
+        detail("GoggleBridge", Vector3.new(.37, .08, .12), art.Accent, head, CFrame.new(0, .43, -.56))
+        for _, x in ipairs({-.35, .35}) do
+            detail("WeldingRim", Vector3.new(.57, .38, .18), art.Accent, head, CFrame.new(x, .45, -.56), Enum.PartType.Ball)
+            detail("WeldingLens", Vector3.new(.43, .26, .04), rgb(100, 205, 204), head, CFrame.new(x, .45, -.66), Enum.PartType.Ball)
+            detail("OverallStrap", Vector3.new(.23, 1.77, .08), rgb(54, 142, 147), torso, CFrame.new(x * 1.6, .06, -.54))
+            detail("Buckle", Vector3.new(.27, .19, .10), art.Accent, torso, CFrame.new(x * 1.6, .47, -.59))
         end
-    else
-        for row = 0, 3 do for column = 0, 3 do
-            local color = (row + column) % 2 == 0 and rgb(40, 155, 111) or rgb(20, 32, 35)
-            detail("HaoriCheck", Vector3.new(.48, .47, .07), color, torso, CFrame.new(-.75 + column * .5, .72 - row * .48, -.55))
-        end end
-        local back = checkedSurface("HaoriBackChecks", torso, Enum.NormalId.Back, 4, 4)
-        shape(back, "BackCenterSeam", 127, 0, 3, 249, rgb(15, 30, 29))
+        detail("BibPocket", Vector3.new(.70, .48, .10), rgb(22, 79, 88), torso, CFrame.new(0, -.01, -.56))
+        detail("UtilityBelt", Vector3.new(2.06, .22, 1.06), rgb(61, 52, 44), torso, CFrame.new(0, -.81, 0))
         for _, arm in ipairs({ra, la}) do
-            checkedSurface("SleeveFrontChecks", arm, Enum.NormalId.Front, 2, 4)
-            checkedSurface("SleeveBackChecks", arm, Enum.NormalId.Back, 2, 4)
-            checkedSurface("SleeveOuterChecks", arm, arm == ra and Enum.NormalId.Right or Enum.NormalId.Left, 2, 4)
-            detail("HaoriCuff", Vector3.new(1.035, .18, 1.035), rgb(22, 39, 36), arm, CFrame.new(0, -.83, 0))
-            detail("Hand", Vector3.new(1.02, .24, 1.02), skin, arm, CFrame.new(0, -.92, 0))
+            detail("WorkGlove", Vector3.new(1.04, .60, 1.04), rgb(156, 60, 58), arm, CFrame.new(0, -.66, 0))
         end
-        for _, side in ipairs({-1, 1}) do detail("WhiteCollar", Vector3.new(.13, .52, .04), rgb(224, 225, 206), torso, CFrame.new(side * .13, .71, -.61) * CFrame.Angles(0, 0, side * -.38)) end
-        for _, leg in ipairs({rl, ll}) do
-            for index = 0, 2 do detail("LegWrap", Vector3.new(1.02, .11, 1.035), rgb(206, 207, 187), leg, CFrame.new(0, -.35 - index * .19, 0)) end
+        local gauntlet = detail("PistonGauntlet", Vector3.new(1.36, 1.11, 1.34), art.Accent, ra, CFrame.new(0, -.48, -.04))
+        gauntlet.Material = Enum.Material.Metal
+        local plate = detail("SteelKnuckles", Vector3.new(1.39, .40, .29), rgb(128, 151, 164), ra, CFrame.new(0, -.81, -.78))
+        plate.Material = Enum.Material.Metal
+        for _, x in ipairs({-.53, .53}) do
+            local piston = detail("GauntletPiston", Vector3.new(.15, .90, .15), rgb(157, 176, 188), ra, CFrame.new(x, -.36, -.55))
+            piston.Material = Enum.Material.Metal
         end
-        for _, x in ipairs({-.77, .77}) do
-            local earring = detail("HanafudaEarring", Vector3.new(.15, .4, .1), rgb(237, 224, 199), head, CFrame.new(x, -.39, -.15))
-            local art = surface("AuthoredEarringMotif", earring, Enum.NormalId.Front, Vector2.new(64, 160))
-            shape(art, "Sun", 20, 19, 24, 24, rgb(180, 57, 48), 12)
-            for index = -1, 1 do shape(art, "Ray", 30 + index * 10, 53, 4, 80, rgb(77, 78, 74), 1, index * 14) end
-            shape(art, "Footer", 7, 141, 50, 4, rgb(77, 78, 74))
+        for i = 0, 2 do detail("SteamVent", Vector3.new(.64, .07, .08), rgb(60, 67, 73), ra, CFrame.new(0, -.2 - i * .16, .65)) end
+    else
+        -- Tied navy hair and a split long coat; a broad hooked glaive, not a short sword.
+        detail("HairCap", Vector3.new(1.71, .44, 1.12), art.Hair, head, CFrame.new(0, .43, .06), Enum.PartType.Ball)
+        for i = 1, 3 do
+            detail("SideFringe", Vector3.new(.36, .38, .18), art.Hair, head,
+                CFrame.new(-.55 + i * .28, .30 - i * .07, -.52) * CFrame.Angles(0, 0, -.32), Enum.PartType.Ball)
         end
-        detail("Scabbard", Vector3.new(.17, 3.4, .19), rgb(21, 28, 34), torso, CFrame.new(-.25, .05, .69) * CFrame.Angles(0, 0, -.52))
-        local handle = detail("SwordHandle", Vector3.new(.2, .64, .2), rgb(236, 218, 193), torso, CFrame.new(.65, 1.62, .69) * CFrame.Angles(0, 0, -.52))
-        for index = 0, 3 do detail("HandleBinding", Vector3.new(.225, .065, .225), rgb(45, 46, 43), handle, CFrame.new(0, -.24 + index * .15, 0)) end
-        detail("SwordGuard", Vector3.new(.48, .085, .43), rgb(84, 91, 86), handle, CFrame.new(0, -.36, 0))
-        if not CharacterArt[hero] then
-            for index = -3, 3 do detail("BurgundyHair", Vector3.new(.34, .51, .7), rgb(72, 30, 39), head, CFrame.new(index * .19, .56, 0) * CFrame.Angles(0, 0, -index * .14)) end
+        detail("PonytailTie", Vector3.new(.45, .29, .45), art.Accent, head, CFrame.new(0, .38, .66), Enum.PartType.Ball)
+        for i = 1, 3 do
+            detail("Ponytail", Vector3.new(.48 - i * .05, .67, .39), art.Hair, head,
+                CFrame.new(i * .12, .25 - i * .49, .76 + i * .07) * CFrame.Angles(-.13, 0, .16), Enum.PartType.Ball)
         end
+        detail("CoralClip", Vector3.new(.4, .13, .14), art.Accent, head, CFrame.new(-.69, .26, -.42) * CFrame.Angles(0, 0, -.5))
+        for _, x in ipairs({-.62, .62}) do
+            detail("CoatTail", Vector3.new(.92, 1.34, 1.07), art.Outfit, torso, CFrame.new(x, -1.26, .05) * CFrame.Angles(0, 0, -x * .05))
+            detail("FoamHem", Vector3.new(.94, .14, 1.09), rgb(218, 233, 236), torso, CFrame.new(x, -1.89, .05))
+            detail("CoatLapel", Vector3.new(.15, 1.41, .075), rgb(218, 233, 236), torso, CFrame.new(x * .36, .3, -.54) * CFrame.Angles(0, 0, x * -.14))
+        end
+        for _, arm in ipairs({ra, la}) do
+            detail("FoamCuff", Vector3.new(1.045, .2, 1.045), rgb(218, 233, 236), arm, CFrame.new(0, -.7, 0))
+            detail("Hand", Vector3.new(1.01, .25, 1.01), skin, arm, CFrame.new(0, -.9, 0))
+        end
+        local shaft = detail("GlaiveShaft", Vector3.new(.16, 4.6, .16), rgb(75, 106, 123), ra,
+            CFrame.new(.2, -.36, -.76) * CFrame.Angles(0, 0, -.10))
+        for i = 0, 2 do detail("Grip", Vector3.new(.2, .10, .2), art.Accent, shaft, CFrame.new(0, -.22 + i * .18, 0)) end
+        local blade = detail("GlaiveBlade", Vector3.new(.67, 1.19, .12), rgb(174, 211, 226), shaft,
+            CFrame.new(.23, 1.86, 0) * CFrame.Angles(0, 0, -.24))
+        blade.Material = Enum.Material.Metal
+        detail("GlaiveHook", Vector3.new(.47, .15, .14), rgb(213, 237, 240), shaft, CFrame.new(.42, 1.34, 0) * CFrame.Angles(0, 0, .34))
     end
 
-    -- Preserve reviewed asset IDs, native mesh scales, and attachment transforms exactly.
-    for _, spec in ipairs(CharacterArt[hero] or {}) do
-        local p = detail(spec.Name, spec.Size, spec.Color, head, spec.Offset)
-        p:SetAttribute("ToolboxSource", spec.Source)
-        local mesh = Instance.new("SpecialMesh")
-        mesh.MeshType, mesh.MeshId, mesh.TextureId, mesh.Scale = Enum.MeshType.FileMesh, spec.Mesh, spec.Texture, spec.Scale
-        mesh.Parent = p
-    end
     local humanoid = Instance.new("Humanoid")
     humanoid.Name, humanoid.RequiresNeck, humanoid.DisplayDistanceType = "Humanoid", true, Enum.HumanoidDisplayDistanceType.None
     humanoid.Parent = model
@@ -237,6 +200,8 @@ function Factory.Create(hero)
     for _, item in ipairs(model:GetDescendants()) do if item:IsA("BasePart") then count += 1 end end
     model:SetAttribute("CharacterPartCount", count)
     model:SetAttribute("OriginalFaceArt", true)
+    model:SetAttribute("OriginalFaceId", art.FaceId)
+    model:SetAttribute("ArtRevision", "OriginalCast1")
     model.PrimaryPart = root
     return model
 end
