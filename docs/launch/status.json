@@ -1,5 +1,5 @@
 {
-  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; WO-1.4 original story/docs and Ashgate signage saved; WO-1.2 native original art instantiated with valid rigs; visible likeness/screenshots blocked by blank capture output. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.3 specials, WO-2.2 director, WO-5.5 fixed3/4/lifecycle/latency tests. Names/art approval and human runs remain owner gates. Hub source built/instantiated (WO-5.1), IDs remain zero; party/deploy functionality is next in WO-5.2. Fixed 2/3-client runs passed. WO-2.2 director/body tells saved after scheduler/AI specs and independent review; M2 campaign telemetry is pending. WO-5.5 fixed4 passed144.94s; lifecycle14assertions passed but same-identity rejoin blocked (Studio assigns fresh IDs). 150ms campaign passed158.80s;250ms running.",
+  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; WO-1.4 original story/docs and Ashgate signage saved; WO-1.2 native original art instantiated with valid rigs; visible likeness/screenshots blocked by blank capture output. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.3 specials, WO-2.2 director, WO-5.5 fixed3/4/lifecycle/latency tests. Names/art approval and human runs remain owner gates. Hub source built/instantiated (WO-5.1), IDs remain zero; party/deploy functionality is next in WO-5.2. Fixed 2/3-client runs passed. WO-2.2 director/body tells saved after scheduler/AI specs and independent review; M2 campaign telemetry is pending. WO-5.5 fixed4 passed144.94s; lifecycle14assertions passed but same-identity rejoin blocked (Studio assigns fresh IDs). 150ms passed158.80s;250ms passed167.15s. Lag restored0. All remaining lifecycle coverage is itemized in MULTIPLAYER_EVIDENCE.md; WO-5.5 is partially verified, not closed.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -58,7 +58,7 @@
     "WO-2.2": {
       "owner": "combat",
       "status": "implemented; aggregate telemetry pending",
-      "evidence": "2026-09-24: fresh Studio AttackDirectorAI+EnemyAISlots PASS; world finalreview PASS; front/back slots, nonidleHold,2-5tokens, renewal/capshrink/targetdeparture invalidation, bodytell client contract",
+      "evidence": "2026-09-24: fresh Studio AttackDirectorAI+EnemyAISlots PASS; world finalreview PASS; front/back slots, nonidleHold,2-5tokens, renewal/capshrink/targetdeparture invalidation, bodytell client contract; commit3bbc5cc",
       "next": "WO-2.3 archetypes; five-run aggregate M2 telemetry/frustum/human gates remain open"
     },
     "WO-2.3": {
@@ -189,9 +189,9 @@
     },
     "WO-5.5": {
       "owner": "root",
-      "status": "in progress",
-      "evidence": "2026-09-24: actual2-to-4PASS15assertions152.07s; fixed2PASS147.44s; fixed3PASS140.46s; all12encounters; fixed4running, lifecycle/lagpending",
-      "next": "run generalized harness at2/3/4, lifecycle and150/250ms"
+      "status": "partially verified; remaining cases recorded",
+      "evidence": "2026-09-24: fixed2/3/4 and2-to-4 PASSall12encounters;150/250msPASS;14lifecycle/stockshare assertionsPASS;22timingpairs250ms zero>50ms early; MULTIPLAYER_EVIDENCE.md",
+      "next": "same-IDreconnect blocked by Studio identity reuse; retry/freshcampaign/emptyserver/readycancel scenarios pending; rerun afterM3"
     },
     "WO-5.6": {
       "owner": "root",

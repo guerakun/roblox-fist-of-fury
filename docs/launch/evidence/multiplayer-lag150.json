@@ -1,0 +1,783 @@
+{
+  "ok": true,
+  "result": {
+    "clients": {
+      "Player1": {
+        "slot": 2,
+        "driver": {
+          "hero": "Piston",
+          "telegraphTiming": {
+            "pairs": 0,
+            "earlyImpacts": 0,
+            "sumDelta": 0
+          },
+          "elapsed": 154.18293739994988,
+          "frames": 2288,
+          "runStats": {
+            "kills": 26,
+            "duration": 149,
+            "damageDealt": 1862,
+            "damageTaken": 87,
+            "coinsEarned": 690
+          },
+          "actionRequests": {
+            "SelectCharacter": 1,
+            "Ready": 1,
+            "Special": 28,
+            "Light": 158,
+            "Heavy": 43
+          },
+          "stocks": 3,
+          "slot": 2,
+          "maxDt": 0.2859368920326233,
+          "transitions": [
+            {
+              "at": 1.4579733000136912,
+              "state": "1:0:Waiting"
+            },
+            {
+              "at": 4.487597199971788,
+              "state": "1:0:Intermission"
+            },
+            {
+              "at": 8.556970600038767,
+              "state": "1:1:Combat"
+            },
+            {
+              "at": 13.220709000015631,
+              "state": "1:1:Intermission"
+            },
+            {
+              "at": 17.287691100034863,
+              "state": "1:2:Combat"
+            },
+            {
+              "at": 23.353837299975567,
+              "state": "1:2:Intermission"
+            },
+            {
+              "at": 28.420918600051664,
+              "state": "1:2:Traverse"
+            },
+            {
+              "at": 30.356102099991404,
+              "state": "1:3:Combat"
+            },
+            {
+              "at": 36.42121069994755,
+              "state": "1:3:Intermission"
+            },
+            {
+              "at": 40.48675070004538,
+              "state": "1:4:Combat"
+            },
+            {
+              "at": 49.487623999943025,
+              "state": "1:4:Advance"
+            },
+            {
+              "at": 52.1534955999814,
+              "state": "2:0:Intermission"
+            },
+            {
+              "at": 56.21840140002314,
+              "state": "2:1:Combat"
+            },
+            {
+              "at": 62.21896159998141,
+              "state": "2:1:Intermission"
+            },
+            {
+              "at": 66.35196420003194,
+              "state": "2:2:Combat"
+            },
+            {
+              "at": 74.28581589995883,
+              "state": "2:2:Intermission"
+            },
+            {
+              "at": 79.35183659999166,
+              "state": "2:2:Traverse"
+            },
+            {
+              "at": 81.75435940001626,
+              "state": "2:3:Combat"
+            },
+            {
+              "at": 86.81821289996151,
+              "state": "2:3:Intermission"
+            },
+            {
+              "at": 90.81899119995069,
+              "state": "2:3:Traverse"
+            },
+            {
+              "at": 91.6850508999778,
+              "state": "2:4:Combat"
+            },
+            {
+              "at": 102.88413050002418,
+              "state": "2:4:Advance"
+            },
+            {
+              "at": 105.8188529999461,
+              "state": "3:0:Intermission"
+            },
+            {
+              "at": 109.8837191000348,
+              "state": "3:1:Combat"
+            },
+            {
+              "at": 114.88369769998826,
+              "state": "3:1:Intermission"
+            },
+            {
+              "at": 118.88305930001661,
+              "state": "3:2:Combat"
+            },
+            {
+              "at": 125.94906350004021,
+              "state": "3:2:Intermission"
+            },
+            {
+              "at": 131.01599009998608,
+              "state": "3:2:Traverse"
+            },
+            {
+              "at": 133.2193981000455,
+              "state": "3:3:Combat"
+            },
+            {
+              "at": 140.54916359996423,
+              "state": "3:3:Intermission"
+            },
+            {
+              "at": 144.5528894000454,
+              "state": "3:4:Combat"
+            }
+          ],
+          "wave": 4,
+          "stage": 3,
+          "status": "Victory",
+          "meanDt": 0.06674321781570365,
+          "framesOver50ms": 2287,
+          "percent": 29,
+          "controlledInputsOnly": true
+        },
+        "name": "Player1",
+        "server": {
+          "hero": "Piston",
+          "resultReason": "All three districts and six elite curses defeated.",
+          "readyCount": 2,
+          "waveTitle": "KILN SOVEREIGN",
+          "stageName": "ABANDONED FACTORY",
+          "nextWaveAt": 0,
+          "encounterName": "KILN SOVEREIGN",
+          "boss": false,
+          "targetX": 495,
+          "blocking": false,
+          "runStats": {
+            "kills": 26,
+            "duration": 149,
+            "damageDealt": 1862,
+            "damageTaken": 87,
+            "coinsEarned": 690
+          },
+          "enemiesRemaining": 0,
+          "stocks": 3,
+          "waves": 4,
+          "downed": false,
+          "walkingMaxX": 525,
+          "stage": 3,
+          "encounterKind": "Boss",
+          "shareStockCooldown": 0,
+          "status": "Victory",
+          "rescueTarget": false,
+          "ready": true,
+          "playersTotal": 2,
+          "wave": 4,
+          "canShareStock": false,
+          "objective": "CLEAR / KILN SOVEREIGN",
+          "checkpointLabel": "MINIBOSS CLEARED / MID-DISTRICT",
+          "kind": "Snapshot",
+          "percent": 29,
+          "cooldowns": {
+            "Dash": 0,
+            "Special": 1790232943.256524
+          }
+        }
+      },
+      "Player2": {
+        "slot": 1,
+        "driver": {
+          "hero": "Gale",
+          "telegraphTiming": {
+            "pairs": 0,
+            "earlyImpacts": 0,
+            "sumDelta": 0
+          },
+          "elapsed": 153.0019169000443,
+          "frames": 2272,
+          "runStats": {
+            "kills": 26,
+            "duration": 149,
+            "damageDealt": 1768,
+            "damageTaken": 67,
+            "coinsEarned": 690
+          },
+          "actionRequests": {
+            "Ready": 1,
+            "Special": 30,
+            "Light": 176,
+            "Heavy": 46
+          },
+          "stocks": 3,
+          "slot": 1,
+          "maxDt": 0.11735379695892334,
+          "transitions": [
+            {
+              "at": 1.5072682000463828,
+              "state": "1:0:Waiting"
+            },
+            {
+              "at": 3.2922462000278756,
+              "state": "1:0:Intermission"
+            },
+            {
+              "at": 7.4228386000031605,
+              "state": "1:1:Combat"
+            },
+            {
+              "at": 12.08992689999286,
+              "state": "1:1:Intermission"
+            },
+            {
+              "at": 16.092669300036505,
+              "state": "1:2:Combat"
+            },
+            {
+              "at": 22.15689750004094,
+              "state": "1:2:Intermission"
+            },
+            {
+              "at": 27.223315800074488,
+              "state": "1:2:Traverse"
+            },
+            {
+              "at": 29.222315200022422,
+              "state": "1:3:Combat"
+            },
+            {
+              "at": 35.222772900015116,
+              "state": "1:3:Intermission"
+            },
+            {
+              "at": 39.29207389999647,
+              "state": "1:4:Combat"
+            },
+            {
+              "at": 48.289161000051536,
+              "state": "1:4:Advance"
+            },
+            {
+              "at": 50.95605629996862,
+              "state": "2:0:Intermission"
+            },
+            {
+              "at": 55.021058200043626,
+              "state": "2:1:Combat"
+            },
+            {
+              "at": 61.088424700079486,
+              "state": "2:1:Intermission"
+            },
+            {
+              "at": 65.15473010006826,
+              "state": "2:2:Combat"
+            },
+            {
+              "at": 73.08709380007349,
+              "state": "2:2:Intermission"
+            },
+            {
+              "at": 78.15370590006933,
+              "state": "2:2:Traverse"
+            },
+            {
+              "at": 80.62031690008007,
+              "state": "2:3:Combat"
+            },
+            {
+              "at": 85.62163880001754,
+              "state": "2:3:Intermission"
+            },
+            {
+              "at": 89.62038440001197,
+              "state": "2:3:Traverse"
+            },
+            {
+              "at": 90.48629829997662,
+              "state": "2:4:Combat"
+            },
+            {
+              "at": 101.68609740003012,
+              "state": "2:4:Advance"
+            },
+            {
+              "at": 104.68633439997211,
+              "state": "3:0:Intermission"
+            },
+            {
+              "at": 108.68579480005428,
+              "state": "3:1:Combat"
+            },
+            {
+              "at": 113.68610270007048,
+              "state": "3:1:Intermission"
+            },
+            {
+              "at": 117.68578110006638,
+              "state": "3:2:Combat"
+            },
+            {
+              "at": 124.75209980004001,
+              "state": "3:2:Intermission"
+            },
+            {
+              "at": 129.81849249999505,
+              "state": "3:2:Traverse"
+            },
+            {
+              "at": 132.0850602000719,
+              "state": "3:3:Combat"
+            },
+            {
+              "at": 139.35160180006642,
+              "state": "3:3:Intermission"
+            },
+            {
+              "at": 143.4175199000165,
+              "state": "3:4:Combat"
+            }
+          ],
+          "wave": 4,
+          "stage": 3,
+          "status": "Victory",
+          "meanDt": 0.0666644552289705,
+          "framesOver50ms": 2271,
+          "percent": 17,
+          "controlledInputsOnly": true
+        },
+        "name": "Player2",
+        "server": {
+          "hero": "Gale",
+          "resultReason": "All three districts and six elite curses defeated.",
+          "readyCount": 2,
+          "waveTitle": "KILN SOVEREIGN",
+          "stageName": "ABANDONED FACTORY",
+          "nextWaveAt": 0,
+          "encounterName": "KILN SOVEREIGN",
+          "boss": false,
+          "targetX": 495,
+          "blocking": false,
+          "runStats": {
+            "kills": 26,
+            "duration": 149,
+            "damageDealt": 1768,
+            "damageTaken": 67,
+            "coinsEarned": 690
+          },
+          "enemiesRemaining": 0,
+          "stocks": 3,
+          "waves": 4,
+          "downed": false,
+          "walkingMaxX": 525,
+          "stage": 3,
+          "encounterKind": "Boss",
+          "shareStockCooldown": 0,
+          "status": "Victory",
+          "rescueTarget": false,
+          "ready": true,
+          "playersTotal": 2,
+          "wave": 4,
+          "canShareStock": false,
+          "objective": "CLEAR / KILN SOVEREIGN",
+          "checkpointLabel": "MINIBOSS CLEARED / MID-DISTRICT",
+          "kind": "Snapshot",
+          "percent": 17,
+          "cooldowns": {
+            "Dash": 0,
+            "Special": 1790232943.707247
+          }
+        }
+      }
+    },
+    "elapsed": 158.79957290005405,
+    "passed": true,
+    "final": {
+      "hero": "Piston",
+      "resultReason": "All three districts and six elite curses defeated.",
+      "readyCount": 2,
+      "waveTitle": "KILN SOVEREIGN",
+      "stageName": "ABANDONED FACTORY",
+      "nextWaveAt": 0,
+      "encounterName": "KILN SOVEREIGN",
+      "boss": false,
+      "targetX": 495,
+      "blocking": false,
+      "runStats": {
+        "kills": 26,
+        "duration": 149,
+        "damageDealt": 1862,
+        "damageTaken": 87,
+        "coinsEarned": 690
+      },
+      "enemiesRemaining": 0,
+      "stocks": 3,
+      "waves": 4,
+      "downed": false,
+      "walkingMaxX": 525,
+      "stage": 3,
+      "encounterKind": "Boss",
+      "shareStockCooldown": 0,
+      "status": "Victory",
+      "rescueTarget": false,
+      "ready": true,
+      "playersTotal": 2,
+      "wave": 4,
+      "canShareStock": false,
+      "objective": "CLEAR / KILN SOVEREIGN",
+      "checkpointLabel": "MINIBOSS CLEARED / MID-DISTRICT",
+      "kind": "Snapshot",
+      "percent": 29,
+      "cooldowns": {
+        "Dash": 0,
+        "Special": 1790232943.256524
+      }
+    },
+    "connectedPlayers": 2,
+    "transitions": [
+      {
+        "at": 13.455319300061092,
+        "state": "1:1:Combat",
+        "players": 2,
+        "enemies": 3
+      },
+      {
+        "at": 17.621850099996664,
+        "state": "1:1:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 21.720802400028333,
+        "state": "1:2:Combat",
+        "players": 2,
+        "enemies": 1
+      },
+      {
+        "at": 27.703970600035973,
+        "state": "1:2:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 32.7872107999865,
+        "state": "1:2:Traverse",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 34.78736050007865,
+        "state": "1:3:Combat",
+        "players": 2,
+        "enemies": 4
+      },
+      {
+        "at": 40.8041553000221,
+        "state": "1:3:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 44.937472100020386,
+        "state": "1:4:Combat",
+        "players": 2,
+        "enemies": 1
+      },
+      {
+        "at": 53.93715530005284,
+        "state": "1:4:Advance",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 56.60415200004354,
+        "state": "2:0:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 60.68724060000386,
+        "state": "2:1:Combat",
+        "players": 2,
+        "enemies": 4
+      },
+      {
+        "at": 66.62037330004387,
+        "state": "2:1:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 70.73783900006674,
+        "state": "2:2:Combat",
+        "players": 2,
+        "enemies": 1
+      },
+      {
+        "at": 78.70190950005781,
+        "state": "2:2:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 83.73590239998884,
+        "state": "2:2:Traverse",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 86.17075669998303,
+        "state": "2:3:Combat",
+        "players": 2,
+        "enemies": 3
+      },
+      {
+        "at": 91.1691941000754,
+        "state": "2:3:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 95.20171010005288,
+        "state": "2:3:Traverse",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 96.05327200004831,
+        "state": "2:4:Combat",
+        "players": 2,
+        "enemies": 1
+      },
+      {
+        "at": 107.26723260001745,
+        "state": "2:4:Advance",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 110.25102680001874,
+        "state": "3:0:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 114.27031489997171,
+        "state": "3:1:Combat",
+        "players": 2,
+        "enemies": 3
+      },
+      {
+        "at": 119.30106229998637,
+        "state": "3:1:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 123.26905860006809,
+        "state": "3:2:Combat",
+        "players": 2,
+        "enemies": 1
+      },
+      {
+        "at": 130.36720670002978,
+        "state": "3:2:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 135.4006644000765,
+        "state": "3:2:Traverse",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 137.61938170006033,
+        "state": "3:3:Combat",
+        "players": 2,
+        "enemies": 4
+      },
+      {
+        "at": 144.93284410005435,
+        "state": "3:3:Intermission",
+        "players": 2,
+        "enemies": 0
+      },
+      {
+        "at": 148.98242570005823,
+        "state": "3:4:Combat",
+        "players": 2,
+        "enemies": 1
+      },
+      {
+        "at": 158.5850369000109,
+        "state": "3:4:Victory",
+        "players": 2,
+        "enemies": 0
+      }
+    ],
+    "reason": "Victory",
+    "lateJoin": {
+      "players": []
+    },
+    "encounters": [
+      {
+        "party": 2,
+        "wave": 1,
+        "kind": "Wave",
+        "stage": 1,
+        "enemies": 3
+      },
+      {
+        "party": 2,
+        "wave": 2,
+        "kind": "Miniboss",
+        "stage": 1,
+        "enemies": 1
+      },
+      {
+        "party": 2,
+        "wave": 3,
+        "kind": "Wave",
+        "stage": 1,
+        "enemies": 4
+      },
+      {
+        "party": 2,
+        "wave": 4,
+        "kind": "Boss",
+        "stage": 1,
+        "enemies": 1
+      },
+      {
+        "party": 2,
+        "wave": 1,
+        "kind": "Wave",
+        "stage": 2,
+        "enemies": 4
+      },
+      {
+        "party": 2,
+        "wave": 2,
+        "kind": "Miniboss",
+        "stage": 2,
+        "enemies": 1
+      },
+      {
+        "party": 2,
+        "wave": 3,
+        "kind": "Wave",
+        "stage": 2,
+        "enemies": 3
+      },
+      {
+        "party": 2,
+        "wave": 4,
+        "kind": "Boss",
+        "stage": 2,
+        "enemies": 1
+      },
+      {
+        "party": 2,
+        "wave": 1,
+        "kind": "Wave",
+        "stage": 3,
+        "enemies": 3
+      },
+      {
+        "party": 2,
+        "wave": 2,
+        "kind": "Miniboss",
+        "stage": 3,
+        "enemies": 1
+      },
+      {
+        "party": 2,
+        "wave": 3,
+        "kind": "Wave",
+        "stage": 3,
+        "enemies": 4
+      },
+      {
+        "party": 2,
+        "wave": 4,
+        "kind": "Boss",
+        "stage": 3,
+        "enemies": 1
+      }
+    ],
+    "failures": [],
+    "assertions": [
+      {
+        "passed": true,
+        "name": "configured hero selections match assignments",
+        "detail": 2
+      },
+      {
+        "passed": true,
+        "name": "initial waiting state",
+        "detail": "Waiting"
+      },
+      {
+        "passed": true,
+        "name": "one ready keeps multiplayer lobby waiting",
+        "detail": {
+          "players": 2,
+          "status": "Waiting",
+          "ready": 1,
+          "enemies": 0
+        }
+      },
+      {
+        "passed": true,
+        "name": "exactly one initial enemy set",
+        "detail": {
+          "wave": 1,
+          "spawned": 3,
+          "stage": 1,
+          "enemies": 3
+        }
+      },
+      {
+        "passed": true,
+        "name": "all twelve encounters observed",
+        "detail": 12
+      },
+      {
+        "passed": true,
+        "name": "late join scenario completed or disabled",
+        "detail": false
+      },
+      {
+        "passed": true,
+        "name": "expected clients remain at victory",
+        "detail": 2
+      }
+    ],
+    "test": "NightfallMultiplayerCampaign"
+  },
+  "lagMs": 150,
+  "timingLimitation": "Baseline EnemyImpact lacks targetModel; first timing probe captured zero pairs. Campaign and final client states passed; hit/telegraph desync not measured by this run."
+}

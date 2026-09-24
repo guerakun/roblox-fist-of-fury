@@ -10,6 +10,12 @@ if not okArgs or type(args) ~= "table" or args.test ~= "NightfallMultiplayerCamp
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
+local Config = require(ReplicatedStorage.Nightfall.Shared.Config)
+local heroIds = Config.CharacterOrder or {}
+if #heroIds == 0 then for id in pairs(Config.Characters) do table.insert(heroIds,id) end table.sort(heroIds) end
+local initialCount = math.clamp(math.floor(tonumber(args.initialPlayers) or 2), 2, 4)
+local lateCount = math.clamp(math.floor(tonumber(args.latePlayers) or (initialCount==2 and 2 or 0)), 0, 4-initialCount)
+local expectedTotal = initialCount + lateCount
 local began = os.clock()
 local timeout = math.clamp(tonumber(args.timeout) or 600, 60, 600)
 local result = {test=args.test,passed=false,assertions={},transitions={},encounters={},clients={},lateJoin={players={}},failures={}}
@@ -94,37 +100,40 @@ local function run()
     local server=game.ServerScriptService:WaitForChild("NightfallServer",30)
     if not server then error("NightfallServer missing") end
     Combat=require(server:WaitForChild("CombatService",15))
-    if not awaitCondition("two actual client drivers",function()
+    if not awaitCondition("all initial client drivers",function()
         local players=Players:GetPlayers()
-        return #players==2 and allReadyForTest(players)
+        return #players==initialCount and allReadyForTest(players)
     end,70) then return end
     initialPlayers=Players:GetPlayers()
     table.sort(initialPlayers,function(a,b)return a.UserId<b.UserId end)
     for index,player in ipairs(initialPlayers) do
         slots[player]=index
-        command(player,{kind="Setup",slot=index,hero=index==1 and "Naruto" or "Luffy"})
+        command(player,{kind="Setup",slot=index,hero=heroIds[(index-1)%#heroIds+1]})
     end
     if not awaitCondition("different heroes selected",function()
-        return snapshot(initialPlayers[1]).hero=="Naruto" and snapshot(initialPlayers[2]).hero=="Luffy"
+        for index,player in ipairs(initialPlayers) do if snapshot(player).hero~=heroIds[(index-1)%#heroIds+1] then return false end end return true
     end,20) then return end
-    check("two different heroes before ready",true,"Naruto / Luffy")
+    check("configured hero selections match assignments",true,initialCount)
     if not check("initial waiting state",state().status=="Waiting",state().status) then finish("Unexpected initial state");return end
     command(initialPlayers[1],{kind="Ready"})
     if not awaitCondition("first ready acknowledged",function()return Combat.GetReadyCount()==1 end,12) then return end
     task.wait(1.25)
     local first=state()
-    if not check("one ready keeps two-player lobby waiting",first.status=="Waiting" and first.readyCount==1 and first.playersTotal==2 and countEnemies()==0,
+    if not check("one ready keeps multiplayer lobby waiting",first.status=="Waiting" and first.readyCount==1 and first.playersTotal==initialCount and countEnemies()==0,
         {status=first.status,ready=first.readyCount,players=first.playersTotal,enemies=countEnemies()}) then finish("Ready gate failed");return end
     local firstSpawnCount=0
     local spawnConnection=workspace.Enemies.ChildAdded:Connect(function(model)
         if model:IsA("Model") then firstSpawnCount+=1 end
     end)
-    command(initialPlayers[2],{kind="Ready"})
-    if not awaitCondition("second ready starts combat",function()return state().status=="Combat" end,18) then spawnConnection:Disconnect();return end
+    if lateCount==0 then qa:FireAllClients({kind="ReleaseLateJoin"}) end
+    for index=2,#initialPlayers do command(initialPlayers[index],{kind="Ready"}) end
+    if not awaitCondition("all ready starts combat",function()return state().status=="Combat" end,18) then spawnConnection:Disconnect();return end
     task.wait(.35)
     spawnConnection:Disconnect()
     local firstCombat=state()
-    if not check("exactly one initial enemy set",firstCombat.stage==1 and firstCombat.wave==1 and firstSpawnCount==3 and countEnemies()==3,
+    local expectedInitial=0
+    for _,count in pairs(Config.Stages[1].Waves[1].Enemies) do expectedInitial+=count+math.floor((initialCount-1)*.5) end
+    if not check("exactly one initial enemy set",firstCombat.stage==1 and firstCombat.wave==1 and firstSpawnCount==expectedInitial and countEnemies()==expectedInitial,
         {stage=firstCombat.stage,wave=firstCombat.wave,spawned=firstSpawnCount,enemies=countEnemies()}) then finish("Duplicate initial wave");return end
     for _,player in ipairs(initialPlayers) do command(player,{kind="Drive",enabled=true}) end
     local seen, lastTransition, lateStarted, lateComplete = {}, "", false, false
@@ -145,7 +154,7 @@ local function run()
                 table.insert(result.encounters,{stage=current.stage,wave=current.wave,kind=current.encounterKind,party=Combat.GetPlayerCount(),enemies=countEnemies()})
             end
         end
-        if current.status=="Combat" and current.stage==1 and current.wave==2 and not lateStarted then
+        if lateCount>0 and current.status=="Combat" and current.stage==1 and current.wave==2 and not lateStarted then
             lateStarted=true
             -- Every driver independently holds attacks on this encounter until ReleaseLateJoin.
             task.spawn(function()
@@ -159,9 +168,9 @@ local function run()
                     local changed=boss:GetAttributeChangedSignal("PercentLimit"):Connect(function()
                         table.insert(result.lateJoin.thresholdHistory,boss:GetAttribute("PercentLimit"))
                     end)
-                    StudioTestService:AddPlayers(2)
+                    StudioTestService:AddPlayers(lateCount)
                     local checkedStocks={}
-                    if not awaitCondition("two late clients join and initialize",function()
+                    if not awaitCondition("all late clients join and initialize",function()
                         local players=Players:GetPlayers()
                         for _,player in ipairs(players) do
                             if not slots[player] then
@@ -173,14 +182,14 @@ local function run()
                                 end
                             end
                         end
-                        return #players==4 and allReadyForTest(players)
+                        return #players==expectedTotal and allReadyForTest(players)
                     end,80) then changed:Disconnect();return end
                     local late={}
                     for _,player in ipairs(Players:GetPlayers()) do if not slots[player] then table.insert(late,player) end end
                     table.sort(late,function(a,b)return a.UserId<b.UserId end)
                     for index,player in ipairs(late) do
-                        slots[player]=index+2
-                        command(player,{kind="Setup",slot=index+2,hero="Naruto"})
+                        slots[player]=index+initialCount
+                        command(player,{kind="Setup",slot=index+initialCount,hero=heroIds[1]})
                         command(player,{kind="Drive",enabled=true})
                     end
                     local after=boss:GetAttribute("PercentLimit")
@@ -190,7 +199,7 @@ local function run()
                     local unchanged=type(before)=="number" and before==after and result.lateJoin.sameBossPresent
                     for _,value in ipairs(result.lateJoin.thresholdHistory) do if value~=before then unchanged=false end end
                     check("late joins do not rescale the active miniboss",unchanged,{before=before,after=after,sameBoss=result.lateJoin.sameBossPresent})
-                    check("four actual clients active",Combat.GetPlayerCount()==4 and #late==2,Combat.GetPlayerCount())
+                    check("expected actual clients active",Combat.GetPlayerCount()==expectedTotal and #late==lateCount,Combat.GetPlayerCount())
                     lateComplete=true
                     qa:FireAllClients({kind="ReleaseLateJoin"})
                 end,debug.traceback)
@@ -201,13 +210,16 @@ local function run()
         if current.status=="Defeat" then check("campaign party survives",false,current.checkpointLabel);finish("Defeat");return end
         if current.status=="Victory" then
             check("all twelve encounters observed",#result.encounters==12,#result.encounters)
-            check("late join scenario completed",lateComplete,lateComplete)
-            check("four clients remain at victory",#Players:GetPlayers()==4 and Combat.GetPlayerCount()==4,Combat.GetPlayerCount())
+            check("late join scenario completed or disabled",lateCount==0 or lateComplete,lateComplete)
+            check("expected clients remain at victory",#Players:GetPlayers()==expectedTotal and Combat.GetPlayerCount()==expectedTotal,Combat.GetPlayerCount())
             qa:FireAllClients({kind="ReportNow"})
-            task.wait(1)
-            for _,player in ipairs(Players:GetPlayers()) do
-                check("client submitted stats: "..player.Name,clientReports[player]~=nil)
-            end
+            awaitCondition("all clients converge to final Victory",function()
+                for _,player in ipairs(Players:GetPlayers()) do
+                    local report=clientReports[player]
+                    if not report or report.status~="Victory" or report.stage~=3 or report.wave~=4 then return false end
+                end
+                return true
+            end,15)
             finish("Victory");return
         end
         task.wait(.1)

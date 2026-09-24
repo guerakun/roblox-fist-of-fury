@@ -1,0 +1,74 @@
+{
+  "ok": true,
+  "result": {
+    "coverage": "Stock transfer conservation, KO/downed state, baseline district reset, real disconnect/replacement. Full campaign ready/late membership covered by separate harness. Other lifecycle assertions remain explicitly unverified.",
+    "identityReused": false,
+    "blocked": [
+      "Studio AddPlayers creates a new identity; same-UserId reconnect cases 1-4 require a real test account or supported identity reuse. No production identity override added."
+    ],
+    "test": "CurtainBreakLifecycle",
+    "assertions": [
+      {
+        "name": "KO charges exactly one stock 2",
+        "passed": true
+      },
+      {
+        "name": "KO charges exactly one stock 1",
+        "passed": true
+      },
+      {
+        "name": "KO charges exactly one stock 0",
+        "passed": true
+      },
+      {
+        "name": "downed and anchored at zero",
+        "passed": true
+      },
+      {
+        "name": "invalid recipient rejected",
+        "passed": true
+      },
+      {
+        "name": "unknown recipient rejected",
+        "passed": true
+      },
+      {
+        "name": "valid stock rescue accepted",
+        "passed": true
+      },
+      {
+        "passed": true,
+        "name": "stock transfer conserves total",
+        "detail": {
+          "after": 3,
+          "before": 3
+        }
+      },
+      {
+        "name": "recipient restored once",
+        "passed": true
+      },
+      {
+        "name": "duplicate transfer rejected",
+        "passed": true
+      },
+      {
+        "name": "baseline district reset stocks and percent",
+        "passed": true
+      },
+      {
+        "name": "real client disconnect",
+        "passed": true
+      },
+      {
+        "name": "replacement joins",
+        "passed": true
+      },
+      {
+        "name": "new identity gets first-join stocks",
+        "passed": true
+      }
+    ],
+    "passed": true
+  }
+}
