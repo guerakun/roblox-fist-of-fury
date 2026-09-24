@@ -40,7 +40,7 @@ Evidence: revise MultiplayerLifecycle cases 3–5; actual two-client success/int
 
 Server records accepted damage/skill events, not client score. A pure style policy owns x1–x4 progression, hit penalty and rank calculation. Record final thresholds/par times in COMBAT; values require bot tuning. Air/throw events only count when those mechanics exist. Score events need real accepted effects; no placeholder awards for unimplemented actions.
 
-Retry farming needs an explicit score policy in addition to coin keys. Proposed: keep per-wave best completed-attempt score, with transient current-attempt score; retry discards failed-attempt points and resets multiplier. Duration and damage taken accumulate across retries. Replayed resolved effects and a stable enemy/drop identity cannot award twice within an attempt. This proposal must be reviewed against the intended reward curve before implementation.
+Retry farming needs an explicit score policy in addition to coin keys. Proposed: keep per-wave best completed-attempt score, with transient current-attempt score; retry discards failed-attempt points and resets multiplier. Replaying a completed wave replaces its best entry only when higher; it never adds another completed-wave score. Freeze the first finalized district result. Duration and damage taken accumulate across retries. Replayed resolved effects and a stable enemy/drop identity cannot award twice within an attempt. This proposal must be reviewed against the intended reward curve before implementation.
 
 Reward handoff approved by root for implementation after release (not implemented yet):
 
