@@ -31,15 +31,20 @@ Public evidence replaces numeric account keys with run-local Player labels. Unre
 
 ## Results
 
-Provisional collection: 3/5 fresh runs saved; remaining seeds are still running. No M0 completion claim yet.
+All five fresh solo sessions completed on the unchanged baseline gameplay. Client stock accounting matched server stock counters on every run; floored snapshot damage matched fractional server totals within one point. All windup cap violation counts were zero.
 
 | Seed | Outcome | Seconds | Stocks lost D1/D2/D3 | Damage (snapshot) | Eligible idle | Flank windows | Peak windups |
 |---|---|---:|---|---:|---|---|---:|
 | 1101 | Victory | 273.32 | 0/0/1 | 497 | 106/624 (17.0%) | 3/5 (60.0%) | 2 |
 | 1102 | Victory | 275.36 | 0/0/0 | 495 | 159/913 (17.4%) | 5/9 (55.6%) | 2 |
 | 1103 | Victory | 273.95 | 0/0/1 | 487 | 100/654 (15.3%) | 3/5 (60.0%) | 2 |
+| 1104 | Victory | 293.85 | 0/0/1 | 676 | 101/760 (13.3%) | 1/7 (14.3%) | 2 |
+| 1105 | Victory | 274.85 | 0/0/1 | 560 | 127/733 (17.3%) | 3/7 (42.9%) | 2 |
 
-Clear rate: 3/3. Mean stocks lost: 0.67. Mean duration: 274.21 s. Mean snapshot damage: 493.00.
-Pooled eligible idle: 365/2191 = 16.66%.
-Pooled qualified flank windows: 11/19 = 57.89%.
+Clear rate: 5/5. Mean stocks lost: 0.80. Mean duration: 278.27 s. Mean snapshot damage: 543.00.
+Pooled eligible idle: 593/3684 = 16.10%.
+Pooled qualified flank windows: 15/33 = 45.45%.
 Rank and frustum unsupported in baseline. Five runs are a coarse engineering comparison, not human certification.
+
+
+The retained ToolboxAnimations source matched the repository after normalized line endings (170397 bytes, DJB2 1294375898). No gameplay tuning or AI changes occurred during collection.

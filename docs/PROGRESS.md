@@ -1,14 +1,14 @@
 # Morning summary
 
-M0 baseline collection ongoing: first three fresh HumanBot runs cleared in 273.32/275.36/273.95 s, losing 1/0/1 stocks (all factory). WO-0.1 specs and WO-0.3 telemetry are closed; no later milestone implemented yet. Exact resume: collect remaining seeds 1104–1105, then close WO-0.2 and release Phase B. Human tests, candidate names/art and published/live validation remain owner gates. Native screenshot helper fails initialization after reset; Studio capture fallback not yet attempted.
+M0 complete: four existing specs plus telemetry counter/sampling spec passed. Five fresh HumanBot runs: 5/5 clears, mean 278.27s, 0.80 stocks lost, 543.00 snapshot damage. Gameplay baseline ca00266, telemetry c1a037d, bot b21b807; full evidence linked below. Published/live operations remain prohibited. Evidence export rejection was resolved by replacing account IDs with anonymous Player labels; originals stay ignored locally. Exact next orders: combat WO-2.1 pure extraction, presentation WO-1.1, world WO-1.4, root WO-5.5 multiplayer/lifecycle. Candidate names/art and human playtests still require owner review in morning.
 
 ## Launch program status
 
 | WO | Owner | Status | Evidence | Next step |
 |---|---|---|---|---|
-| WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup; commit ebd49d4, tag pushed | WO-0.3 telemetry before five WO-0.2 runs |
-| WO-0.2 | root | running | 2026-09-24: harness b21b807 reviewed; 3/5 fresh runs saved in docs/launch/evidence; first three clears, 0/0/2 combined district losses | finish seeds 1104–1105, verify all reports, commit complete baseline and release Phase B |
-| WO-0.3 | root (combat handoff after M0) | closed | 2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations; commit c1a037d; commit c1a037d | collect WO-0.2 five-run baseline; append telemetry results |
+| WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup; commit ebd49d4, tag pushed | baseline preserved; tag is rollback reference |
+| WO-0.2 | root | closed | 2026-09-24: 5 fresh seeds1101â€“1105; 5/5 clears; mean278.27s, 0.80 stocks lost, 543.00 damage; raw anonymous JSON in launch/evidence; bot b21b807; counters agree | release Phase B; compare WO-2.1 extraction seed1101 before syncing M1 changes |
+| WO-0.3 | root (combat handoff after M0) | closed | 2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations; commit c1a037d | hand off telemetry ownership to combat for M2 |
 | WO-1.1 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.2 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.3 | presentation | queued | not run | follow launch phase dependencies |

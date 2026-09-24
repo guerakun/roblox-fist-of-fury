@@ -1,0 +1,16 @@
+{
+  "runs": 5,
+  "clears": 5,
+  "meanSeconds": 278.2678854600061,
+  "meanStocksLost": 0.8,
+  "meanDamageTaken": 543,
+  "pooledIdleTicks": 593,
+  "pooledEligibleTicks": 3684,
+  "pooledFlankedWindows": 15,
+  "pooledWindows": 33,
+  "windupCapViolations": 0,
+  "baselineGameplay": "ca00266",
+  "instrumentation": "c1a037d",
+  "bot": "b21b807",
+  "nativeCapture": "helper failed initialization twice; Studio capture fallback pending"
+}
