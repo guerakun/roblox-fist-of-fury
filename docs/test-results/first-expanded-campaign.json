@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"stocks\":3,\"elapsed\":183.59347989992239,\"done\":true,\"frames\":11003,\"transitions\":[{\"at\":0,\"state\":\"1:0:Waiting\"},{\"at\":0,\"state\":\"1:1:Defeat\"},{\"at\":3,\"state\":\"1:0:Intermission\"},{\"at\":7,\"state\":\"1:1:Combat\"},{\"at\":14,\"state\":\"1:1:Intermission\"},{\"at\":18,\"state\":\"1:2:Combat\"},{\"at\":26,\"state\":\"1:2:Intermission\"},{\"at\":31,\"state\":\"1:2:Traverse\"},{\"at\":32,\"state\":\"1:3:Combat\"},{\"at\":38,\"state\":\"1:3:Intermission\"},{\"at\":42,\"state\":\"1:4:Combat\"},{\"at\":56,\"state\":\"1:4:Advance\"},{\"at\":59,\"state\":\"2:0:Intermission\"},{\"at\":63,\"state\":\"2:1:Combat\"},{\"at\":69,\"state\":\"2:1:Intermission\"},{\"at\":73,\"state\":\"2:2:Combat\"},{\"at\":88,\"state\":\"2:2:Intermission\"},{\"at\":93,\"state\":\"2:2:Traverse\"},{\"at\":95,\"state\":\"2:3:Combat\"},{\"at\":102,\"state\":\"2:3:Intermission\"},{\"at\":106,\"state\":\"2:3:Traverse\"},{\"at\":107,\"state\":\"2:4:Combat\"},{\"at\":120,\"state\":\"2:4:Advance\"},{\"at\":122,\"state\":\"3:0:Intermission\"},{\"at\":126,\"state\":\"3:1:Combat\"},{\"at\":133,\"state\":\"3:1:Intermission\"},{\"at\":137,\"state\":\"3:2:Combat\"},{\"at\":148,\"state\":\"3:2:Intermission\"},{\"at\":153,\"state\":\"3:2:Traverse\"},{\"at\":155,\"state\":\"3:3:Combat\"},{\"at\":161,\"state\":\"3:3:Intermission\"},{\"at\":165,\"state\":\"3:4:Combat\"},{\"at\":183,\"state\":\"3:4:Victory\"}],\"wave\":4,\"runStats\":{\"kills\":27,\"duration\":296,\"damageDealt\":2974,\"damageTaken\":749,\"coinsEarned\":690},\"maxDt\":0.06778500229120255,\"status\":\"Victory\",\"meanDt\":0.016687255761178408,\"stage\":3,\"percent\":50}"
+    }
+  ],
+  "isError": false
+}

@@ -48,23 +48,23 @@ local activeEffects = 0
 local actorPoses: {[Model]: any} = {}
 local activeSounds = 0
 local lastHitSound = 0
-local ambience = Instance.new("Sound")
-ambience.Name = "NightfallCityAmbience"
-ambience.SoundId = "rbxassetid://9112759731"
-ambience.Volume = 0.12
-ambience.Looped = true
-ambience.Parent = SoundService
-ambience:Play()
+local preferences = {shake = 0.65, effects = 1, volume = 0.8, ambience = 0.65, music = 0.6, highContrast = false}
+local bossEffects = require(script.Parent:WaitForChild("BossEffects")).new(preferences)
+local hitPoseHoldUntil = 0
+local touchPad: Frame? = nil
+local touchJump: TextButton? = nil
+local stageAudio = require(script.Parent:WaitForChild("StageAudio")).new(preferences)
+stageAudio.Update(snapshot)
 local function combatSound(kind: string, position: Vector3)
     local now = os.clock()
-    if activeSounds >= 8 or (kind == "Hit" and now - lastHitSound < 0.07) then return end
+    if preferences.volume <= 0 or activeSounds >= 8 or (kind == "Hit" and now - lastHitSound < 0.07) then return end
     if kind == "Hit" then lastHitSound = now end
     local anchor = Instance.new("Part")
     anchor.Anchored = true; anchor.CanCollide = false; anchor.CanTouch = false; anchor.CanQuery = false
     anchor.Transparency = 1; anchor.Size = Vector3.one * 0.1; anchor.Position = position; anchor.Parent = workspace
     local sound = Instance.new("Sound")
     sound.SoundId = kind == "Hit" and "rbxassetid://132504023010884" or "rbxassetid://135315310485417"
-    sound.Volume = kind == "Hit" and 0.33 or 0.17
+    sound.Volume = (kind == "Hit" and 0.33 or 0.17) * preferences.volume
     sound.PlaybackSpeed = kind == "Dash" and 1.15 or 1
     sound.RollOffMinDistance = 16; sound.RollOffMaxDistance = 130
     sound.Parent = anchor; sound:Play()
@@ -103,12 +103,13 @@ local function label(parent: Instance, text: string, size: number, color: Color3
 end
 local gui = make("ScreenGui", {Name = "NightfallHUD", ResetOnSpawn = false, IgnoreGuiInset = false,
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling, DisplayOrder = 10}, player:WaitForChild("PlayerGui"))
-local canvas = make("Frame", {BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1)}, gui)
+gui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
+local canvas = make("Frame", {Name = "Canvas", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1)}, gui)
 local top = make("Frame", {BackgroundColor3 = COLORS.ink, BackgroundTransparency = 0.08,
     Position = UDim2.fromOffset(22, 16), Size = UDim2.fromOffset(342, 108)}, canvas)
 round(top, 10); outline(top, COLORS.cyan)
-label(top, "CURTAIN BREAK", 25, COLORS.text, UDim2.fromOffset(16, 9), UDim2.fromOffset(312, 30))
-label(top, "F I S T   O F   F U R Y", 10, COLORS.cyan, UDim2.fromOffset(17, 39), UDim2.fromOffset(312, 16))
+local titleLabel = label(top, "CURTAIN BREAK", 25, COLORS.text, UDim2.fromOffset(16, 9), UDim2.fromOffset(312, 30))
+local brandLabel = label(top, "F I S T   O F   F U R Y", 10, COLORS.cyan, UDim2.fromOffset(17, 39), UDim2.fromOffset(312, 16))
 local chapterLabel = label(top, "01 / VEIL OVER THE CITY", 12, COLORS.muted, UDim2.fromOffset(17, 69), UDim2.fromOffset(310, 18))
 local progressBack = make("Frame", {BackgroundColor3 = COLORS.panel, BorderSizePixel = 0,
     Position = UDim2.fromOffset(17, 94), Size = UDim2.fromOffset(308, 3)}, top)
@@ -117,7 +118,7 @@ local progressFill = make("Frame", {BackgroundColor3 = COLORS.cyan, BorderSizePi
 local encounter = make("Frame", {BackgroundColor3 = COLORS.ink, BackgroundTransparency = 0.08,
     AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -22, 0, 16), Size = UDim2.fromOffset(245, 85)}, canvas)
 round(encounter, 10); outline(encounter, COLORS.muted)
-local waveLabel = label(encounter, "CO-OP / 1–4 PLAYERS", 12, COLORS.cyan, UDim2.fromOffset(16, 10), UDim2.fromOffset(215, 21))
+local waveLabel = label(encounter, "CO-OP / 1–4 PLAYERS", 11, COLORS.cyan, UDim2.fromOffset(16, 10), UDim2.fromOffset(215, 21))
 local enemyLabel = label(encounter, "ENTER THE CURTAIN", 20, COLORS.text, UDim2.fromOffset(16, 34), UDim2.fromOffset(215, 26))
 local objectiveLabel = label(encounter, "Clear each arena. Keep moving →", 10, COLORS.muted, UDim2.fromOffset(16, 63), UDim2.fromOffset(220, 15))
 
@@ -140,6 +141,7 @@ end
 local abilities = make("Frame", {BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 1),
     Position = UDim2.new(1, -22, 1, -23), Size = UDim2.fromOffset(468, 78)}, canvas)
 local abilityLabels: {[string]: TextLabel} = {}
+local abilityKeyLabels: {[string]: TextLabel} = {}
 local abilityButtons: {[string]: TextButton} = {}
 local abilityNames = {"Light", "Heavy", "Special", "Dash", "Block", "Recovery"}
 local abilityKeys = {"J / X", "K / Y", "L / B", "Q / LT", "F / LB", "E / RB"}
@@ -151,7 +153,7 @@ for index, action in ipairs(abilityNames) do
     key.TextXAlignment = Enum.TextXAlignment.Center
     local text = label(button, string.upper(action), 10, COLORS.text, UDim2.fromOffset(3, 33), UDim2.fromOffset(67, 24))
     text.TextXAlignment = Enum.TextXAlignment.Center
-    abilityLabels[action] = text; abilityButtons[action] = button
+    abilityLabels[action] = text; abilityButtons[action] = button; abilityKeyLabels[action] = key
 end
 local moveLabel = label(canvas, "A D  MOVE    W S  DEPTH    SPACE  JUMP / DOUBLE JUMP", 10, COLORS.muted,
     UDim2.new(1, -490, 1, -126), UDim2.fromOffset(468, 20))
@@ -171,17 +173,42 @@ local function toast(text: string, color: Color3?)
 end
 
 local ending = make("Frame", {Visible = false, BackgroundColor3 = COLORS.ink, BackgroundTransparency = 0.03,
-    AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.48), Size = UDim2.fromOffset(420, 224)}, canvas)
+    AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.48), Size = UDim2.fromOffset(420, 348)}, canvas)
 round(ending, 14); outline(ending, COLORS.cyan, 0.25)
 local endingTitle = label(ending, "CURTAIN BROKEN", 30, COLORS.cyan, UDim2.fromOffset(22, 24), UDim2.fromOffset(376, 44))
 endingTitle.TextXAlignment = Enum.TextXAlignment.Center
 local endingDetail = label(ending, "The city lives to see another dawn.", 13, COLORS.muted, UDim2.fromOffset(24, 80), UDim2.fromOffset(372, 48))
 endingDetail.TextWrapped = true; endingDetail.TextXAlignment = Enum.TextXAlignment.Center
 local retry = make("TextButton", {Text = "PLAY AGAIN  /  R", Font = Enum.Font.GothamBold, TextSize = 14,
-    BackgroundColor3 = COLORS.cyan, TextColor3 = COLORS.ink, Position = UDim2.fromOffset(80, 156), Size = UDim2.fromOffset(260, 42)}, ending)
+    BackgroundColor3 = COLORS.cyan, TextColor3 = COLORS.ink, Position = UDim2.fromOffset(80, 288), Size = UDim2.fromOffset(260, 42)}, ending)
 round(retry, 7)
 retry.Activated:Connect(function() actionRemote:FireServer("Restart", {}) end)
 
+local presentation = require(script.Parent:WaitForChild("CombatHUD")).new({
+    colors = COLORS, settings = preferences, ending = ending, actionRemote = actionRemote,
+    onSettingsChanged = function() stageAudio.UpdatePreferences() end,
+})
+task.spawn(function()
+    local module = script.Parent:WaitForChild("ProgressionUI", 20)
+    if module and module:IsA("ModuleScript") then
+        local ok, problem = pcall(function() require(module).Init() end)
+        if not ok then warn("Nightfall progression UI: " .. tostring(problem)) end
+    end
+end)
+local function inputLabels()
+    local last = UserInputService:GetLastInputType()
+    local controller = string.find(last.Name, "Gamepad") ~= nil
+    local touch = last == Enum.UserInputType.Touch or (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled)
+    local keyboardKeys = {"J", "K", "L", "Q", "HOLD F", "E"}
+    local controllerKeys = {"X", "Y", "B", "LT", "HOLD LB", "RB"}
+    for index, action in ipairs(abilityNames) do
+        abilityKeyLabels[action].Text = touch and (action == "Block" and "HOLD" or "TAP") or (controller and controllerKeys[index] or keyboardKeys[index])
+    end
+    moveLabel.Text = controller and "LEFT STICK  MOVE / DEPTH    A  JUMP    D-PAD  HERO" or "A D  MOVE    W S  DEPTH    SPACE  JUMP / RECOVERY"
+    retry.Text = controller and "PLAY AGAIN / START" or touch and "PLAY AGAIN" or "PLAY AGAIN / R"
+end
+UserInputService.LastInputTypeChanged:Connect(inputLabels)
+inputLabels()
 -- Responsive panels retain legible labels; mobile gets a separate thumb pad and jump button.
 local hudScale = make("UIScale", {Scale = 1}, top)
 local encounterScale = make("UIScale", {Scale = 1}, encounter)
@@ -191,16 +218,78 @@ local endingScale = make("UIScale", {Scale = 1}, ending)
 local function resize()
     local camera = workspace.CurrentCamera
     if not camera then return end
-    local width = camera.ViewportSize.X
+    local safe = canvas.AbsoluteSize
+    local width = safe.X > 100 and safe.X or camera.ViewportSize.X
+    local height = safe.Y > 100 and safe.Y or camera.ViewportSize.Y
     local scale = math.clamp(width / 1040, 0.57, 1)
-    hudScale.Scale = scale; encounterScale.Scale = scale; playerScale.Scale = scale
-    abilityScale.Scale = scale; endingScale.Scale = math.min(1, width / 460)
-    playerPanel.Position = UDim2.new(0, 16, 1, -(151 * scale + 18))
+    local touch = UserInputService.TouchEnabled
+    if touchPad then touchPad.Visible = touch end
+    if touchJump then touchJump.Visible = touch end
+    endingScale.Scale = math.min(1, width / 460, math.max(.25, (height - 24) / 348))
     abilities.Position = UDim2.new(1, -16, 1, -18)
-    moveLabel.Visible = width > 830 and not UserInputService.TouchEnabled
-    moveName.Visible = width > 830
+    if touch then
+        local sideSpace = (width - 252) * .5
+        local titleWidth = math.clamp(sideSpace, 144, 210)
+        local encounterWidth = math.clamp(sideSpace, 132, 174)
+        hudScale.Scale = 1; encounterScale.Scale = 1; playerScale.Scale = 1
+        top.Size = UDim2.fromOffset(titleWidth, 48); top.Position = UDim2.fromOffset(12, 8)
+        titleLabel.Position = UDim2.fromOffset(11, 3); titleLabel.Size = UDim2.new(1, -22, 0, 23); titleLabel.TextSize = titleWidth < 180 and 15 or 18
+        brandLabel.Visible = false
+        chapterLabel.Position = UDim2.fromOffset(12, 27); chapterLabel.Size = UDim2.new(1, -24, 0, 15); chapterLabel.TextSize = 9
+        chapterLabel.TextTruncate = Enum.TextTruncate.AtEnd
+        progressBack.Position = UDim2.fromOffset(12, 44); progressBack.Size = UDim2.new(1, -24, 0, 2)
+        encounter.Size = UDim2.fromOffset(encounterWidth, 48); encounter.Position = UDim2.new(1, -12, 0, 8)
+        waveLabel.Position = UDim2.fromOffset(10, 4); waveLabel.Size = UDim2.new(1, -20, 0, 17); waveLabel.TextSize = 9
+        enemyLabel.Position = UDim2.fromOffset(10, 22); enemyLabel.Size = UDim2.new(1, -20, 0, 22); enemyLabel.TextSize = 14
+        enemyLabel.TextTruncate = Enum.TextTruncate.AtEnd; objectiveLabel.Visible = false
+        local chooseHero = height >= 450 and (snapshot.status == "Intermission" or snapshot.status == "Traverse" or snapshot.status == "Advance")
+        local healthHeight = chooseHero and 124 or 70
+        playerPanel.Size = UDim2.fromOffset(178, healthHeight); playerPanel.Position = UDim2.new(0, 16, 1, -(150 + healthHeight))
+        heroLabel.Position = UDim2.fromOffset(10, 6); heroLabel.Size = UDim2.fromOffset(158, 19); heroLabel.TextSize = 14
+        percentLabel.Position = UDim2.fromOffset(10, 26); percentLabel.Size = UDim2.fromOffset(91, 35); percentLabel.TextSize = 30
+        stocksLabel.Position = UDim2.fromOffset(99, 33); stocksLabel.Size = UDim2.fromOffset(72, 23); stocksLabel.TextSize = 14
+        damageHint.Visible = false
+        for index, hero in ipairs(HEROES) do
+            local button = heroButtons[hero]
+            button.Visible = chooseHero; button.Size = UDim2.fromOffset(52, 44); button.Position = UDim2.fromOffset(8 + (index - 1) * 55, 72); button.TextSize = 9
+        end
+        local buttonScale = math.clamp(width / 750, .8, 1)
+        abilityScale.Scale = buttonScale; abilities.Size = UDim2.fromOffset(220, 132)
+        for index, action in ipairs(abilityNames) do
+            abilityButtons[action].Position = UDim2.fromOffset((index - 1) % 3 * 75, math.floor((index - 1) / 3) * 66)
+            abilityButtons[action].Size = UDim2.fromOffset(70, 60); abilityLabels[action].Position = UDim2.fromOffset(2, 27)
+        end
+        if touchJump then touchJump.Position = UDim2.new(1, -29, 1, -(132 * buttonScale + 28)) end
+        if touchPad then touchPad.Position = UDim2.new(0, 26, 1, -136) end
+    else
+        hudScale.Scale = scale; encounterScale.Scale = scale; playerScale.Scale = scale
+        top.Size = UDim2.fromOffset(342, 108); top.Position = UDim2.fromOffset(22, 16)
+        titleLabel.Position = UDim2.fromOffset(16, 9); titleLabel.Size = UDim2.fromOffset(312, 30); titleLabel.TextSize = 25
+        brandLabel.Visible = true
+        chapterLabel.Position = UDim2.fromOffset(17, 69); chapterLabel.Size = UDim2.fromOffset(310, 18); chapterLabel.TextSize = 12
+        progressBack.Position = UDim2.fromOffset(17, 94); progressBack.Size = UDim2.fromOffset(308, 3)
+        encounter.Size = UDim2.fromOffset(245, 85); encounter.Position = UDim2.new(1, -22, 0, 16)
+        waveLabel.Position = UDim2.fromOffset(16, 10); waveLabel.Size = UDim2.fromOffset(215, 21); waveLabel.TextSize = 11
+        enemyLabel.Position = UDim2.fromOffset(16, 34); enemyLabel.Size = UDim2.fromOffset(215, 26); enemyLabel.TextSize = 20; objectiveLabel.Visible = true
+        playerPanel.Size = UDim2.fromOffset(280, 151); playerPanel.Position = UDim2.new(0, 16, 1, -(151 * scale + 18))
+        heroLabel.Position = UDim2.fromOffset(15, 10); heroLabel.Size = UDim2.fromOffset(245, 22); heroLabel.TextSize = 17
+        percentLabel.Position = UDim2.fromOffset(14, 32); percentLabel.Size = UDim2.fromOffset(170, 55); percentLabel.TextSize = 46
+        stocksLabel.Position = UDim2.fromOffset(180, 47); stocksLabel.Size = UDim2.fromOffset(86, 28); stocksLabel.TextSize = 19; damageHint.Visible = true
+        for index, hero in ipairs(HEROES) do
+            local button = heroButtons[hero]
+            button.Visible = true; button.Size = UDim2.fromOffset(82, 29); button.Position = UDim2.fromOffset(12 + (index - 1) * 87, 110); button.TextSize = 10
+        end
+        abilityScale.Scale = scale; abilities.Size = UDim2.fromOffset(468, 78)
+        for index, action in ipairs(abilityNames) do
+            abilityButtons[action].Position = UDim2.fromOffset((index - 1) * 79, 0)
+            abilityButtons[action].Size = UDim2.fromOffset(73, 74); abilityLabels[action].Position = UDim2.fromOffset(3, 33)
+        end
+    end
+    moveLabel.Visible = width > 830 and not touch; moveName.Visible = width > 830 and not touch
+    toastLabel.Position = UDim2.new(0.5, -math.min(280, width * .46), 0, touch and 119 or (width < 650 and 217 or 201))
+    toastLabel.Size = UDim2.fromOffset(math.min(560, width * .92), touch and 25 or 35); toastLabel.TextSize = touch and 13 or 19
+    presentation.resize()
 end
-
 local function characterReady(character: Model)
     humanoid = character:WaitForChild("Humanoid") :: Humanoid
     root = character:WaitForChild("HumanoidRootPart") :: BasePart
@@ -271,6 +360,10 @@ end
 
 local function send(action: string, held: boolean?)
     if UserInputService:GetFocusedTextBox() then return end
+    if player:GetAttribute("MenuOpen") or player:GetAttribute("SettingsOpen") then
+        localBlocking = false
+        if action ~= "Block" or held ~= false then return end
+    end
     if action == "Jump" then
         if snapshot.downed or snapshot.blocking or localBlocking or ending.Visible then return end
         if humanoid and humanoid.Health > 0 then
@@ -299,6 +392,7 @@ local bindings: any = {
 }
 for action, keys in pairs(bindings) do
     ContextActionService:BindAction("Nightfall_" .. action, function(_, inputState)
+        if UserInputService:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
         if inputState == Enum.UserInputState.Begin then send(action, action == "Block" and true or nil)
         elseif (inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel) and action == "Block" then send("Block", false) end
         return Enum.ContextActionResult.Sink
@@ -315,7 +409,7 @@ for action, button in pairs(abilityButtons) do
     else button.Activated:Connect(function() send(action) end) end
 end
 UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
+    if processed or player:GetAttribute("MenuOpen") or player:GetAttribute("SettingsOpen") then return end
     heldKeys[input.KeyCode] = true
     if input.KeyCode == Enum.KeyCode.One then actionRemote:FireServer("SelectCharacter", {hero = "Naruto"})
     elseif input.KeyCode == Enum.KeyCode.Two then actionRemote:FireServer("SelectCharacter", {hero = "Luffy"})
@@ -336,7 +430,7 @@ UserInputService.WindowFocusReleased:Connect(function()
     actionRemote:FireServer("Block", {held = false})
 end)
 
-local touchPad = make("Frame", {Visible = UserInputService.TouchEnabled, Active = true,
+touchPad = make("Frame", {Visible = UserInputService.TouchEnabled, Active = true,
     BackgroundColor3 = COLORS.panel, BackgroundTransparency = 0.3, Position = UDim2.new(0, 25, 1, -280), Size = UDim2.fromOffset(116, 116)}, canvas)
 round(touchPad, 58); outline(touchPad, COLORS.cyan)
 local touchKnob = make("Frame", {BackgroundColor3 = COLORS.cyan, BackgroundTransparency = 0.28,
@@ -356,7 +450,7 @@ UserInputService.InputChanged:Connect(function(input) if input == touchInput the
 UserInputService.InputEnded:Connect(function(input)
     if input == touchInput then touchInput = nil; touchMove = Vector2.zero; touchKnob.Position = UDim2.fromScale(0.5, 0.5) end
 end)
-local touchJump = make("TextButton", {Visible = UserInputService.TouchEnabled, Text = "JUMP", Font = Enum.Font.GothamBold,
+touchJump = make("TextButton", {Visible = UserInputService.TouchEnabled, Text = "JUMP", Font = Enum.Font.GothamBold,
     TextSize = 12, TextColor3 = COLORS.text, BackgroundColor3 = COLORS.panel,
     AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -30, 1, -123), Size = UDim2.fromOffset(70, 58)}, canvas)
 round(touchJump, 14); outline(touchJump, COLORS.cyan)
@@ -368,7 +462,7 @@ local function particlePart(position: Vector3, color: Color3, size: Vector3): Ba
         Position = position, Transparency = 0.1}, effectsFolder)
 end
 local function burst(position: Vector3, color: Color3, heavy: boolean, direction: number)
-    if activeEffects >= 24 then return end
+    if preferences.effects <= 0 or activeEffects >= 24 then return end
     activeEffects += 1
     task.delay(0.65, function() activeEffects -= 1 end)
     local ring = particlePart(position, color, Vector3.new(0.12, 1, 1))
@@ -378,8 +472,9 @@ local function burst(position: Vector3, color: Color3, heavy: boolean, direction
     TweenService:Create(ring, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
         {Size = Vector3.new(0.04, scale, scale), Transparency = 1}):Play()
     Debris:AddItem(ring, 0.4)
-    for index = 1, (heavy and 9 or 5) do
-        local angle = index * math.pi * 2 / (heavy and 9 or 5)
+    local sparkCount = math.max(2, math.floor((heavy and 9 or 5) * preferences.effects))
+    for index = 1, sparkCount do
+        local angle = index * math.pi * 2 / sparkCount
         local offset = Vector3.new(math.cos(angle) * 4 * direction, math.sin(angle) * 3, math.sin(angle * 2) * 1.3)
         local streak = particlePart(position, color, Vector3.new(0.16, 0.16, heavy and 2 or 1))
         streak.CFrame = CFrame.lookAt(position, position + offset)
@@ -392,7 +487,7 @@ end
 local specialEffects: {any} = {}
 local specialConnection: RBXScriptConnection? = nil
 local function startSpecial(position: Vector3, hero: string, direction: number): boolean
-    if #specialEffects >= 8 or activeEffects >= 24 then return false end
+    if preferences.effects <= 0 or #specialEffects >= 8 or activeEffects >= 24 then return false end
     if hero ~= "Naruto" and hero ~= "Luffy" and hero ~= "Tanjiro" then return false end
     direction = direction >= 0 and 1 or -1
     local windup, reach = 0.22, 15
@@ -542,7 +637,7 @@ local function startSpecial(position: Vector3, hero: string, direction: number):
 end
 local function importedEffect(kind: string, position: Vector3): boolean
     local template = asset("VFX", kind)
-    if not template or activeEffects >= 24 then return false end
+    if preferences.effects <= 0 or not template or activeEffects >= 24 then return false end
     local effect = template:Clone()
     for _, item in ipairs(effect:GetDescendants()) do
         if item:IsA("LuaSourceContainer") then item:Destroy() end
@@ -557,7 +652,7 @@ local function importedEffect(kind: string, position: Vector3): boolean
     else effect:Destroy(); return false end
     for _, item in ipairs(holder:GetDescendants()) do
         if item:IsA("BasePart") then item.Anchored = true; item.CanCollide = false; item.CanTouch = false; item.CanQuery = false end
-        if item:IsA("ParticleEmitter") then item.Enabled = false; item:Emit(math.clamp(item:GetAttribute("BurstCount") or item:GetAttribute("EmitCount") or 16, 1, 60)) end
+        if item:IsA("ParticleEmitter") then item.Enabled = false; item:Emit(math.clamp(math.floor((item:GetAttribute("BurstCount") or item:GetAttribute("EmitCount") or 16) * preferences.effects), 1, 60)) end
     end
     if effect:IsA("BasePart") then effect.Anchored = true; effect.CanCollide = false; effect.CanTouch = false; effect.CanQuery = false end
     activeEffects += 1
@@ -575,6 +670,37 @@ local function damageNumber(position: Vector3, amount: number, heavy: boolean)
     TweenService:Create(number, TweenInfo.new(0.6), {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
     Debris:AddItem(anchor, 0.65)
 end
+local activeHazards = 0
+local hazardOwners: {[BasePart]: Model} = {}
+local function hazardFootprint(event: any, impact: boolean)
+    if activeHazards >= 36 or typeof(event.position) ~= "Vector3" then return end
+    activeHazards += 1
+    local duration = impact and 0.28 or math.clamp(tonumber(event.duration) or 0.6, 0.1, 5)
+    local radius = math.clamp(tonumber(event.radius) or 6, 1, 60)
+    local color = typeof(event.color) == "Color3" and event.color or (event.jumpable and COLORS.cyan or COLORS.red)
+    if preferences.highContrast then color = event.jumpable and Color3.fromRGB(185, 255, 253) or COLORS.orange end
+    local position = event.position
+    local size: Vector3
+    if event.shape == "Circle" then size = Vector3.new(0.07, radius * 2, radius * 2)
+    elseif typeof(event.size) == "Vector3" then size = Vector3.new(math.max(0.1, event.size.X), 0.07, math.max(0.1, event.size.Z))
+    else
+        position += Vector3.new(event.heavy and 0 or (event.direction or 1) * radius * 0.5, 0, 0)
+        size = Vector3.new(event.heavy and radius * 2 or radius, 0.07, event.heavy and 25 or 7)
+    end
+    local floorPosition = Vector3.new(position.X, 0.17, position.Z)
+    local warningPart = particlePart(floorPosition, color, size)
+    if event.shape == "Circle" then warningPart.Shape = Enum.PartType.Cylinder; warningPart.CFrame = CFrame.new(floorPosition) * CFrame.Angles(0, 0, math.pi / 2) end
+    warningPart.Transparency = impact and 0.18 or 0.76
+    if not impact and typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then hazardOwners[warningPart] = event.targetModel end
+    if not impact then
+        local marker = make("BillboardGui", {Size = UDim2.fromOffset(96, 26), AlwaysOnTop = true, StudsOffsetWorldSpace = Vector3.new(0, 0.6, 0)}, warningPart)
+        local hint = label(marker, event.jumpable and "↑ JUMP" or "! DODGE", 13, color, UDim2.fromScale(0, 0), UDim2.fromScale(1, 1))
+        hint.TextXAlignment = Enum.TextXAlignment.Center; hint.TextStrokeTransparency = 0.2
+        TweenService:Create(warningPart, TweenInfo.new(duration), {Transparency = preferences.highContrast and 0.16 or 0.28}):Play()
+    else TweenService:Create(warningPart, TweenInfo.new(duration), {Transparency = 1}):Play() end
+    Debris:AddItem(warningPart, duration + 0.04)
+    task.delay(duration + 0.05, function() activeHazards -= 1; hazardOwners[warningPart] = nil end)
+end
 local function registerActor(model: Model): any
     if actorPoses[model] then return actorPoses[model] end
     local actorHumanoid = model:FindFirstChildOfClass("Humanoid")
@@ -587,9 +713,45 @@ local function registerActor(model: Model): any
     actorPoses[model] = actor
     return actor
 end
+local hitFlashes: {[Model]: Highlight} = {}
+local damageEdge = make("Frame", {Name = "DamageEdge", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1)}, gui)
+local damageStroke = make("UIStroke", {Color = COLORS.red, Thickness = 5, Transparency = 1}, damageEdge)
+local damageTween: Tween? = nil
+local function hitFeedback(event: any)
+    if tonumber(event.damage) == nil or event.damage <= 0 then return end
+    local target: Model? = nil
+    if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then target = event.targetModel
+    elseif type(event.targetUserId) == "number" then
+        local victim = Players:GetPlayerByUserId(event.targetUserId)
+        target = victim and victim.Character
+    end
+    if event.playerUserId == player.UserId then hitPoseHoldUntil = math.max(hitPoseHoldUntil, os.clock() + 0.045) end
+    if not target or not target.Parent then return end
+    if target == player.Character then
+        hitPoseHoldUntil = math.max(hitPoseHoldUntil, os.clock() + 0.06)
+        if preferences.effects > 0 then
+            if damageTween then damageTween:Cancel() end
+            damageStroke.Transparency = 0.25
+            damageTween = TweenService:Create(damageStroke, TweenInfo.new(0.25), {Transparency = 1}); damageTween:Play()
+        end
+    else
+        local actor = registerActor(target)
+        if actor then actor.poseHoldUntil = os.clock() + 0.06 end
+    end
+    if preferences.effects <= 0 then return end
+    if hitFlashes[target] then hitFlashes[target]:Destroy() end
+    local flash = make("Highlight", {Name = "HitReaction", Adornee = target, DepthMode = Enum.HighlightDepthMode.Occluded,
+        FillColor = target == player.Character and COLORS.red or COLORS.text, FillTransparency = 0.35,
+        OutlineColor = COLORS.text, OutlineTransparency = 0.1}, target)
+    hitFlashes[target] = flash
+    TweenService:Create(flash, TweenInfo.new(0.17), {FillTransparency = 1, OutlineTransparency = 1}):Play()
+    Debris:AddItem(flash, 0.2)
+    task.delay(0.21, function() if hitFlashes[target] == flash then hitFlashes[target] = nil end end)
+end
 fxRemote.OnClientEvent:Connect(function(event: any)
     if type(event) ~= "table" then return end
     local kind = event.kind
+    if kind == "Hit" then hitFeedback(event) end
     if kind == "Attack" or kind == "Dash" then
         local action = kind == "Dash" and "Dash" or event.action
         if action == "Special" or action == "Slam" then action = "Heavy" end
@@ -630,21 +792,34 @@ fxRemote.OnClientEvent:Connect(function(event: any)
     if not distinctSpecial and (kind == "Hit" or kind == "Attack" or kind == "Dash") then combatSound(kind, position) end
     local color = HERO_COLORS[event.hero] or (event.enemy and COLORS.red or COLORS.cyan)
     if kind == "BossPhase" then
-        toast("SIGNAL EATER / OVERLOAD", COLORS.red)
-        burst(position, COLORS.red, true, 1)
-        cameraKick = math.max(cameraKick, 0.9)
+        local bossName = event.enemyName or event.name or (type(snapshot.boss) == "table" and snapshot.boss.name) or "BOSS"
+        toast(string.upper(bossName) .. " / PHASE " .. tostring(event.phase or 2), COLORS.red)
+        burst(position, typeof(event.color) == "Color3" and event.color or COLORS.red, true, 1)
+        cameraKick = math.max(cameraKick, 0.8)
+    elseif kind == "BossStagger" then
+        toast(string.upper(event.enemyName or "CURSE") .. " / EXPOSED — PUNISH NOW", COLORS.green)
+        if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
+            presentation.cancelWarnings(event.targetModel)
+            for part, owner in pairs(hazardOwners) do
+                if owner == event.targetModel then part:Destroy(); hazardOwners[part] = nil end
+            end
+        end
+        burst(position, COLORS.green, false, 1)
+    elseif kind == "ShareStock" then
+        toast(string.upper(event.donorName or "TEAMMATE") .. " SHARED A STOCK / " .. string.upper(event.targetName or "ALLY") .. " RETURNS", COLORS.green)
+        burst(position, COLORS.green, false, 1)
+    elseif kind == "Checkpoint" then
+        toast(event.title or "CHECKPOINT REACHED", COLORS.cyan)
     elseif kind == "GuardBreak" then
-        toast("GUARD BROKEN", COLORS.orange)
+        toast("GUARD BROKEN / EVADE", COLORS.orange)
         burst(position, COLORS.orange, true, 1)
     elseif kind == "Telegraph" then
-        local radius = math.clamp(tonumber(event.radius) or 6, 2, 30)
-        local duration = math.clamp(tonumber(event.duration) or 0.6, 0.15, 4)
-        local direction = tonumber(event.direction) or 1
-        local warning = particlePart(Vector3.new(position.X + (event.heavy and 0 or direction * radius * 0.5), 0.16, position.Z), COLORS.red,
-            Vector3.new(event.heavy and radius * 2 or radius, 0.06, event.heavy and 25 or 7))
-        warning.Transparency = 0.72
-        TweenService:Create(warning, TweenInfo.new(duration), {Transparency = 0.22}):Play()
-        Debris:AddItem(warning, duration + 0.05)
+        hazardFootprint(event, false)
+        presentation.telegraph(event)
+    elseif kind == "EnemyImpact" then
+        hazardFootprint(event, true)
+        bossEffects.Emit(event)
+        if root and (root.Position - position).Magnitude < 35 then cameraKick = math.max(cameraKick, 0.45) end
     end
     local heavy = event.heavy == true or event.action == "Heavy" or event.action == "Special" or kind == "KO"
     if kind == "Hit" or kind == "KO" or kind == "Attack" or kind == "Special" or kind == "Dash" or kind == "Recovery" then
@@ -669,15 +844,15 @@ stateRemote.OnClientEvent:Connect(function(state: any)
     stocksLabel.Text = stocks > 0 and string.rep("● ", stocks) or "OUT"
     damageHint.Text = snapshot.downed and "WAITING FOR YOUR TEAM" or (snapshot.blocking and "GUARDING / WATCH YOUR BACK" or "HIGHER % = BIGGER LAUNCH")
     chapterLabel.Text = string.format("%02d / %s", snapshot.stage or 1, string.upper(snapshot.stageName or "VEIL OVER THE CITY"))
-    waveLabel.Text = string.format("WAVE %d / %d  ·  CO-OP", snapshot.wave or 0, snapshot.waves or 3)
-    enemyLabel.Text = tostring(snapshot.enemiesRemaining or 0) .. " CURSES REMAIN"
+    waveLabel.Text = string.format("WAVE %d / %d · %s", snapshot.wave or 0, snapshot.waves or 4, string.upper(snapshot.encounterKind or "CO-OP"))
+    enemyLabel.Text = tostring(snapshot.enemiesRemaining or 0) .. ((snapshot.enemiesRemaining or 0) == 1 and " CURSE REMAINS" or " CURSES REMAIN")
     local total = math.max(1, snapshot.waves or 3)
     local progress = math.clamp(((snapshot.stage or 1) - 1) / 3 + (snapshot.wave or 0) / total / 3, 0, 1)
     TweenService:Create(progressFill, TweenInfo.new(0.3), {Size = UDim2.fromScale(progress, 1)}):Play()
     moveName.Text = HERO_MOVES[hero] or "SPECIAL"
     for name, button in pairs(heroButtons) do button.BackgroundTransparency = name == hero and 0 or 0.65 end
     local status = snapshot.status
-    objectiveLabel.Text = (status == "StageClear" or status == "Advance") and "MOVE RIGHT / RALLY AT EXIT →" or (status == "Intermission" and "BREATHE / NEXT WAVE APPROACHING" or "Clear the wave to open the curtain")
+    objectiveLabel.Text = (status == "StageClear" or status == "Advance" or status == "Traverse") and "MOVE RIGHT / RALLY TOGETHER →" or (status == "Intermission" and "BREATHE / NEXT WAVE APPROACHING" or "Clear the wave to open the curtain")
     ending.Visible = status == "Defeat" or status == "Victory"
     if ending.Visible then
         endingTitle.Text = status == "Victory" and "CURTAIN BROKEN" or "THE CITY GOES DARK"
@@ -685,7 +860,12 @@ stateRemote.OnClientEvent:Connect(function(state: any)
         endingDetail.Text = status == "Victory" and "Three districts reclaimed. Your squad made it through."
             or "Your squad ran out of stocks. Guard, recover, and stay together on the next run."
     elseif status ~= previousStatus and (status == "StageClear" or status == "Advance") then toast("DISTRICT CLEARED  /  ADVANCE →", COLORS.cyan) end
-    if status == "Intermission" and previousStatus ~= status then toast("WAVE CLEARED / REGROUP", COLORS.cyan) end
+    if status == "Traverse" and previousStatus ~= status then toast("NEXT ENCOUNTER / MOVE RIGHT TOGETHER →", COLORS.cyan) end
+    if status == "Intermission" and previousStatus ~= status then toast((snapshot.wave or 0) == 0 and "ENTER THE CURTAIN / GET READY" or "WAVE CLEARED / REGROUP", COLORS.cyan) end
+    if (snapshot.wave or 0) == 0 and status == "Intermission" then waveLabel.Text = "ENTER THE CURTAIN"; enemyLabel.Text = "GET READY" end
+    if status ~= previousStatus then resize() end
+    presentation.updateSnapshot(snapshot)
+    stageAudio.Update(snapshot)
     previousStatus = status
 end)
 
@@ -728,7 +908,8 @@ local function sampleToolbox(dt: number)
         if data then
             local duration = math.max(0.05, data.duration)
             local time = actionPose and math.clamp(now - poseStart, 0, duration) or (now - locomotionStart) % duration
-            applyToolboxPose(rigJoints, data, time, dt)
+            if now < hitPoseHoldUntil then poseStart += dt; locomotionStart += dt
+            else applyToolboxPose(rigJoints, data, time, dt) end
         end
     end
     for model, actor in pairs(actorPoses) do
@@ -744,7 +925,8 @@ local function sampleToolbox(dt: number)
             end
             if data then
                 local duration = math.max(0.05, data.duration)
-                applyToolboxPose(actor.joints, data, actionPose and math.clamp(now - actor.start, 0, duration) or now % duration, dt)
+                if now < (actor.poseHoldUntil or 0) then actor.start += dt
+                else applyToolboxPose(actor.joints, data, actionPose and math.clamp(now - actor.start, 0, duration) or now % duration, dt) end
             end
         end
     end
@@ -758,8 +940,12 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
             (heldKeys[Enum.KeyCode.S] and 1 or 0) - (heldKeys[Enum.KeyCode.W] and 1 or 0))
         local movement = keyboard + (gamepadMove.Magnitude > 0.15 and gamepadMove or Vector2.zero) + touchMove
         if movement.Magnitude > 1 then movement = movement.Unit end
-        if UserInputService:GetFocusedTextBox() or ending.Visible then movement = Vector2.zero end
-        if math.abs(movement.X) > 0.1 then facing = movement.X > 0 and 1 or -1 end
+        if UserInputService:GetFocusedTextBox() or ending.Visible or player:GetAttribute("MenuOpen") or player:GetAttribute("SettingsOpen") then movement = Vector2.zero end
+        if math.abs(movement.X) > 0.1 then
+            local nextFacing = movement.X > 0 and 1 or -1
+            if nextFacing ~= facing and localBlocking then actionRemote:FireServer("Block", {held = true, direction = nextFacing}) end
+            facing = nextFacing
+        end
         humanoid:Move(Vector3.new(movement.X, 0, movement.Y * 0.7), false)
     end
     partyAccum += dt
@@ -773,12 +959,19 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
             for _, enemy in ipairs(enemiesFolder:GetChildren()) do if enemy:IsA("Model") then registerActor(enemy) end end
         end
         local localX = root and root.Position.X or 60
+        if snapshot.downed then
+            for _, teammate in ipairs(Players:GetPlayers()) do
+                local character = teammate.Character
+                local teammateRoot = character and character:FindFirstChild("HumanoidRootPart")
+                if teammateRoot and teammateRoot:IsA("BasePart") and not character:GetAttribute("Downed") then localX = teammateRoot.Position.X; break end
+            end
+        end
         local minX, maxX = localX, localX
         for _, teammate in ipairs(Players:GetPlayers()) do
             local character = teammate.Character
             local teammateRoot = character and character:FindFirstChild("HumanoidRootPart")
             local teammateHumanoid = character and character:FindFirstChildOfClass("Humanoid")
-            if teammateRoot and teammateRoot:IsA("BasePart") and teammateHumanoid and teammateHumanoid.Health > 0
+            if teammateRoot and teammateRoot:IsA("BasePart") and teammateHumanoid and teammateHumanoid.Health > 0 and not character:GetAttribute("Downed")
                 and math.abs(teammateRoot.Position.X - localX) < 170 then
                 minX = math.min(minX, teammateRoot.Position.X); maxX = math.max(maxX, teammateRoot.Position.X)
             end
@@ -793,12 +986,16 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
     local goalPosition = cameraTarget + Vector3.new(0, cameraDistance * 0.37, cameraDistance)
     cameraPosition = cameraPosition and cameraPosition:Lerp(goalPosition, 1 - math.exp(-6 * dt)) or goalPosition
     cameraKick = math.max(0, cameraKick - dt * 3)
-    local shake = Vector3.new(math.noise(os.clock() * 28, 0), math.noise(0, os.clock() * 28), 0) * cameraKick
+    local shake = Vector3.new(math.noise(os.clock() * 28, 0), math.noise(0, os.clock() * 28), 0) * cameraKick * preferences.shake
     camera.CFrame = CFrame.lookAt(cameraPosition + shake, cameraTarget + shake)
     renderAccum += dt
     if renderAccum > 0.1 then
         renderAccum = 0
+        presentation.updateSpatial(camera, root)
         local now = workspace:GetServerTimeNow()
+        if snapshot.status == "Intermission" and type(snapshot.nextWaveAt) == "number" then
+            objectiveLabel.Text = string.format("NEXT WAVE IN %.1fs / REGROUP", math.max(0, snapshot.nextWaveAt - now))
+        end
         for name, text in pairs(abilityLabels) do
             local finish = (snapshot.cooldowns or {})[name]
             local remaining = type(finish) == "number" and math.max(0, finish - now) or 0
@@ -812,5 +1009,7 @@ workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
     if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize) end
     resize()
 end)
+canvas:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
+UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(function() resize(); inputLabels() end)
 resize()
 toast("STAY TOGETHER. BREAK THE CURTAIN.", COLORS.cyan)

@@ -31,3 +31,6 @@ Research limitation: the title “Fist of Fury” can refer to multiple games. N
 ## Implementation provenance
 
 The city in `src/server/WorldBuilder.lua` is original procedural geometry and authored typography using Roblox Parts, SurfaceGuis, lights and post-processing. There are no downloaded anime background images, commercial soundtrack files or imported map models in that module. Toolbox adoption for combat/VFX/animation/movement is tracked separately by the integration owner so evidence of insertion, creator attribution and actual use remains auditable.
+
+## Jujutsu Shenanigans — current primary listing check
+[Official Roblox experience listing](https://www.roblox.com/games/9391468976/Jujutsu-Shenanigans), checked 2026-09-23, advertises a melee combo, four skills, dash/stun escape, block, special, sprint/obstacle avoidance and awakening, and identifies destruction as a design focus. This is evidence of advertised controls/features, not a hands-on feel assessment. The present slice has a smaller action set and a directed PvE route; awakening and parkour are not claimed implemented. Our quality criteria remain control response, readable attack identities, layered feedback and meaningful destruction.

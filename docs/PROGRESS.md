@@ -1,0 +1,44 @@
+# Overnight development log — 2026-09-23
+
+## Current objective
+Work toward a publishable three-stage cooperative campaign by 07:00 America/New_York. Stage 1: city streets; stage 2: abandoned station; stage 3: abandoned factory. Every stage needs a distinct miniboss and boss. Do not erase previous world/story ideas; retain them as backlog.
+
+## Team coordination
+Agents can message each other directly. Combat, client and world owners exchange encounter names, locations, FX shapes and state contracts. Root integrates, tests in Studio, reviews economy/persistence and saves/pushes milestones. Agents work on separate files. A later review should be performed by someone who did not author the feature.
+
+## 02:26 EDT — expansion started
+- Existing slice committed as `92c7c12`; three city districts, one boss, Toolbox ingredients, co-op smoke test.
+- World owner: rebuild districts 2/3 as distinct station/factory; preserve lane and gate contracts.
+- Combat owner: six encounter identities, telegraphed mechanics, checkpoint flow, co-op fairness.
+- Client owner: boss UI, accessibility, clearer feedback, results and mobile/controller layout.
+- Root: progression, earned coins, free chapter reward track, cosmetic shop, fair earned combat boons, integration/testing.
+- Shipping claim remains development slice until evidence supports stronger wording. Published-universe asset permissions, live persistence and device coverage remain explicit gates.
+
+## Monetization direction
+Keep every stage and hero playable free. Earn coins through encounters. Sell optional cosmetics and an evergreen cosmetic chapter pass only after live product IDs and persistence have been verified. Combat boons are earned through play, one equipped at a time; money does not raise combat power. No paid revives, loot boxes, streak penalties or expiring earned rewards.
+
+## Evidence policy
+Record actual tests separately from planned tests. Forced progression verifies transitions; it does not prove normal-input campaign balance. Local two-client testing does not certify public-server latency or mobile performance.
+
+## 03:18 EDT — first expanded campaign completion
+- Three distinct stages, 12 encounters and six elite identities implemented. Physical rally travel, all-player ready lobby and miniboss checkpoints replace automatic wave teleporting.
+- Normal-action automated client completed all 12 encounters and reached Victory in 183.59 seconds of driver time: 27 KOs, 2,974 damage dealt, 690 encounter coins, final three stocks / 50%. This driver reads telegraphs perfectly and is not human balance certification. Server run duration/damage includes a pre-driver idle defeat and is not a clean benchmark.
+- One-desktop sample during that run: 11,003 frames, mean 16.687 ms, maximum 67.785 ms at Studio rendering quality 21. No mobile or network performance claim.
+- EnemyMoves tests passed six elite rigs, 38 pattern entries, punish windows, lane gaps, jump thresholds, party mark deduplication and all 12 wave definitions.
+- ProfileStore fake-adapter tests passed load/save/rejoin, unique per-load session tokens, contention, expiry, failed-load protection, schema handling and save warning recovery. A separate 16.2-second delayed-save test verified latest mutation persisted before release and lease was cleared.
+- Practice economy tests passed duplicate reward/claim rejection, cosmetic purchase/equip, earned Haste, rejection of premium-for-coins forgery and invalid tier values. Live DataStore is not tested.
+- Actual keyboard P toggled the journal; Return readied and began the first fight.
+- Reviewed Toolbox hair/hat meshes now supplement the three heroes; faces/clothing have another authored detail pass. Original generated pump and station material added. Background art has a second abandonment/readability pass.
+- Review caught runtime MaterialVariant.BaseMaterial security failure; fixed with serialized MaterialService metadata and Edit-only fallback. Rojo build passes.
+- Remaining immediate integration: latest hero/UI fixes, boss-specific cosmetic effects, stage audio, compact journal/loading-state fixes. Then fresh solo and expanded co-op tests, saved-place sync and GitHub milestone.
+- Current paid sales remain disabled. Fair economy rationale and exact reward numbers preserved in MONETIZATION.md.
+- A 30-minute continuation heartbeat runs until 07:00 EDT. It should remain quiet unless something meaningful changes; work continues in this task.
+
+## Overnight interruption and handoff
+- Around 03:31 EDT, the account usage limit interrupted the agents. Scheduled wake-ups did not produce additional completed work. The remaining overnight window was not development time used.
+- Before interruption, latest Studio integration started without game-script errors. Stage ambience/music assets loaded. The fresh iPhone 7 simulator lobby fit its safe area; the journal had a 606x158 content area and 44px touch controls. An open loading journal correctly closed when its server eligibility changed to combat.
+- Six elite rigs instantiated with 39-49 cosmetic parts each. Phase-two signature-first sequencing and reconnect survival retention were implemented in source.
+- Voluntary stock sharing was added in source/client UI, but final integration and conservation scenarios were NOT run.
+- The two-to-four-client campaign harness was written but NOT executed. Earlier two-client smoke and single-client expanded campaign results remain the actual evidence. Rendering/memory analysis was prepared but NOT executed.
+- At the user's later public-repository handoff, all overnight source, test harnesses and notes are committed. The main place was rebuilt from source and generates its world on Play. It excludes test harnesses. The earlier editable-world milestone remains recoverable from Git history.
+- Remaining release gates: latest-feature regression, expanded co-op/reconnect/stock sharing, human feel and hardware controls, final-universe assets and live persistence. Paid sales remain disabled.
