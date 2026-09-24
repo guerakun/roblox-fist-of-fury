@@ -11,9 +11,13 @@ local Transport=require(script.Parent.TeleportCoordinator)
 local Preparation=require(script.Parent.DeparturePreparation)
 local ReturnParty=require(script.Parent.ReturnPartyService)
 local Analytics=require(script.Parent.LaunchAnalytics)
+local SnapshotCache=require(script.Parent.HubSnapshotCache)
+local InvitationCache=require(script.Parent.InvitationCache)
 local studio=game:GetService('RunService'):IsStudio()
-local profiles,messages,invitations,rates,busy,dispatching={},{},{},{},{},{}
+local profiles,messages,rates,busy,dispatching={},{},{},{},{}
+local invitations=InvitationCache.new()
 local service,adapter,store,transport,remotes,preparation,returnParty
+local partySnapshots
 local stopping=false
 local recovering={} local restoring={}
 local recoverMember
@@ -24,13 +28,13 @@ local function unlocked(p,difficulty)
     return difficulty=='Hard' and tiers.Normal==true or difficulty=='Nightmare' and tiers.Hard==true
 end
 local function snapshot(p)
-    local raw=service:PartyFor(p.UserId)local party
+    local raw=partySnapshots:Get(p.UserId)local party
     if raw then
         party={id=raw.id,leader=raw.leader,members={},status=raw.status,queuedAt=raw.queueAt,difficulty=raw.difficulty or 'Normal',heat=raw.heat or {}}
         for _,uid in ipairs(raw.members)do local q=Players:GetPlayerByUserId(uid)table.insert(party.members,{userId=uid,name=q and q.DisplayName or 'Rejoining member'})end
     end
     local available={}for _,q in ipairs(Players:GetPlayers())do table.insert(available,{userId=q.UserId,name=q.DisplayName})end
-    local invites={}for id,info in pairs(invitations[p.UserId]or{})do if info.expires>os.time()then table.insert(invites,{partyId=id,leaderName=info.name})end end
+    local invites={}for id,info in pairs(invitations:List(p.UserId))do table.insert(invites,{partyId=id,leaderName=info.name})end
     local profile=profiles[p]
     return {kind='HubState',party=party,invites=invites,players=available,message=messages[p],selectedHero=profile and profile.data.hero or 'Gale',
         unlocks={Normal=true,Hard=unlocked(p,'Hard'),Nightmare=unlocked(p,'Nightmare')},studio=studio,saveStatus=profile and profile.mode or 'Loading',deploymentHeld=preparation.owned[p]~=nil or recovering[p]~=nil or restoring[p]~=nil}
@@ -120,11 +124,14 @@ recoverMember=function(p)
     else recovery.backoff=math.min(30,recovery.backoff*2)recovery.nextTry=os.clock()+recovery.backoff report(p,'Party service is recovering. Your progress is protected; please wait.')end
     publish(p)
 end
+local allowedRequests={SelectHero=true,Invite=true,Accept=true,Leave=true,Cancel=true,Queue=true,Refresh=true}
 local function request(p,action,payload)
+    if not allowedRequests[action]then return end
     if type(action)~='string' or (payload~=nil and type(payload)~='table') or busy[p]then return end
     local rate=rates[p]or{at=os.clock(),count=0}rates[p]=rate
     if os.clock()-rate.at>2 then rate.at=os.clock()rate.count=0 end rate.count+=1 if rate.count>10 then return end
     if transport.pending[p] or preparation.owned[p] or recovering[p] or restoring[p]then return end
+    if action=='Refresh'then publish(p)return end
     payload=payload or{}busy[p]=true
     local ok,err=pcall(function()
         if action=='SelectHero'then
@@ -133,8 +140,9 @@ local function request(p,action,payload)
         elseif action=='Invite'then
             local target=type(payload.userId)=='number' and Players:GetPlayerByUserId(payload.userId)
             assert(target,'Choose a player in this refuge.')assert(service:Invite(p.UserId,target.UserId),'Invite unavailable.')
-            local party=service:PartyFor(p.UserId)invitations[target.UserId]=invitations[target.UserId]or{}invitations[target.UserId][party.id]={name=p.DisplayName,expires=os.time()+60}
+            local party=service:PartyFor(p.UserId)invitations:Add(target.UserId,party.id,p.DisplayName)
         elseif action=='Accept'then assert(service:Accept(p.UserId,payload.partyId),'Invite expired or party unavailable.')
+            invitations:Accept(p.UserId,payload.partyId)
         elseif action=='Leave'then assert(service:Leave(p.UserId),'Deployment already starting.')service:Create(p.UserId)
         elseif action=='Cancel'then assert(service:Cancel(p.UserId),'Only the leader can cancel a queued deployment.')
         elseif action=='Queue'then
@@ -154,6 +162,7 @@ function H.Init()
     remotes=game.ReplicatedStorage.HubRemotes
     store=ProfileStore.new(not studio and game:GetService('DataStoreService'):GetDataStore(ProfileConfig.DataStoreName)or nil,{ephemeral=studio})
     adapter=Adapter.new({onReady=ready})service=Matchmaking.new(adapter)returnParty=ReturnParty.new(adapter)
+    partySnapshots=SnapshotCache.new({ttl=5,load=function(id)return service:PartyFor(id)end})
     preparation=Preparation.new({profile=function(p)return profiles[p]end,canMutate=function(profile)return store:CanMutate(profile)end,release=function(profile)return store:Release(profile)end})
     transport=Transport.new({send=function(place,group,options)game:GetService('TeleportService'):TeleportAsync(place,group,options)end,delay=task.delay,
         exhausted=function(p,matchId)
@@ -193,11 +202,13 @@ function H.Init()
         if not wasTeleporting then pcall(function()service:Leave(p.UserId)end)end
         local profile=profiles[p]profiles[p]=nil if profile and profile.mode~='Released'then task.spawn(function()store:Release(profile)end)end
         rates[p],busy[p],messages[p],recovering[p],restoring[p]=nil,nil,nil,nil,nil
+        invitations:Remove(p.UserId)partySnapshots:Remove(p.UserId)
     end)
     for _,p in ipairs(Players:GetPlayers())do task.spawn(joined,p)end
     task.spawn(function()
         local backoff=2 local subscribed=studio
         while not stopping do
+            invitations:Sweep()
             local ok=pcall(function()
                 if not subscribed then adapter:Subscribe()subscribed=true end
                 for _,difficulty in ipairs({'Normal','Hard','Nightmare'})do service:Step(difficulty)end
