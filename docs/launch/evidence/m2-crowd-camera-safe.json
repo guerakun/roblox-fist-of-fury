@@ -1,0 +1,3162 @@
+{
+  "passMeaning": "Harness finished on request only; CPU target is reported separately by MicroProfilerCapture",
+  "orchestrationPassed": true,
+  "populations": [
+    {
+      "elapsed": 0.00005450006574392319,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 0.5091718001058325,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 1.0249965001130477,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 1.5259319000178948,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 2.0424738000147045,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 2.5427182000130415,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 3.042910300078802,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 3.558203599997796,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 4.075714800041169,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 4.591509700054303,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 5.108263700036332,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 5.625696200062521,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 6.1410834999987856,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 6.641215900075622,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 7.141658400068991,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 7.641890500090085,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 8.15795360004995,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 8.65992250002455,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 9.174431400024332,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 9.6752822000999,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 10.191375700058416,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 10.691790000069886,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 11.208375500049442,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 11.725821100058965,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 12.241273600026034,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 12.758241100003943,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 13.27464910002891,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 13.79078790009953,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 14.292418500059284,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 14.807884800015017,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 15.325021299999207,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 15.84087620000355,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 16.34153270011302,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 16.857905100099742,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 17.3747069000965,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 17.875522200018167,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 18.391006100107916,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 18.907703900011256,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 19.423827000078745,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 19.924941200064495,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 20.441051200032234,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 20.956926300073974,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 21.458067400031723,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 21.97417210007552,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 22.47473970009014,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 22.975041500059888,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 23.490988800069317,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 24.0068679000251,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 24.508231100044213,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 25.02512290002778,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 25.540496100089513,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 26.0411939000478,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 26.541505600092933,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 27.05860119999852,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 27.574854100006633,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 28.07547310006339,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 28.590708200004883,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 29.091177600086667,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 29.607515300041996,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 30.125580799998716,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 30.640647300053388,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 31.157851400086656,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 31.67385630006902,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 32.19082590006292,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 32.7068833000958,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 33.22378470003605,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 33.739823000039905,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 34.24009490001481,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 34.7580697000958,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 35.27359850006178,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 35.77378450008109,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 36.27399240003433,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 36.79060990002472,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 37.291023800033145,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 37.80712540005334,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 38.307260300032794,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 38.807761600008234,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 39.32466939999722,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 39.82485760003328,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 40.34041810000781,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 40.85630960005801,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 41.35737490002066,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 41.87483460002113,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 42.389691100106575,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 42.89040080003906,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 43.4064852000447,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 43.906776200048625,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 44.40746380004566,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 44.923333700047806,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 45.43993270001374,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 45.94042020000052,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 46.456876900047064,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 46.97268120001536,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 47.47278619999997,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 47.97383680008352,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 48.48991950007621,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 48.99031820008531,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 49.507161500048824,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 50.02394300000742,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 50.524261900107376,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 51.03950900002383,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 51.54032260004897,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 52.05588860006537,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 52.55706970009487,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 53.07383520004805,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 53.590263400110416,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 54.10554440005217,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 54.60628120007459,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 55.10689990001265,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 56.02528450009413,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 56.538965800078586,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 57.04084400006104,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 57.55707030009944,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 58.05778800009284,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 58.573777400073595,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 59.08959930005949,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 59.590477600111626,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 60.10625750001054,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 60.62265600007959,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 61.122801600024104,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 61.6392023001099,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 62.13988120004069,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 62.65707940002903,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 63.173127800109796,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 63.689635800081305,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 64.18983420007862,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 64.70589880004991,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 65.20634820009582,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 65.72196510003414,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 66.22269000008237,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 66.739305300056,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 67.25643130007666,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 67.7726549000945,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 68.27275040000677,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 68.772944400087,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 69.2892584000947,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 69.790052400087,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 70.3060052000219,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 70.80639140005223,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 71.3228206000058,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 71.83936760004144,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 72.3563042000169,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 72.872221800033,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 73.37282600009348,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 73.88956800010055,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 74.40584660007153,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 74.9064014001051,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 75.42295300005935,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 75.93912370002363,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 76.43981390004046,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 76.95551580004394,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 77.47194680001121,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 77.9731851000106,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 78.48848729999736,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 79.00490790000185,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 79.50506960006896,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 80.0222691000672,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 80.5226391000906,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 81.02373030001763,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 81.53936540009454,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 82.05501160002314,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 82.55581570009235,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 83.05698950006627,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 83.57246770011261,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 84.07351510005537,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 84.58844010008033,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 85.0890448000282,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 85.6068667001091,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 86.12143980001565,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 86.62156670005061,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 87.122157100006,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 87.62235100008547,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 88.12295330001507,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 88.62319030007347,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 89.13850730005652,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 89.6555072000483,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 90.15560590010136,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 90.67227720003575,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 91.18902660009917,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 91.70541340007912,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 92.20551650004927,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 92.7217422000831,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 93.23955160006881,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 93.75525510008447,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 94.27149300009478,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 94.77187570009846,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 95.27239520009607,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 95.78855250007473,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 96.3061827000929,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 96.82218360004481,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 97.33764570008498,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 97.83799860009458,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 99.85636930004694,
+      "alive": 4,
+      "enemies": 12
+    }
+  ],
+  "diagnostics": [
+    {
+      "actors": [
+        {
+          "targetId": "Player2",
+          "recoveryIn": 0.618096113204956,
+          "resolveIn": -0.631903886795044,
+          "lastMove": "GrapplerThrow",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.9962549209594727,
+            "x": 82.99931335449219,
+            "z": -1.607446551322937
+          },
+          "slot": {
+            "y": 0,
+            "x": -12,
+            "z": -8
+          },
+          "lastAttackAgo": 2.282052993774414,
+          "tokenRemaining": 0.7180960178375244,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.00002978568954858929,
+            "x": -1.8838629505401939e-25,
+            "z": -5.943817936617114e-26
+          },
+          "state": "Recover",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 3.4499990940093994,
+            "x": 81.25952911376953,
+            "z": -2.7775936126708984
+          },
+          "canAttack": true,
+          "kind": "Grappler",
+          "attackIn": 0.7680962085723877,
+          "walkTo": {
+            "y": 3.4499995708465576,
+            "x": 82.82164001464844,
+            "z": -1.8730754852294922
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": -3.4681308269500732,
+          "resolveIn": -4.018130779266357,
+          "lastMove": "StriderJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.932983160018921,
+            "x": 101.42911529541016,
+            "z": 2.2422218322753906
+          },
+          "slot": {
+            "y": 0,
+            "x": 10,
+            "z": 0
+          },
+          "lastAttackAgo": 4.498621940612793,
+          "retreatIn": -5.763061046600342,
+          "velocity": {
+            "y": 0.000006552672857651487,
+            "x": 3.126037120819092,
+            "z": -4.639101028442383
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.7599997520446777,
+            "x": 112.79866027832031,
+            "z": 5.172805309295654
+          },
+          "canAttack": true,
+          "kind": "Strider",
+          "attackIn": -2.8981308937072754,
+          "walkTo": {
+            "y": 2.7599997520446777,
+            "x": 113.50775146484375,
+            "z": 4.120502948760986
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": -3.299647808074951,
+          "resolveIn": -4.549647808074951,
+          "lastMove": "GrapplerGrab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 100.47028350830078,
+            "z": -5.371175765991211
+          },
+          "slot": {
+            "y": 0,
+            "x": 10,
+            "z": 0
+          },
+          "lastAttackAgo": 6.199960947036743,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.000006477353963418864,
+            "x": -9.400958061218262,
+            "z": 2.5706887245178223
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 3.4499995708465576,
+            "x": 109.48583221435547,
+            "z": -8.123374938964844
+          },
+          "canAttack": true,
+          "kind": "Grappler",
+          "attackIn": -3.1496477127075195,
+          "walkTo": {
+            "y": 3.4499995708465576,
+            "x": 108.46199035644531,
+            "z": -7.843405723571777
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": 0.4800150394439697,
+          "resolveIn": -0.06998491287231445,
+          "lastMove": "StriderJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.932983160018921,
+            "x": 101.42911529541016,
+            "z": 2.2422218322753906
+          },
+          "slot": {
+            "y": 0,
+            "x": 5,
+            "z": 0
+          },
+          "lastAttackAgo": 0.5502469539642334,
+          "tokenRemaining": 2.450015068054199,
+          "retreatIn": -3.713253974914551,
+          "velocity": {
+            "y": 0.00000652914877719013,
+            "x": 0,
+            "z": 0
+          },
+          "state": "Recover",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 2.7599997520446777,
+            "x": 103.66867065429688,
+            "z": 0.7790473699569702
+          },
+          "canAttack": true,
+          "kind": "Strider",
+          "attackIn": 1.0500149726867676,
+          "walkTo": {
+            "y": 2.7599997520446777,
+            "x": 105.1340103149414,
+            "z": 2.277378559112549
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": -1.5677599906921387,
+          "resolveIn": -2.417759895324707,
+          "lastMove": "LeaperVaultKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.932983160018921,
+            "x": 101.42911529541016,
+            "z": 2.2422218322753906
+          },
+          "slot": {
+            "y": 0,
+            "x": -14,
+            "z": -10
+          },
+          "lastAttackAgo": 3.398254871368408,
+          "tokenRemaining": 2.5502099990844727,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.000006504614248115104,
+            "x": 9.101346015930176,
+            "z": 13.159236907958984
+          },
+          "state": "Engage",
+          "attacking": false,
+          "token": true,
+          "position": {
+            "y": 2.7599997520446777,
+            "x": 92.49683380126953,
+            "z": -4.494026184082031
+          },
+          "canAttack": true,
+          "kind": "Leaper",
+          "attackIn": -1.417759895324707,
+          "walkTo": {
+            "y": 2.7599997520446777,
+            "x": 97.15583801269531,
+            "z": 2.2422218322753906
+          }
+        },
+        {
+          "targetId": "Player2",
+          "recoveryIn": -0.4753439426422119,
+          "resolveIn": -1.025343894958496,
+          "lastMove": "HuskJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.9962549209594727,
+            "x": 82.99931335449219,
+            "z": -1.607446551322937
+          },
+          "slot": {
+            "y": 0,
+            "x": 10,
+            "z": 0
+          },
+          "lastAttackAgo": 1.9656338691711426,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.000006507638317998499,
+            "x": -2.2252135276794434,
+            "z": 10.384586334228516
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.999999761581421,
+            "x": 91.94559478759766,
+            "z": 0.13014385104179382
+          },
+          "canAttack": true,
+          "kind": "Husk",
+          "attackIn": -0.11534404754638672,
+          "walkTo": {
+            "y": 2.999999761581421,
+            "x": 92.16221618652344,
+            "z": 0.7401463985443115
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": -3.415354013442993,
+          "resolveIn": -4.115354061126709,
+          "lastMove": "WardenKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.932983160018921,
+            "x": 101.42911529541016,
+            "z": 2.2422218322753906
+          },
+          "slot": {
+            "y": 0,
+            "x": 12,
+            "z": 8
+          },
+          "lastAttackAgo": 4.71567177772522,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.0000065201834331674036,
+            "x": -2.9605231285095215,
+            "z": -7.7715020179748535
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 3.1499996185302734,
+            "x": 115.48562622070312,
+            "z": 10.19632339477539
+          },
+          "canAttack": true,
+          "kind": "Warden",
+          "attackIn": -2.7653539180755615,
+          "walkTo": {
+            "y": 3.1499996185302734,
+            "x": 115.13985443115234,
+            "z": 9.288656234741211
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -0.48081469535827637,
+          "resolveIn": -1.130814790725708,
+          "lastMove": "PitcherShove",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 91.93890380859375,
+            "z": 7.023544788360596
+          },
+          "slot": {
+            "y": 0,
+            "x": -5,
+            "z": 0
+          },
+          "lastAttackAgo": 1.531317949295044,
+          "retreatIn": 0.8191852569580078,
+          "velocity": {
+            "y": 0.002859397092834115,
+            "x": 12.99764633178711,
+            "z": 0.2474307417869568
+          },
+          "state": "Retreat",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.8499348163604736,
+            "x": 97.2834243774414,
+            "z": 3.801664113998413
+          },
+          "canAttack": true,
+          "kind": "Pitcher",
+          "attackIn": 0.369185209274292,
+          "walkTo": {
+            "y": 2.8497731685638428,
+            "x": 108.93890380859375,
+            "z": 4.023544788360596
+          }
+        },
+        {
+          "targetId": "Player2",
+          "recoveryIn": 0.9508481025695801,
+          "resolveIn": 0.25084805488586426,
+          "lastMove": "WardenKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.9962549209594727,
+            "x": 82.99931335449219,
+            "z": -1.607446551322937
+          },
+          "slot": {
+            "y": 0,
+            "x": -5,
+            "z": 0
+          },
+          "lastAttackAgo": 0.3495798110961914,
+          "tokenRemaining": 2.650848150253296,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.000006541744824062334,
+            "x": 2.6817830975415364e-33,
+            "z": 4.831977894940479e-34
+          },
+          "state": "Attack",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 3.1499996185302734,
+            "x": 82.25115966796875,
+            "z": 0.28291329741477966
+          },
+          "canAttack": true,
+          "kind": "Warden",
+          "attackIn": 1.6008481979370117,
+          "walkTo": {
+            "y": 3.1499996185302734,
+            "x": 82.99576568603516,
+            "z": 0.41707587242126465
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -0.719782829284668,
+          "resolveIn": -1.2697827816009521,
+          "lastMove": "LeaperJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 91.93890380859375,
+            "z": 7.023544788360596
+          },
+          "slot": {
+            "y": 0,
+            "x": 5,
+            "z": 0
+          },
+          "lastAttackAgo": 1.7503178119659424,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.0005672654951922596,
+            "x": -1.889493465423584,
+            "z": 0.6987237334251404
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.7599871158599854,
+            "x": 94.17217254638672,
+            "z": 6.342897415161133
+          },
+          "canAttack": true,
+          "kind": "Leaper",
+          "attackIn": 0.0502171516418457,
+          "walkTo": {
+            "y": 2.7599549293518066,
+            "x": 94.50434112548828,
+            "z": 6.720130443572998
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": 1.4577550888061523,
+          "resolveIn": 0.9077551364898682,
+          "lastMove": "HuskJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 2.932983160018921,
+            "x": 101.42911529541016,
+            "z": 2.2422218322753906
+          },
+          "slot": {
+            "y": 0,
+            "x": 14,
+            "z": 10
+          },
+          "lastAttackAgo": 0.03265500068664551,
+          "tokenRemaining": 2.967755079269409,
+          "retreatIn": -1790239838.456802,
+          "velocity": {
+            "y": 0.000006561216650879942,
+            "x": 2.663585901260376,
+            "z": -4.012447357177734
+          },
+          "state": "Attack",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 2.999999761581421,
+            "x": 103.77500915527344,
+            "z": 4.3223114013671875
+          },
+          "canAttack": true,
+          "kind": "Husk",
+          "attackIn": 1.8177549839019775,
+          "walkTo": {
+            "y": 2.999999761581421,
+            "x": 105.15583801269531,
+            "z": 2.2422218322753906
+          }
+        },
+        {
+          "retreatIn": -1790239838.456802,
+          "targetId": "Player2",
+          "slot": {
+            "y": 0,
+            "x": 5,
+            "z": 0
+          },
+          "velocity": {
+            "y": 0.000006563895112776663,
+            "x": -12.851898193359375,
+            "z": 1.956708312034607
+          },
+          "recoveryIn": -1790239838.456802,
+          "target": {
+            "y": 2.9962549209594727,
+            "x": 82.99931335449219,
+            "z": -1.607446551322937
+          },
+          "resolveIn": -1790239838.456802,
+          "state": "Retreat",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "token": false,
+          "position": {
+            "y": 2.8499996662139893,
+            "x": 72.4791259765625,
+            "z": 0.4060349464416504
+          },
+          "canAttack": true,
+          "kind": "Pitcher",
+          "attackIn": -8.594541072845459,
+          "walkTo": {
+            "y": 2.8499996662139893,
+            "x": 65.99944305419922,
+            "z": 1.392613172531128
+          }
+        }
+      ],
+      "cameraSpan": 17.69995480740107,
+      "elapsed": 10.191495000035502,
+      "cameraEstimate": {
+        "y": 5,
+        "x": 92.29486083984375,
+        "z": 0
+      },
+      "cameraGoalSpan": 18.156394958496094,
+      "time": 1790239838.456802,
+      "requestedElapsed": 10,
+      "cameraGoal": {
+        "y": 5,
+        "x": 92.07763671875,
+        "z": 0
+      },
+      "players": [
+        {
+          "id": "Player4",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 91.93890380859375,
+            "z": 7.023544788360596
+          }
+        },
+        {
+          "id": "Player2",
+          "position": {
+            "y": 2.9962549209594727,
+            "x": 82.99931335449219,
+            "z": -1.607446551322937
+          }
+        },
+        {
+          "id": "Player3",
+          "position": {
+            "y": 2.932983160018921,
+            "x": 101.42911529541016,
+            "z": 2.2422218322753906
+          }
+        },
+        {
+          "id": "Player1",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 100.47028350830078,
+            "z": -5.371175765991211
+          }
+        }
+      ]
+    },
+    {
+      "actors": [
+        {
+          "targetId": "Player4",
+          "recoveryIn": 1.1146650314331055,
+          "resolveIn": -0.13533496856689453,
+          "lastMove": "GrapplerGrab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 88.0501708984375,
+            "z": 7.13292121887207
+          },
+          "slot": {
+            "y": 0,
+            "x": 10,
+            "z": 0
+          },
+          "lastAttackAgo": 1.7854831218719482,
+          "tokenRemaining": 1.2146649360656738,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.0000064532150645391084,
+            "x": 0,
+            "z": 0
+          },
+          "state": "Recover",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 3.4499995708465576,
+            "x": 100.60643005371094,
+            "z": 7.80824089050293
+          },
+          "canAttack": true,
+          "kind": "Grappler",
+          "attackIn": 1.264665126800537,
+          "walkTo": {
+            "y": 3.4499993324279785,
+            "x": 99.01121520996094,
+            "z": 7.13292121887207
+          }
+        },
+        {
+          "targetId": "Player2",
+          "recoveryIn": -0.9714400768280029,
+          "resolveIn": -1.521440029144287,
+          "lastMove": "StriderJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 129.01759338378906,
+            "z": 3.7734951972961426
+          },
+          "slot": {
+            "y": 0,
+            "x": -14,
+            "z": -10
+          },
+          "lastAttackAgo": 2.001641035079956,
+          "retreatIn": -6.381210088729858,
+          "velocity": {
+            "y": 0.000006503407348645851,
+            "x": 11.077279090881348,
+            "z": -14.1878080368042
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.7599997520446777,
+            "x": 106.29389190673828,
+            "z": 4.946958065032959
+          },
+          "canAttack": true,
+          "kind": "Strider",
+          "attackIn": -0.4014401435852051,
+          "walkTo": {
+            "y": 2.7599997520446777,
+            "x": 115.01759338378906,
+            "z": -6.226504802703857
+          }
+        },
+        {
+          "targetId": "Player2",
+          "recoveryIn": 2.531752109527588,
+          "resolveIn": 1.281752109527588,
+          "lastMove": "GrapplerGrab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 129.01759338378906,
+            "z": 3.7734951972961426
+          },
+          "slot": {
+            "y": 0,
+            "x": -14,
+            "z": 10
+          },
+          "lastAttackAgo": 0.3684561252593994,
+          "tokenRemaining": 2.6317520141601562,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.000007281124908331549,
+            "x": 5.1130445635293384e-36,
+            "z": 6.107402007757753e-36
+          },
+          "state": "Attack",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 3.4499995708465576,
+            "x": 118.89013671875,
+            "z": 4.253028392791748
+          },
+          "canAttack": true,
+          "kind": "Grappler",
+          "attackIn": 2.6817522048950195,
+          "walkTo": {
+            "y": 4.612125873565674,
+            "x": 123.47624969482422,
+            "z": 9.731049537658691
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": -0.08666706085205078,
+          "resolveIn": -0.636667013168335,
+          "lastMove": "StriderJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 115.55644989013672,
+            "z": -7.421988487243652
+          },
+          "slot": {
+            "y": 0,
+            "x": 12,
+            "z": 8
+          },
+          "lastAttackAgo": 1.1168839931488037,
+          "retreatIn": -2.996664047241211,
+          "velocity": {
+            "y": 0.5597905516624451,
+            "x": -1.9830148220062256,
+            "z": -3.4601759910583496
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.750880241394043,
+            "x": 115.07476806640625,
+            "z": 5.199172019958496
+          },
+          "canAttack": true,
+          "kind": "Strider",
+          "attackIn": 0.48333287239074707,
+          "walkTo": {
+            "y": 2.740882396697998,
+            "x": 127.55644989013672,
+            "z": -11
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -2.7699360847473145,
+          "resolveIn": -3.619935989379883,
+          "lastMove": "LeaperVaultKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 88.0501708984375,
+            "z": 7.13292121887207
+          },
+          "slot": {
+            "y": 0,
+            "x": 5,
+            "z": 0
+          },
+          "lastAttackAgo": 4.600461006164551,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.0006604701047763228,
+            "x": -3.937297710088217e-11,
+            "z": 1.7676408947675526e-11
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.7599849700927734,
+            "x": 91.47724914550781,
+            "z": 10.045599937438965
+          },
+          "canAttack": true,
+          "kind": "Leaper",
+          "attackIn": -2.619935989379883,
+          "walkTo": {
+            "y": 2.759971857070923,
+            "x": 90.64592742919922,
+            "z": 9.88046646118164
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -1.2599780559539795,
+          "resolveIn": -1.8099780082702637,
+          "lastMove": "HuskJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 88.0501708984375,
+            "z": 7.13292121887207
+          },
+          "slot": {
+            "y": 0,
+            "x": 5,
+            "z": 0
+          },
+          "lastAttackAgo": 2.7504541873931885,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.00000653215465717949,
+            "x": 1.7454806566238403,
+            "z": 3.1393539905548096
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.999999761581421,
+            "x": 94.88549041748047,
+            "z": 4.484956741333008
+          },
+          "canAttack": true,
+          "kind": "Husk",
+          "attackIn": -0.8999781608581543,
+          "walkTo": {
+            "y": 2.999999761581421,
+            "x": 95.44031524658203,
+            "z": 5.482846260070801
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": -2.534266233444214,
+          "resolveIn": -3.2342662811279297,
+          "lastMove": "WardenKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 115.55644989013672,
+            "z": -7.421988487243652
+          },
+          "slot": {
+            "y": 0,
+            "x": -5,
+            "z": 0
+          },
+          "lastAttackAgo": 3.8345930576324463,
+          "tokenRemaining": 2.981355905532837,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.000006494964509329293,
+            "x": -5.929405233473517e-8,
+            "z": -6.19816376001836e-9
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": true,
+          "position": {
+            "y": 3.1499996185302734,
+            "x": 108.87251281738281,
+            "z": -4.970099449157715
+          },
+          "canAttack": true,
+          "kind": "Warden",
+          "attackIn": -1.8842661380767822,
+          "walkTo": {
+            "y": 3.1499996185302734,
+            "x": 108.0867919921875,
+            "z": -5.434858322143555
+          }
+        },
+        {
+          "targetId": "Player2",
+          "recoveryIn": -20.415016889572144,
+          "resolveIn": -21.065016984939575,
+          "lastMove": "PitcherShove",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 129.01759338378906,
+            "z": 3.7734951972961426
+          },
+          "slot": {
+            "y": 0,
+            "x": -5,
+            "z": 0
+          },
+          "lastAttackAgo": 21.46552014350891,
+          "retreatIn": -19.11501693725586,
+          "velocity": {
+            "y": -0.10217751562595367,
+            "x": -0.17893487215042114,
+            "z": -0.5870909690856934
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 4.090061187744141,
+            "x": 115.81520080566406,
+            "z": 5.782865524291992
+          },
+          "canAttack": true,
+          "kind": "Pitcher",
+          "attackIn": -19.565016984939575,
+          "walkTo": {
+            "y": 3.999934434890747,
+            "x": 112.01759338378906,
+            "z": 3.7734951972961426
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -4.618109226226807,
+          "resolveIn": -5.3181092739105225,
+          "lastMove": "WardenKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 88.0501708984375,
+            "z": 7.13292121887207
+          },
+          "slot": {
+            "y": 0,
+            "x": -10,
+            "z": 0
+          },
+          "lastAttackAgo": 5.918513059616089,
+          "tokenRemaining": 0.998358964920044,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.00009322294499725103,
+            "x": -9.589773178100586,
+            "z": 2.8348326683044434
+          },
+          "state": "Engage",
+          "attacking": false,
+          "token": true,
+          "position": {
+            "y": 3.1499977111816406,
+            "x": 89.07524108886719,
+            "z": 9.51453685760498
+          },
+          "canAttack": true,
+          "kind": "Warden",
+          "attackIn": -3.968109130859375,
+          "walkTo": {
+            "y": 3.149995803833008,
+            "x": 84.0501708984375,
+            "z": 11
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": 0.6620798110961914,
+          "resolveIn": 0.11207985877990723,
+          "lastMove": "LeaperJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 88.0501708984375,
+            "z": 7.13292121887207
+          },
+          "slot": {
+            "y": 0,
+            "x": -12,
+            "z": -8
+          },
+          "lastAttackAgo": 0.3684561252593994,
+          "tokenRemaining": 2.632079839706421,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.02272092178463936,
+            "x": -1.0329659052879101e-29,
+            "z": 5.483888108823354e-29
+          },
+          "state": "Attack",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 2.7594828605651855,
+            "x": 85.3633804321289,
+            "z": 4.866817951202393
+          },
+          "canAttack": true,
+          "kind": "Leaper",
+          "attackIn": 1.432079792022705,
+          "walkTo": {
+            "y": 7.260991096496582,
+            "x": 84.0501708984375,
+            "z": 7.13292121887207
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": -2.3440210819244385,
+          "resolveIn": -2.8940210342407227,
+          "lastMove": "HuskJab",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 77.18281555175781,
+            "z": 3.666071653366089
+          },
+          "slot": {
+            "y": 0,
+            "x": 5,
+            "z": 0
+          },
+          "lastAttackAgo": 3.8345930576324463,
+          "retreatIn": -1790239858.391004,
+          "velocity": {
+            "y": 0.000006568353001057403,
+            "x": 8.483146667480469,
+            "z": 8.487415313720703
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.999999761581421,
+            "x": 75.2277603149414,
+            "z": 2.707514524459839
+          },
+          "canAttack": true,
+          "kind": "Husk",
+          "attackIn": -1.9840211868286133,
+          "walkTo": {
+            "y": 2.999999761581421,
+            "x": 82.18281555175781,
+            "z": 9.666071891784668
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": -2.0839171409606934,
+          "resolveIn": -2.8839170932769775,
+          "lastMove": "PitcherThrow",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 77.18281555175781,
+            "z": 3.666071653366089
+          },
+          "slot": {
+            "y": 0,
+            "x": 10,
+            "z": 0
+          },
+          "lastAttackAgo": 3.8345930576324463,
+          "retreatIn": -8.266242980957031,
+          "velocity": {
+            "y": 0.0000065167469074367546,
+            "x": 12.233660697937012,
+            "z": 1.2814569473266602
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.8499996662139893,
+            "x": 90.44266510009766,
+            "z": 1.2043967247009277
+          },
+          "canAttack": true,
+          "kind": "Pitcher",
+          "attackIn": -1.9339170455932617,
+          "walkTo": {
+            "y": 2.8499996662139893,
+            "x": 94.18281555175781,
+            "z": 3.666071653366089
+          }
+        }
+      ],
+      "cameraSpan": 50.88009761354348,
+      "elapsed": 30.125689700013027,
+      "cameraEstimate": {
+        "y": 5,
+        "x": 102.62349700927734,
+        "z": 0
+      },
+      "cameraGoalSpan": 51.83477783203125,
+      "time": 1790239858.391004,
+      "requestedElapsed": 30,
+      "cameraGoal": {
+        "y": 5,
+        "x": 103.10020446777344,
+        "z": 0
+      },
+      "players": [
+        {
+          "id": "Player4",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 88.0501708984375,
+            "z": 7.13292121887207
+          }
+        },
+        {
+          "id": "Player2",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 129.01759338378906,
+            "z": 3.7734951972961426
+          }
+        },
+        {
+          "id": "Player3",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 77.18281555175781,
+            "z": 3.666071653366089
+          }
+        },
+        {
+          "id": "Player1",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 115.55644989013672,
+            "z": -7.421988487243652
+          }
+        }
+      ]
+    },
+    {
+      "actors": [
+        {
+          "targetId": "Player4",
+          "recoveryIn": -22.647552728652954,
+          "resolveIn": -23.897552728652954,
+          "lastMove": "GrapplerThrow",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 78.6594009399414,
+            "z": 12.240427017211914
+          },
+          "slot": {
+            "y": 0,
+            "x": 14,
+            "z": -10
+          },
+          "lastAttackAgo": 25.547701835632324,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0.000006516220310004428,
+            "x": 0.20385169982910156,
+            "z": -0.09074687957763672
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 3.4499995708465576,
+            "x": 93.86534881591797,
+            "z": 4.726404190063477
+          },
+          "canAttack": true,
+          "kind": "Grappler",
+          "attackIn": -22.497552633285522,
+          "walkTo": {
+            "y": 3.4499995708465576,
+            "x": 94.64126586914062,
+            "z": 4.380783557891846
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": -3.2299580574035645,
+          "resolveIn": -3.9799580574035645,
+          "lastMove": "StriderSlide",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 157.3227081298828,
+            "z": -5.105546474456787
+          },
+          "slot": {
+            "y": 0,
+            "x": -14,
+            "z": -10
+          },
+          "lastAttackAgo": 4.850435018539429,
+          "retreatIn": -2.0299580097198486,
+          "velocity": {
+            "y": 0.000009182193025480956,
+            "x": -0.3143439292907715,
+            "z": -0.0984208881855011
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.7599997520446777,
+            "x": 143.92312622070312,
+            "z": -10.68614387512207
+          },
+          "canAttack": true,
+          "kind": "Strider",
+          "attackIn": -3.079957962036133,
+          "walkTo": {
+            "y": 2.759995698928833,
+            "x": 143.13641357421875,
+            "z": -11
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": -23.081222772598267,
+          "resolveIn": -24.331222772598267,
+          "lastMove": "GrapplerThrow",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 157.3227081298828,
+            "z": -5.105546474456787
+          },
+          "slot": {
+            "y": 0,
+            "x": -12,
+            "z": -8
+          },
+          "lastAttackAgo": 25.981459856033325,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0.000007241169896587962,
+            "x": -0.0724872350692749,
+            "z": -0.03803788125514984
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 3.4499995708465576,
+            "x": 146.2772216796875,
+            "z": -10.621675491333008
+          },
+          "canAttack": true,
+          "kind": "Grappler",
+          "attackIn": -22.931222677230835,
+          "walkTo": {
+            "y": 3.449998378753662,
+            "x": 145.55625915527344,
+            "z": -11
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": -2.2453980445861816,
+          "resolveIn": -2.9953980445861816,
+          "lastMove": "StriderSlide",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 157.3227081298828,
+            "z": -5.105546474456787
+          },
+          "slot": {
+            "y": 0,
+            "x": -14,
+            "z": -10
+          },
+          "lastAttackAgo": 3.866036891937256,
+          "retreatIn": -1.0453979969024658,
+          "velocity": {
+            "y": 0.000006545891665155068,
+            "x": 9.248735427856445,
+            "z": 6.303843975067139
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.7599997520446777,
+            "x": 142.02398681640625,
+            "z": -8.706013679504395
+          },
+          "canAttack": true,
+          "kind": "Strider",
+          "attackIn": -2.09539794921875,
+          "walkTo": {
+            "y": 2.7599997520446777,
+            "x": 142.7833709716797,
+            "z": -8.18847942352295
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -0.16863298416137695,
+          "resolveIn": -1.0186328887939453,
+          "lastMove": "LeaperVaultKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 78.6594009399414,
+            "z": 12.240427017211914
+          },
+          "slot": {
+            "y": 0,
+            "x": 10,
+            "z": 0
+          },
+          "lastAttackAgo": 1.9991328716278076,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0,
+            "x": 15.964561462402344,
+            "z": 1.064302921295166
+          },
+          "state": "Reposition",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.759999990463257,
+            "x": 75.5907211303711,
+            "z": 10.128754615783691
+          },
+          "canAttack": false,
+          "kind": "Leaper",
+          "attackIn": -0.018632888793945312,
+          "walkTo": {
+            "y": 2.759999990463257,
+            "x": 88.65940856933594,
+            "z": 11
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": -10.919238090515137,
+          "resolveIn": -11.769237995147705,
+          "lastMove": "HuskJumpKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 65.7236557006836,
+            "z": 5.281330585479736
+          },
+          "slot": {
+            "y": 0,
+            "x": 14,
+            "z": 10
+          },
+          "lastAttackAgo": 12.7497239112854,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0.004778171423822641,
+            "x": 1.5521330833435059,
+            "z": 11.899828910827637
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.999885082244873,
+            "x": 85.95457458496094,
+            "z": -2.298977851867676
+          },
+          "canAttack": true,
+          "kind": "Husk",
+          "attackIn": -10.769237995147705,
+          "walkTo": {
+            "y": 2.9972667694091797,
+            "x": 87.6851577758789,
+            "z": 11
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": -18.99881386756897,
+          "resolveIn": -19.698813915252686,
+          "lastMove": "WardenKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 157.3227081298828,
+            "z": -5.105546474456787
+          },
+          "slot": {
+            "y": 0,
+            "x": -14,
+            "z": 10
+          },
+          "lastAttackAgo": 20.29918098449707,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0.000006564524028362939,
+            "x": 0.0839802622795105,
+            "z": -0.3807319402694702
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 3.1499996185302734,
+            "x": 143.83340454101562,
+            "z": 3.073850631713867
+          },
+          "canAttack": true,
+          "kind": "Warden",
+          "attackIn": -18.348813772201538,
+          "walkTo": {
+            "y": 3.1499996185302734,
+            "x": 144.01318359375,
+            "z": 2.2587640285491943
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -0.9162778854370117,
+          "resolveIn": -1.716277837753296,
+          "lastMove": "PitcherThrow",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 78.6594009399414,
+            "z": 12.240427017211914
+          },
+          "slot": {
+            "y": 0,
+            "x": 14,
+            "z": -10
+          },
+          "lastAttackAgo": 2.6668379306793213,
+          "retreatIn": -49.09569478034973,
+          "velocity": {
+            "y": 2.5799497649359182e-8,
+            "x": -0.2606327533721924,
+            "z": -0.023052960634231567
+          },
+          "state": "Hold",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.8499999046325684,
+            "x": 95.53617095947266,
+            "z": 5.316776752471924
+          },
+          "canAttack": true,
+          "kind": "Pitcher",
+          "attackIn": -0.7662777900695801,
+          "walkTo": {
+            "y": 2.8499999046325684,
+            "x": 94.78392791748047,
+            "z": 5.3119916915893555
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": -20.065465927124023,
+          "resolveIn": -20.76546597480774,
+          "lastMove": "WardenKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 78.6594009399414,
+            "z": 12.240427017211914
+          },
+          "slot": {
+            "y": 0,
+            "x": 14,
+            "z": -10
+          },
+          "lastAttackAgo": 21.365844011306763,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0.0000064860782913456205,
+            "x": 9.988622665405273,
+            "z": -0.2506606876850128
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 3.1499996185302734,
+            "x": 86.73043060302734,
+            "z": 2.396085262298584
+          },
+          "canAttack": true,
+          "kind": "Warden",
+          "attackIn": -19.415465831756592,
+          "walkTo": {
+            "y": 3.1499996185302734,
+            "x": 92.65940856933594,
+            "z": 2.2404260635375977
+          }
+        },
+        {
+          "targetId": "Player3",
+          "recoveryIn": -20.984702110290527,
+          "resolveIn": -21.834702014923096,
+          "lastMove": "LeaperVaultKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 65.7236557006836,
+            "z": 5.281330585479736
+          },
+          "slot": {
+            "y": 0,
+            "x": 14,
+            "z": 10
+          },
+          "lastAttackAgo": 22.815122842788696,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0.010161185637116432,
+            "x": -6.937189102172852,
+            "z": 6.222705364227295
+          },
+          "state": "Approach",
+          "attacking": false,
+          "token": false,
+          "position": {
+            "y": 2.759732723236084,
+            "x": 84.78363037109375,
+            "z": -4.3561930656433105
+          },
+          "canAttack": true,
+          "kind": "Leaper",
+          "attackIn": -20.834702014923096,
+          "walkTo": {
+            "y": 2.7595696449279785,
+            "x": 87.66641235351562,
+            "z": 11
+          }
+        },
+        {
+          "targetId": "Player4",
+          "recoveryIn": 0.3648340702056885,
+          "resolveIn": -0.4851658344268799,
+          "lastMove": "HuskJumpKick",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 78.6594009399414,
+            "z": 12.240427017211914
+          },
+          "slot": {
+            "y": 0,
+            "x": 12,
+            "z": 8
+          },
+          "lastAttackAgo": 1.46567702293396,
+          "tokenRemaining": 1.5348341464996338,
+          "retreatIn": -1790239888.371682,
+          "velocity": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "state": "Recover",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 3,
+            "x": 78.6594009399414,
+            "z": 10
+          },
+          "canAttack": false,
+          "kind": "Husk",
+          "attackIn": 0.5148341655731201,
+          "walkTo": {
+            "y": 2.999999761581421,
+            "x": 88.77960968017578,
+            "z": 10.526077270507812
+          }
+        },
+        {
+          "targetId": "Player1",
+          "recoveryIn": 0.1839890480041504,
+          "resolveIn": -0.6160109043121338,
+          "lastMove": "PitcherThrow",
+          "moveDirection": {
+            "y": 0,
+            "x": 0,
+            "z": 0
+          },
+          "target": {
+            "y": 3.0000457763671875,
+            "x": 157.3227081298828,
+            "z": -5.105546474456787
+          },
+          "slot": {
+            "y": 0,
+            "x": -14,
+            "z": 10
+          },
+          "lastAttackAgo": 1.5665249824523926,
+          "tokenRemaining": 1.4339890480041504,
+          "retreatIn": -38.2469208240509,
+          "velocity": {
+            "y": 0.00000652640937914839,
+            "x": 0,
+            "z": 0
+          },
+          "state": "Recover",
+          "attacking": true,
+          "token": true,
+          "position": {
+            "y": 2.8499996662139893,
+            "x": 142.59226989746094,
+            "z": -2.5036823749542236
+          },
+          "canAttack": true,
+          "kind": "Pitcher",
+          "attackIn": 0.33398914337158203,
+          "walkTo": {
+            "y": 2.8499996662139893,
+            "x": 142.6773223876953,
+            "z": -3.553340196609497
+          }
+        }
+      ],
+      "cameraSpan": 98.39994037839251,
+      "elapsed": 60.106378600001335,
+      "cameraEstimate": {
+        "y": 5,
+        "x": 114.92362976074219,
+        "z": 0
+      },
+      "cameraGoalSpan": 98.39994049072266,
+      "time": 1790239888.371682,
+      "requestedElapsed": 60,
+      "cameraGoal": {
+        "y": 5,
+        "x": 114.92362976074219,
+        "z": 0
+      },
+      "players": [
+        {
+          "id": "Player4",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 78.6594009399414,
+            "z": 12.240427017211914
+          }
+        },
+        {
+          "id": "Player2",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 164.12359619140625,
+            "z": 3.7734951972961426
+          }
+        },
+        {
+          "id": "Player3",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 65.7236557006836,
+            "z": 5.281330585479736
+          }
+        },
+        {
+          "id": "Player1",
+          "position": {
+            "y": 3.0000457763671875,
+            "x": 157.3227081298828,
+            "z": -5.105546474456787
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "stationary four-client/12-enemy Studio CPU instrumentation; not phone FPS or HumanBot difficulty",
+  "populationValidity": {
+    "valid": true,
+    "firstAbsoluteFrame": 5709,
+    "method": "Heartbeat plus barrier-change observations; mismatch latched",
+    "checks": 1101,
+    "mismatches": 0
+  },
+  "passed": true,
+  "telemetry": {
+    "windupPeak": 5,
+    "elapsed": 100.37936401367188,
+    "aiPeakSeconds": 0.0009536000434309244,
+    "flankedWindows": 48,
+    "serverBoundsRejected": 40,
+    "flankWindows": 76,
+    "windups": 168,
+    "aiSeconds": 0.3827686005970463,
+    "started": 1790239828.257115,
+    "capViolations": 0,
+    "stage": 1,
+    "actions": {
+      "Warden": {
+        "WardenKick": 20
+      },
+      "Pitcher": {
+        "PitcherThrow": 34,
+        "PitcherShove": 2
+      },
+      "Leaper": {
+        "LeaperJab": 4,
+        "LeaperVaultKick": 17
+      },
+      "Strider": {
+        "StriderJab": 14,
+        "StriderSlide": 19
+      },
+      "Grappler": {
+        "GrapplerGrab": 6,
+        "GrapplerThrow": 6
+      },
+      "Husk": {
+        "HuskJumpKick": 37,
+        "HuskJab": 9
+      }
+    },
+    "aiMeanMs": 0.4252984451078292,
+    "stocks": [],
+    "aiPeakMs": 0.9536000434309244,
+    "idleRatio": 0.26384125428711414,
+    "cameraFrustum": "not measured",
+    "damage": {
+      "Player1": 124.52199999999999,
+      "Player2": 126.08599999999998,
+      "Player3": 136.252,
+      "Player4": 143.382
+    },
+    "idleGruntTicks": 2154,
+    "encounters": {
+      "1:1": {
+        "stocks": 0,
+        "hits": 72,
+        "damage": 530.2420000000001
+      }
+    },
+    "aiSamples": 900,
+    "eligibleGruntTicks": 8164,
+    "wave": 1,
+    "minWindup": 0.4,
+    "flankRatio": 0.631578947368421,
+    "hits": {
+      "Player1": 17,
+      "Player2": 18,
+      "Player3": 19,
+      "Player4": 18
+    },
+    "actionDiversity": {
+      "byKind": {
+        "Warden": {
+          "passed": 4,
+          "eligible": 6,
+          "minDistinct": 1
+        },
+        "Pitcher": {
+          "passed": 3,
+          "eligible": 5,
+          "minDistinct": 1
+        },
+        "Leaper": {
+          "passed": 2,
+          "eligible": 4,
+          "minDistinct": 1
+        },
+        "Strider": {
+          "passed": 5,
+          "eligible": 6,
+          "minDistinct": 1
+        },
+        "Grappler": {
+          "passed": 2,
+          "eligible": 6,
+          "minDistinct": 0
+        },
+        "Husk": {
+          "passed": 4,
+          "eligible": 6,
+          "minDistinct": 1
+        }
+      },
+      "pendingWindows": 12,
+      "windows": [
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "Block",
+            "WardenKick"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "Block",
+            "WardenKick"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "Grab",
+            "Throw"
+          ],
+          "kind": "Grappler"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "Retreat",
+            "StriderJab",
+            "StriderSlide"
+          ],
+          "kind": "Strider"
+        },
+        {
+          "passed": false,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "Grab"
+          ],
+          "kind": "Grappler"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "Retreat",
+            "StriderJab",
+            "StriderSlide"
+          ],
+          "kind": "Strider"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "LeaperJab",
+            "LeaperVaultKick"
+          ],
+          "kind": "Leaper"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "HuskJab",
+            "HuskJumpKick"
+          ],
+          "kind": "Husk"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "PitcherShove",
+            "Retreat"
+          ],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "LeaperJab",
+            "LeaperVaultKick"
+          ],
+          "kind": "Leaper"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "HuskJab",
+            "HuskJumpKick"
+          ],
+          "kind": "Husk"
+        },
+        {
+          "passed": true,
+          "start": 1790239828.357751,
+          "duration": 30,
+          "actions": [
+            "PitcherShove",
+            "PitcherThrow",
+            "Retreat"
+          ],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "Block",
+            "WardenKick"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "Block",
+            "WardenKick"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "Grab",
+            "Throw"
+          ],
+          "kind": "Grappler"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "Retreat",
+            "StriderJab",
+            "StriderSlide"
+          ],
+          "kind": "Strider"
+        },
+        {
+          "passed": false,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "Grab"
+          ],
+          "kind": "Grappler"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "Retreat",
+            "StriderJab",
+            "StriderSlide"
+          ],
+          "kind": "Strider"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "HuskJab",
+            "HuskJumpKick"
+          ],
+          "kind": "Husk"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "HuskJab",
+            "HuskJumpKick"
+          ],
+          "kind": "Husk"
+        },
+        {
+          "passed": true,
+          "start": 1790239858.37236,
+          "duration": 30,
+          "actions": [
+            "PitcherThrow",
+            "Retreat"
+          ],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": false,
+          "start": 1790239869.3717,
+          "duration": 30,
+          "actions": [
+            "PitcherThrow"
+          ],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": false,
+          "start": 1790239876.855903,
+          "duration": 30,
+          "actions": [
+            "LeaperVaultKick"
+          ],
+          "kind": "Leaper"
+        },
+        {
+          "passed": false,
+          "start": 1790239877.072597,
+          "duration": 30,
+          "actions": [
+            "LeaperVaultKick"
+          ],
+          "kind": "Leaper"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [
+            "Block"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [
+            "Block"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [],
+          "kind": "Grappler"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [
+            "StriderSlide"
+          ],
+          "kind": "Strider"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [],
+          "kind": "Grappler"
+        },
+        {
+          "passed": true,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [
+            "Retreat",
+            "StriderSlide"
+          ],
+          "kind": "Strider"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [
+            "HuskJumpKick"
+          ],
+          "kind": "Husk"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [
+            "HuskJumpKick"
+          ],
+          "kind": "Husk"
+        },
+        {
+          "passed": false,
+          "start": 1790239888.42214,
+          "duration": 30,
+          "actions": [
+            "PitcherThrow"
+          ],
+          "kind": "Pitcher"
+        }
+      ],
+      "policy": "10Hz sampled proximity within 28 studs; actual attacks/block/evade/retreat/grab/throw; partial windows ineligible",
+      "windowSeconds": 30,
+      "partialWindows": 3
+    },
+    "schema": 1,
+    "rank": "not implemented"
+  }
+}

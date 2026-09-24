@@ -1,0 +1,22 @@
+return function()
+    local F=require(game.ServerScriptService.NightfallServer.EnemyFootwork)
+    local A=require(game.ReplicatedStorage.Nightfall.Shared.EnemyArchetypes)
+    local state={};local center=Vector3.new(90,3,0)
+    local function constrain(p)return Vector3.new(math.clamp(p.X,75,105),3,math.clamp(p.Z,-11,11))end
+    local goal=F.Goal(state,center,center,10,constrain)
+    assert((goal-center).Magnitude>=2.5,"Waiting step must create real travel distance")
+    assert(F.Direction(center,goal).Magnitude>.99,"Footwork requests physical movement")
+    local nextGoal=F.Goal(state,goal,center,10.3,constrain)
+    assert((nextGoal-goal).Magnitude>=2.5,"Arrival selects another meaningful waypoint")
+    assert(F.Direction(goal,goal)==Vector3.zero,"No fake input at coincident point")
+    local bounded=F.Goal({},Vector3.new(105,3,11),Vector3.new(105,3,11),20,constrain)
+    assert(bounded.X<=105 and bounded.Z<=11 and (bounded-Vector3.new(105,3,11)).Magnitude>=2.5,"Boundary footwork turns inward")
+    local husk=A.AfterMove("Husk","HuskJab")
+    assert(husk.retreat==.85 and husk.distance==12 and husk.nextMove=="HuskJumpKick","Husk backstep sets up real jump attack")
+    assert(A.AfterMove("Husk","HuskJumpKick").nextMove=="HuskJab","Husk closes with jab afterward")
+    assert(A.AfterMove("Strider","StriderJab").nextMove=="StriderSlide" and A.AfterMove("Strider","StriderSlide").nextMove=="StriderJab","Strider range variation")
+    assert(A.AfterMove("Leaper","LeaperJab").nextMove=="LeaperVaultKick" and A.AfterMove("Leaper","LeaperVaultKick").nextMove=="LeaperJab","Leaper cross-up then close hit")
+    assert(A.AfterMove("Pitcher","PitcherThrow").distance==20,"Pitcher backpedals after projectile")
+    assert(next(A.AfterMove("Warden","WardenKick"))==nil and next(A.AfterMove("Grappler","GrapplerGrab"))==nil,"Reactive guard/grab roles retain their policies")
+    return {physicalFootwork=true,boundaryTurn=true,spacingSequences=4,reactiveRolesUnchanged=true}
+end

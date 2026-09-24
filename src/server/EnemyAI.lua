@@ -1,6 +1,7 @@
 -- Server-owned movement and engagement state; damage remains in CombatService.
 local Director=require(script.Parent.AttackDirector)
 local DifficultyPolicy=require(script.Parent.DifficultyPolicy)
+local Footwork=require(script.Parent.EnemyFootwork)
 local Archetypes=require(game.ReplicatedStorage.Nightfall.Shared.EnemyArchetypes)
 local EnemyAI={}
 local ranges={HuskJab=6,HuskJumpKick=16,StriderSlide=17,StriderJab=6,GrapplerGrab=6,GrapplerThrow=6,
@@ -142,17 +143,19 @@ function EnemyAI.Step(t,c)
         end
         if t<(data.evadeUntil or 0) then state(model,data,"Evade");action(model,data,"Evade");h:Move(Vector3.zero);continue end
         if (archetype=="Pitcher" and distance<12) or t<(data.retreatUntil or 0) then
-            state(model,data,"Retreat");action(model,data,"Retreat");Director.Release(director,model);data.engaging=false
+            state(model,data,"Retreat");Director.Release(director,model);data.engaging=false
             local away=r.Position.X>=pr.Position.X and 1 or -1
             h.WalkSpeed=data.spec.Speed
-            local retreatGoal=Vector3.new(math.clamp(pr.Position.X+away*17,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(pr.Position.Z+(slot.serial%2==0 and 3 or -3),-11,11))
+            local velocity=r.AssemblyLinearVelocity or Vector3.zero
+            if velocity.X*away>.5 then action(model,data,"Retreat")end
+            local retreatGoal=Vector3.new(math.clamp(pr.Position.X+away*(data.retreatDistance or 17),c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(pr.Position.Z+(slot.serial%2==0 and 3 or -3),-11,11))
             h:MoveTo(c.SafePosition and c.SafePosition(retreatGoal) or retreatGoal)
             if archetype~="Pitcher" or t<data.attackAt or distance>7 then continue end
             -- A cornered ranged enemy can shove rather than retreat forever against a bound.
         end
         local pattern=data.phase==2 and data.spec.PhaseMoves or data.spec.Moves
         local moveName=pattern and pattern[data.moveIndex%#pattern+1] or "Melee"
-        if not elite then moveName=Archetypes.Select(archetype,distance,observed,data.moveIndex)
+        if not elite then moveName=data.nextMove or Archetypes.Select(archetype,distance,observed,data.moveIndex)
         else
             if not data.plannedMove or data.planTarget~=target or t>=(data.planUntil or 0) then
                 local lanePlayers=0
@@ -171,7 +174,7 @@ function EnemyAI.Step(t,c)
             data.engaging=false;data.lastAttackAt=t;state(model,data,"Attack")
             c.beginEnemyAttack(model,data,target,moveName,alive)
         else
-            local destination
+            local destination,holdFootwork
             if token then
                 data.engaging=true;state(model,data,"Engage")
                 destination=Vector3.new(pr.Position.X+(slot.offset.X<0 and -1 or 1)*(archetype=="Pitcher" and 17 or 4),r.Position.Y,pr.Position.Z)
@@ -181,11 +184,15 @@ function EnemyAI.Step(t,c)
                 local goal=pr.Position+offset
                 goal=Vector3.new(goal.X,r.Position.Y,goal.Z)
                 goal=c.SafePosition and c.SafePosition(goal) or goal
-                local nearSlot=(Vector3.new(goal.X,0,goal.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude<4
+                local slotDistance=(Vector3.new(goal.X,0,goal.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude
+                local nearSlot=slotDistance<5 or (data.aiState=="Hold" and slotDistance<8)
                 state(model,data,nearSlot and "Hold" or "Approach")
                 if nearSlot then
-                    -- Continuously change lane and range while waiting, never a stationary queue.
-                    goal+=Vector3.new(math.sin(t*2.1+slot.serial)*2.5,0,math.sin(t*1.6+slot.serial)*3)
+                    holdFootwork=true
+                    goal=Footwork.Goal(data,r.Position,goal,t,function(point)
+                        point=Vector3.new(math.clamp(point.X,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(point.Z,-11,11))
+                        return c.SafePosition and c.SafePosition(point) or point
+                    end)
                     if t>=(data.feintAt or t+1) then
                         data.feintAt=t+4+slot.serial%3
                         c.fx("EnemyFeint",r.Position,{targetModel=model,duration=.35,direction=data.facing,enemy=data.kind})
@@ -206,7 +213,8 @@ function EnemyAI.Step(t,c)
             end
             destination=Vector3.new(math.clamp(destination.X,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(destination.Z,-11,11))
             destination=c.SafePosition and c.SafePosition(destination) or destination
-            h.WalkSpeed=data.spec.Speed;h:MoveTo(destination)
+            h.WalkSpeed=data.spec.Speed
+            if holdFootwork then h:Move(Footwork.Direction(r.Position,destination),false) else h:MoveTo(destination)end
         end
     end
     for _,model in ipairs(Director.Grant(director,t,Director.Cap(#alive,profile.TokenBonus)))do

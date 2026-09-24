@@ -26,4 +26,21 @@ function A.Select(id,distance,observed,index)
     if id=="Brute" then return (distance>8 or index%2==0) and "BruteFlop" or "BruteSwing" end
     return "Melee"
 end
+-- Real spacing sequences after a resolved attack; no synthetic action labels.
+function A.AfterMove(id,move)
+    if id=="Husk" then
+        if move=="HuskJab" then return {retreat=.85,distance=12,nextMove="HuskJumpKick"}end
+        return {nextMove="HuskJab"}
+    elseif id=="Strider" then
+        if move=="StriderJab" then return {retreat=.75,distance=13,nextMove="StriderSlide"}end
+        return {retreat=1.2,distance=15,nextMove="StriderJab"}
+    elseif id=="Leaper" then
+        if move=="LeaperJab" then return {retreat=.65,distance=12,nextMove="LeaperVaultKick"}end
+        return {nextMove="LeaperJab"}
+    elseif id=="Pitcher" then
+        if move=="PitcherThrow" then return {retreat=.65,distance=20}end
+        return {retreat=1.3,distance=17,nextMove="PitcherThrow"}
+    end
+    return {}
+end
 return A

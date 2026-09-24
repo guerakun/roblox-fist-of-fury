@@ -1,0 +1,268 @@
+{
+  "maxMs": 0.6489162193057609,
+  "population": {
+    "elapsed": 97.83799860009458,
+    "alive": 4,
+    "enemies": 12
+  },
+  "passMeaning": "cpuTargetPassed requires numerical mean and capture population validity; not an overall launch gate",
+  "scope": "CurtainBreakEnemyAI",
+  "meanTargetPassed": true,
+  "cpuTargetPassed": true,
+  "measurement": "complete inclusive AI-step CPU scope durations from frozen MicroProfiler snapshot",
+  "targetMeanMs": 1.5,
+  "populationValidity": {
+    "valid": true,
+    "firstAbsoluteFrame": 5709,
+    "method": "Heartbeat plus barrier-change observations; mismatch latched from populated capture barrier",
+    "checks": 1069,
+    "mismatches": 0
+  },
+  "limit": "Desktop Studio server CPU only; boundary-partial scopes excluded, no GPU/phone/frame-rate certification.",
+  "calls": [
+    {
+      "ms": 0.539706855577748,
+      "frame": 1074,
+      "enterFrame": 1074,
+      "absoluteFrame": 6526
+    },
+    {
+      "ms": 0.3742478195697174,
+      "frame": 1080,
+      "enterFrame": 1080,
+      "absoluteFrame": 6532
+    },
+    {
+      "ms": 0.3460979835753619,
+      "frame": 1087,
+      "enterFrame": 1087,
+      "absoluteFrame": 6539
+    },
+    {
+      "ms": 0.3819977744171865,
+      "frame": 1094,
+      "enterFrame": 1094,
+      "absoluteFrame": 6546
+    },
+    {
+      "ms": 0.5369764459536555,
+      "frame": 1101,
+      "enterFrame": 1101,
+      "absoluteFrame": 6553
+    },
+    {
+      "ms": 0.5321868993902683,
+      "frame": 1108,
+      "enterFrame": 1108,
+      "absoluteFrame": 6560
+    },
+    {
+      "ms": 0.35930790661214473,
+      "frame": 1114,
+      "enterFrame": 1114,
+      "absoluteFrame": 6566
+    },
+    {
+      "ms": 0.4054576377361059,
+      "frame": 1121,
+      "enterFrame": 1121,
+      "absoluteFrame": 6573
+    },
+    {
+      "ms": 0.41510758151392224,
+      "frame": 1127,
+      "enterFrame": 1127,
+      "absoluteFrame": 6579
+    },
+    {
+      "ms": 0.39622769151131365,
+      "frame": 1134,
+      "enterFrame": 1134,
+      "absoluteFrame": 6586
+    },
+    {
+      "ms": 0.4359474600973101,
+      "frame": 1141,
+      "enterFrame": 1141,
+      "absoluteFrame": 6593
+    },
+    {
+      "ms": 0.4157775776104131,
+      "frame": 1147,
+      "enterFrame": 1147,
+      "absoluteFrame": 6599
+    },
+    {
+      "ms": 0.5742566542848522,
+      "frame": 1154,
+      "enterFrame": 1154,
+      "absoluteFrame": 6606
+    },
+    {
+      "ms": 0.38576775245266504,
+      "frame": 1160,
+      "enterFrame": 1160,
+      "absoluteFrame": 6612
+    },
+    {
+      "ms": 0.41391758844702053,
+      "frame": 1167,
+      "enterFrame": 1167,
+      "absoluteFrame": 6619
+    },
+    {
+      "ms": 0.3544579348688899,
+      "frame": 1173,
+      "enterFrame": 1173,
+      "absoluteFrame": 6625
+    },
+    {
+      "ms": 0.3656078699075067,
+      "frame": 1180,
+      "enterFrame": 1180,
+      "absoluteFrame": 6632
+    },
+    {
+      "ms": 0.4257275196403896,
+      "frame": 1187,
+      "enterFrame": 1187,
+      "absoluteFrame": 6639
+    },
+    {
+      "ms": 0.3768378044800329,
+      "frame": 1193,
+      "enterFrame": 1193,
+      "absoluteFrame": 6645
+    },
+    {
+      "ms": 0.4105576080228275,
+      "frame": 1199,
+      "enterFrame": 1199,
+      "absoluteFrame": 6651
+    },
+    {
+      "ms": 0.49819752294996533,
+      "frame": 1205,
+      "enterFrame": 1205,
+      "absoluteFrame": 6657
+    },
+    {
+      "ms": 0.40172765946758204,
+      "frame": 1211,
+      "enterFrame": 1211,
+      "absoluteFrame": 6663
+    },
+    {
+      "ms": 0.4090676167037657,
+      "frame": 1218,
+      "enterFrame": 1218,
+      "absoluteFrame": 6670
+    },
+    {
+      "ms": 0.4216375434692736,
+      "frame": 1224,
+      "enterFrame": 1224,
+      "absoluteFrame": 6676
+    },
+    {
+      "ms": 0.41791756514248846,
+      "frame": 1231,
+      "enterFrame": 1231,
+      "absoluteFrame": 6683
+    },
+    {
+      "ms": 0.44659739804899345,
+      "frame": 1237,
+      "enterFrame": 1237,
+      "absoluteFrame": 6689
+    },
+    {
+      "ms": 0.39572769442438016,
+      "frame": 1243,
+      "enterFrame": 1243,
+      "absoluteFrame": 6695
+    },
+    {
+      "ms": 0.6489162193057609,
+      "frame": 1249,
+      "enterFrame": 1249,
+      "absoluteFrame": 6701
+    },
+    {
+      "ms": 0.4128275947975055,
+      "frame": 1256,
+      "enterFrame": 1256,
+      "absoluteFrame": 6708
+    },
+    {
+      "ms": 0.34688797897271684,
+      "frame": 1263,
+      "enterFrame": 1263,
+      "absoluteFrame": 6715
+    },
+    {
+      "ms": 0.38808773893603643,
+      "frame": 1269,
+      "enterFrame": 1269,
+      "absoluteFrame": 6721
+    },
+    {
+      "ms": 0.38096778041810353,
+      "frame": 1275,
+      "enterFrame": 1275,
+      "absoluteFrame": 6727
+    },
+    {
+      "ms": 0.3868677460439187,
+      "frame": 1282,
+      "enterFrame": 1282,
+      "absoluteFrame": 6734
+    },
+    {
+      "ms": 0.38837773724645785,
+      "frame": 1288,
+      "enterFrame": 1288,
+      "absoluteFrame": 6740
+    },
+    {
+      "ms": 0.3587579098165179,
+      "frame": 1294,
+      "enterFrame": 1294,
+      "absoluteFrame": 6746
+    },
+    {
+      "ms": 0.35026795928038723,
+      "frame": 1301,
+      "enterFrame": 1301,
+      "absoluteFrame": 6753
+    },
+    {
+      "ms": 0.37092783891247905,
+      "frame": 1308,
+      "enterFrame": 1308,
+      "absoluteFrame": 6760
+    },
+    {
+      "ms": 0.36231788907548435,
+      "frame": 1315,
+      "enterFrame": 1315,
+      "absoluteFrame": 6767
+    },
+    {
+      "ms": 0.3762678078009287,
+      "frame": 1322,
+      "enterFrame": 1322,
+      "absoluteFrame": 6774
+    }
+  ],
+  "firstFrame": {
+    "id": 1069,
+    "absoluteId": 6521
+  },
+  "lastFrame": {
+    "id": 1324,
+    "absoluteId": 6776
+  },
+  "totalMs": 16.208515566482077,
+  "meanMs": 0.4156029632431302
+}

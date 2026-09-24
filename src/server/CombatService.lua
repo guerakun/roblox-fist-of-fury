@@ -218,7 +218,7 @@ function Combat.GetAIDiagnostics()
             moveDirection=h and vector(h.MoveDirection),walkTo=h and vector(h.WalkToPoint),canAttack=enemyVisible(model),target=target and vector(target.Position),
             targetId=slot and slot.target.UserId,slot=slot and vector(slot.offset),token=token~=nil,tokenRemaining=token and token.expires-t,
             attackIn=data.attackAt-t,recoveryIn=data.recoveryUntil-t,resolveIn=(data.resolveAt or 0)-t,attacking=data.attacking,
-            lastMove=data.lastMove,lastAttackAgo=data.lastAttackAt and t-data.lastAttackAt,retreatIn=(data.retreatUntil or 0)-t})
+            footworkGoal=vector(data.footworkGoal),nextMove=data.nextMove,lastMove=data.lastMove,lastAttackAgo=data.lastAttackAt and t-data.lastAttackAt,retreatIn=(data.retreatUntil or 0)-t})
     end
     return result
 end
@@ -663,7 +663,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
         end)
         return
     end
-    data.plannedMove=nil;data.lastMove=moveName
+    data.plannedMove=nil;data.nextMove=nil;data.lastMove=moveName
     if moveName==(data.spec.PhaseMoves or {})[1] then data.lastSignatureAt=t end
     if desperate then data.desperationUsed=true end
     local tellStyle=move.TellStyle or (data.spec.Role=="Grunt" and "Body" or "Floor")
@@ -772,7 +772,10 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
             impact(move.Volumes);impactVisual()
         end
         data.armoredUntil=0
-        if move.Retreat then data.retreatUntil=data.recoveryUntil+move.Retreat end
+        local followup=Archetypes.AfterMove(Archetypes.Id(data.kind,data.spec),moveName)
+        local retreat=followup.retreat or move.Retreat
+        if retreat then data.retreatUntil=data.recoveryUntil+retreat;data.retreatDistance=followup.distance or 17 end
+        data.nextMove=followup.nextMove
         attributes(model,data)
         task.delay(math.max(0,data.recoveryUntil-now()),function()
             if valid() then data.attacking=false;releaseGrab(model,true);AttackDirector.Release(aiDirector,model)end
