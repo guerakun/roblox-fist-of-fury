@@ -17,3 +17,17 @@ The station still completes the three-stage image baseline. Its tiled platform, 
 After the freeze, compare any proposed contrast changes with these unchanged originals. A separate world/presentation pass may reduce competition from decorative crossing/window/furnace values while preserving stage identity and keeping critical tells dominant. Input-mode and short-height HUD changes have their own scoped proposal; they do not authorize camera reframing. Evaluate toast placement against real action and telegraph locations before choosing a change. Do not weaken or hide critical warnings to make screenshots cleaner.
 
 A representative station combat still is now available alongside city and factory. Required follow-up remains motion/attack sequences, all three heroes in action, miniboss/boss warnings, four-player crowd/effect overlap, actual touch/controller reachability and minimum-device frame time. Still-image character size, a visible outline or a readable counter cannot substitute for those checks. Owner art approval and the original reference-quality target remain open.
+
+
+## City decoration palette checkpoint - source only
+
+Root authorized a bounded WorldBuilder color pass on disk while the installed M3 trial world remains frozen. Reinspection of the unchanged city image above supports reducing the broad crossing and lit-office-window values that compete with the small pale hero. The exact candidate edits are:
+
+| City decoration | Previous RGB | New RGB | Scope |
+|---|---|---|---|
+| CrosswalkStripe | 222,235,233 | 170,185,184 | Eight existing noncolliding paint strips at X52-94. |
+| Lit OfficeGlass | 91,124,153 | 70,96,119 | Existing randomly selected lit panes in the six authored city buildings; unchanged random sequence/count. |
+
+These are modest cool gray/blue color reductions, approximately one fifth per RGB channel, not measured luminance or screen contrast. City-local constants avoid changing the shared palette used by other districts. Unlit glass, signs/text, lamps and all light properties, global lighting, materials, part positions/sizes, transparency, collision/touch/query behavior, world bounds, heroes, VFX and telegraphs are unchanged. No station/factory changes accompany this pass.
+
+**Implemented in branch source; visual improvement unverified.** Root has not rebuilt, synchronized or captured the changed world for this note. Compare a matching normal-camera city view and short combat sequence against the frozen image after the trial baseline finishes, checking hero separation, warning dominance, crossing identity and sign legibility. Do not infer better motion comfort, device performance, fairness or reference-quality parity from darker source RGB values. The bright original is preserved above and remains the baseline.

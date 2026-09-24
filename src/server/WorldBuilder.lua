@@ -165,6 +165,9 @@ function WorldBuilder.Build()
 		end
 	end
 
+	-- City-only decorative values: leave signs, lamps and combat tells at their authored colors.
+	local cityLitGlass = Color3.fromRGB(70, 96, 119)
+	local cityCrosswalkPaint = Color3.fromRGB(170, 185, 184)
 	local function building(x, width, height, accent, name)
 		local facade = Color3.fromRGB(random:NextInteger(38, 56), random:NextInteger(44, 61), random:NextInteger(61, 82))
 		part(name, Vector3.new(width, height, 17), Vector3.new(x, height/2, -30), facade, architecture)
@@ -178,7 +181,7 @@ function WorldBuilder.Build()
 			for dx = -width/2+3.5, width/2-2, 5.5 do
 				part("WindowFrame", Vector3.new(4.2, 5.4, .3), Vector3.new(x+dx, y, -21.25), C.ink, architecture)
 				local lit = random:NextNumber() > .48
-				part("OfficeGlass", Vector3.new(3.7, 4.8, .2), Vector3.new(x+dx, y, -21.02), lit and Color3.fromRGB(91, 124, 153) or C.blue, architecture, lit and Enum.Material.Neon or Enum.Material.Glass)
+				part("OfficeGlass", Vector3.new(3.7, 4.8, .2), Vector3.new(x+dx, y, -21.02), lit and cityLitGlass or C.blue, architecture, lit and Enum.Material.Neon or Enum.Material.Glass)
 				part("WindowMullion", Vector3.new(.12, 4.8, .2), Vector3.new(x+dx, y, -20.85), C.ink, architecture)
 			end
 		end
@@ -201,7 +204,7 @@ function WorldBuilder.Build()
 	sign("NoodleShop", "らーめん    RAMEN", 16, 10.2, -20.1, 23, 3.5, C.amber, C.ink)
 	sign("NightMarket", "コンビニ  /  OPEN 24H", 145, 10.2, -20.1, 30, 3.5, C.cyan, C.ink)
 	for x = 52, 94, 6 do
-		part("CrosswalkStripe", Vector3.new(3.7, .045, 25), Vector3.new(x, .032, 0), C.white, streets)
+		part("CrosswalkStripe", Vector3.new(3.7, .045, 25), Vector3.new(x, .032, 0), cityCrosswalkPaint, streets)
 	end
 	for x = 0, 170, 20 do
 		if x < 45 or x > 101 then
