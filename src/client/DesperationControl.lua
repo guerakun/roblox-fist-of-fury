@@ -26,7 +26,9 @@ function Control:Fire()
 end
 function Control:Handle(action,inputState)
     if action=="Special"and(inputState==Enum.UserInputState.End or inputState==Enum.UserInputState.Cancel)then
-        local armed=self.armed self:Reset()return armed
+        -- An unrelated keyboard/controller release cannot cancel an owned touch hold.
+        if not self.armed then return false end
+        self:Reset()return true
     end
     if inputState~=Enum.UserInputState.Begin then return false end
     if action=="Special"and self:Available()then

@@ -14,6 +14,10 @@ function HUD.new(options)
     local pointer=nil local connections={}
     local function connect(signal,fn)table.insert(connections,signal:Connect(fn))end
     connect(button.InputBegan,function(input)
+        if options.inputMode then
+            options.inputMode:Observe(input.UserInputType.Name,input.KeyCode.Name,input.Position.Magnitude,input)
+            if not options.inputMode:CanBegin(input.UserInputType.Name)then return end
+        end
         if (input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1)
             and control:TouchBegin()then pointer=input end
     end)

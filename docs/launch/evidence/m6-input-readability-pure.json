@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-24",
+  "scope": "Seven isolated injected suites in idle hub Studio Edit; policy/controllers and safe-canvas geometry only.",
+  "results": {
+    "FocusGuard": {
+      "endCancel": true,
+      "windowReset": true,
+      "passed": true,
+      "textRelease": true,
+      "releases": 8,
+      "disconnect": true,
+      "physicalInputVerified": false,
+      "returnGates": true,
+      "modalReset": true,
+      "characterReset": true
+    },
+    "InputGesture": {
+      "paidActions": 2,
+      "physicalInputVerified": false,
+      "checks": 19,
+      "reviveMessages": 2,
+      "passed": true
+    },
+    "ReviveControl": {
+      "interruptionCancel": true,
+      "expiryCancel": true,
+      "focusCancel": true,
+      "passed": true,
+      "requests": 24,
+      "duplicateBegin": false,
+      "serverProgressOnly": true,
+      "explicitFalseClear": true,
+      "targetSwitchCancel": true,
+      "lifeAndStatusCancel": true
+    },
+    "CompactHUDLayout": {
+      "rescueStates": 2,
+      "physicalInputVerified": false,
+      "checks": 394,
+      "viewports": 4,
+      "passed": true,
+      "modes": 3
+    },
+    "DesperationControl": {
+      "noRepeat": true,
+      "orderedChord": true,
+      "focusAndLifeCancel": true,
+      "checks": 29,
+      "normalActionsImmediate": true,
+      "shortTapFree": true,
+      "passed": true,
+      "requests": 2
+    },
+    "InputMode": {
+      "physicalInputVerified": false,
+      "passed": true,
+      "checks": 23
+    },
+    "InputModeAdapter": {
+      "physicalInputVerified": false,
+      "syntheticServiceEvents": true,
+      "passed": true,
+      "checks": 13
+    }
+  },
+  "countedChecks": 478,
+  "otherRegressions": "ReviveControl emitted24 test requests; FocusGuard observed8release callbacks. These counts are not added to assertion total.",
+  "files": {
+    "src/client/InputMode.lua": "9ae6ab49ac378b0a9e787c294ecfc951e8fd033b14ae039b947ab14345b171e5",
+    "src/client/CompactHUDLayout.lua": "112286621d40bb4410f191347a6f3c291e79493a2cbd7654d20c58ffee8b4fb6",
+    "src/client/DesperationControl.lua": "d22173b7c27a029ffb19a9303a5ec237620bb924a56f98d11acf0c2f979705ff",
+    "src/client/ReviveControl.lua": "41dc65f1e14f0050d441f0f4cd38fb75d452cbabae9ed8856278c7a89d591e40",
+    "src/client/FocusGuard.lua": "41b15216a9186cd320b779cfd42ca2755dfbd1b6bc3fb40749d9fedc78f9a4a2",
+    "tests/InputMode.spec.lua": "4aa6b3249220678835614f0553a8f580714c77030d80a05a0ca6a147377f974d",
+    "tests/InputModeAdapter.spec.lua": "57f01c5bca665f4d992cfb47faa89aee0372915597613a1efe88680a3e00a83a",
+    "tests/CompactHUDLayout.spec.lua": "3f27b4ba01c2e4245934aa23591f0869a6985f3e246eeef66f6b1d9923a0d4f5",
+    "tests/InputGesture.spec.lua": "9a720113bcda85fd944bd9779076e56d7fc67fa4cc74c14ba624b794da072603",
+    "tests/DesperationControl.spec.lua": "ed2b4a8c81cec3182a28290409305ca0eff7f6be06457ba7124822a9407edff9",
+    "tests/ReviveControl.spec.lua": "bb4a72baa67db61355ba5b23b587505522f0efc4ab513b0a449c19bdfba1b492",
+    "tests/FocusGuard.spec.lua": "14a04a29f8b5f2fc6a5359b87a374779de28335373b3c3542b75fd794435adcc"
+  },
+  "review": "Combat gesture/lifecycle source review and world final layout review PASS after fixing toast overlap and short-touch hero choice.",
+  "sourceIPGate": {
+    "files": 233,
+    "prohibitedMatches": 0
+  },
+  "integrationVerified": false,
+  "physicalInputVerified": false,
+  "requiredNext": "After frozen15, actual InputReadabilityClient widgets and full Main capture at measured safe-canvas size; physical phone/gamepad owner gate remains."
+}

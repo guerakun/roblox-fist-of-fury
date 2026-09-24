@@ -1,0 +1,37 @@
+-- Pure policy only; accepts exact-source module injected by root in idle Edit.
+return function(Mode)
+    Mode=Mode or require(game.Players.LocalPlayer.PlayerScripts.NightfallClient.InputMode)
+    local n=0
+    local function check(value,message)n+=1 assert(value,message)end
+    local mode=Mode.new({keyboard=true,touch=true,gamepad=true})
+    check(mode:Get()=="Keyboard","Touch capability does not force touch layout")
+    check(mode:Captions()[1]=="J"and mode:Captions()[5]=="HOLD F","Keyboard captions")
+    local transitions={}
+    local sub=mode:Subscribe(function(value,previous)table.insert(transitions,{value,previous})end)
+    mode:Observe("MouseMovement","Unknown",90)check(mode:Get()=="Keyboard","Mouse move ignored")
+    mode:Observe("Gamepad1","Thumbstick1",.15)check(mode:Get()=="Keyboard","Stick drift ignored")
+    mode:Observe("Gamepad1","Thumbstick1",.16)check(mode:Get()=="Gamepad","Meaningful stick selects gamepad")
+    check(mode:Captions()[1]=="X","Controller captions")
+    mode:Observe("MouseMovement","Unknown",900)check(mode:Get()=="Gamepad","Mouse noise cannot steal controller")
+    mode:Observe("MouseButton1","Unknown",0)check(mode:Get()=="Keyboard","Explicit mouse click")
+    mode:Observe("Touch","Unknown",0,"move")check(mode:Get()=="Touch","Touch restores immediately")
+    check(mode:Captions()[1]=="TAP"and mode:Captions()[5]=="HOLD","Touch captions")
+    mode:Observe("Touch","Unknown",0,"revive")
+    mode:Observe("Keyboard","J",0)check(mode:Get()=="Touch"and mode.pending=="Keyboard","Held touch owns layout")
+    mode:EndPointer("move")check(mode:Get()=="Touch","Other pointer still owns gesture")
+    mode:EndPointer("revive")check(mode:Get()=="Keyboard","Last End applies pending transition")
+    mode:Observe("Touch","Unknown",0,"guard")mode:Observe("Gamepad1","ButtonX",0)
+    mode:ClearPointers()check(mode:Get()=="Touch"and mode.pending==nil and next(mode.pointers)==nil,"Focus/life discards deferred intent")
+    mode:Observe("Gamepad1","ButtonX",0)check(mode:Get()=="Gamepad","Fresh input works after reset")
+    mode:Capabilities({keyboard=true,touch=true,gamepad=false})check(mode:Get()=="Keyboard","Controller disconnect fallback")
+    local phone=Mode.new({keyboard=false,touch=true,gamepad=true},"Gamepad")
+    check(phone:Get()=="Gamepad","Controller beats phone touch fallback")
+    phone:Capabilities({keyboard=false,touch=true,gamepad=false})check(phone:Get()=="Touch","Phone disconnect fallback")
+    phone:Capabilities({keyboard=true,touch=false,gamepad=false})check(phone:Get()=="Keyboard","Touch capability departure")
+    mode:Observe("Touch","Unknown",0,"desperation")mode:Observe("Gamepad1","ButtonY",0)
+    mode:EndPointer("desperation")check(mode:Get()=="Gamepad","Cancel follows same end path")
+    local before=#transitions sub.Disconnect()mode:Request("Keyboard")check(#transitions==before,"Disconnected subscriber")
+    check(Mode.new({touch=true}):Get()=="Touch","Touch-only initial fallback")
+    check(Mode.new({gamepad=true}):Get()=="Gamepad","Controller-only fallback")
+    return {passed=true,checks=n,physicalInputVerified=false}
+end

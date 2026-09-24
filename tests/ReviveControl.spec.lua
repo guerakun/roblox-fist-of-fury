@@ -1,8 +1,10 @@
 -- Deterministic hold intent fixture; no simulated progress can complete a revive.
-return function()
+return function(Control)
+    if not Control then
     local module=game.ServerScriptService:FindFirstChild("ReviveControl")
     if not module then module=game.Players.LocalPlayer.PlayerScripts.NightfallClient.ReviveControl end
-    local Control=require(module)
+    Control=require(module)
+    end
     local requests={}local blocked=false
     local control=Control.new(function(action,payload)table.insert(requests,{action=action,payload=payload})end,function()return blocked end)
     local function state(target,channel,canStart,progress)

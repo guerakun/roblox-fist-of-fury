@@ -34,21 +34,22 @@ function HUD.new(options)
         Font=Enum.Font.GothamBold,TextSize=12,TextWrapped=true,Size=UDim2.fromOffset(290,50)},options.parent)
     make("UICorner",{CornerRadius=UDim.new(0,7)},downed)
     local touchInput=nil
+    local keyInput=nil
     local control,guard
     control=Control.new(function(action,payload)options.actionRemote:FireServer(action,payload)end,
         function()return guard and guard:Blocked()or false end)
     guard=FocusGuard.new({input=UserInputService,player=player,clearHeld=function()
-        touchInput=nil control:Cancel()
+        touchInput=nil keyInput=nil control:Cancel()
     end})
     local deathConnection=nil
     local childConnection=nil
     local function characterReady(character)
-        control:Cancel()touchInput=nil
+        control:Cancel()touchInput=nil keyInput=nil
         if deathConnection then deathConnection:Disconnect()deathConnection=nil end
         if childConnection then childConnection:Disconnect()childConnection=nil end
         local function bindHumanoid(humanoid)
             if not humanoid:IsA("Humanoid") or deathConnection then return end
-            deathConnection=humanoid.Died:Connect(function()touchInput=nil control:Cancel()end)
+            deathConnection=humanoid.Died:Connect(function()touchInput=nil keyInput=nil control:Cancel()end)
         end
         local humanoid=character:FindFirstChildOfClass("Humanoid")
         if humanoid then bindHumanoid(humanoid)end
@@ -57,35 +58,45 @@ function HUD.new(options)
     connect(player.CharacterAdded,characterReady)
     if player.Character then characterReady(player.Character)end
     connect(button.InputBegan,function(input)
+        if options.inputMode then
+            options.inputMode:Observe(input.UserInputType.Name,input.KeyCode.Name,input.Position.Magnitude,input)
+            if not options.inputMode:CanBegin(input.UserInputType.Name)then return end
+        end
         if input.UserInputType~=Enum.UserInputType.Touch and input.UserInputType~=Enum.UserInputType.MouseButton1 then return end
         if control:Begin()then touchInput=input end
     end)
     connect(UserInputService.InputEnded,function(input)
-        if input==touchInput then touchInput=nil control:Cancel()end
+        if input==touchInput then touchInput=nil keyInput=nil control:Cancel()end
     end)
     connect(UserInputService.InputChanged,function(input)
-        if input==touchInput and input.UserInputState==Enum.UserInputState.Cancel then touchInput=nil control:Cancel()end
+        if input==touchInput and input.UserInputState==Enum.UserInputState.Cancel then touchInput=nil keyInput=nil control:Cancel()end
     end)
-    ContextActionService:BindActionAtPriority(actionName,function(_,state)
-        if state==Enum.UserInputState.End or state==Enum.UserInputState.Cancel then
-            local held=control:Cancel()return held and Enum.ContextActionResult.Sink or Enum.ContextActionResult.Pass
+    ContextActionService:BindActionAtPriority(actionName,function(_,state,input)
+        if state==Enum.UserInputState.Begin and options.inputMode and input then
+            options.inputMode:Observe(input.UserInputType.Name,input.KeyCode.Name,input.Position.Magnitude)
         end
-        if state==Enum.UserInputState.Begin and control:Begin()then return Enum.ContextActionResult.Sink end
+        if state==Enum.UserInputState.End or state==Enum.UserInputState.Cancel then
+            if not keyInput or not input or input.KeyCode~=keyInput then return Enum.ContextActionResult.Pass end
+            keyInput=nil local held=control:Cancel()return held and Enum.ContextActionResult.Sink or Enum.ContextActionResult.Pass
+        end
+        if state==Enum.UserInputState.Begin and options.inputMode and input and not options.inputMode:CanBegin(input.UserInputType.Name)then return Enum.ContextActionResult.Sink end
+        if state==Enum.UserInputState.Begin and not touchInput and control:Begin()then keyInput=input and input.KeyCode return Enum.ContextActionResult.Sink end
         return Enum.ContextActionResult.Pass
     end,false,3000,Enum.KeyCode.V,Enum.KeyCode.ButtonL3)
     local api={button=button,downed=downed,control=control}
     local snapshot={}
+    function api.CancelInput() touchInput=nil keyInput=nil control:Cancel() end
     function api.Update(state)
         snapshot=state control:Update(state)
     end
-    function api.Render(width,touch,gamepad,shareButton)
+    function api.Render(width,touch,gamepad,shareButton,compactBottom)
         control:Update(snapshot)
         local visible=control:Available()and not guard:Blocked()
         button.Visible=visible
         downed.Visible=snapshot.downed==true and snapshot.status~="Defeat" and snapshot.status~="Victory" and not guard:Blocked()
-        local bottom=touch and -18 or -104
+        local bottom=compactBottom or (touch and -18 or -104)
         local shareVisible=shareButton.Visible
-        local reserve=touch and (visible or shareVisible or downed.Visible)
+        local reserve=(touch or compactBottom~=nil) and (visible or shareVisible or downed.Visible)
         if player:GetAttribute(reserveAttribute)~=reserve then player:SetAttribute(reserveAttribute,reserve)end
         local cell=math.min(174,math.max(120,(width-36)/2))
         button.Size=UDim2.fromOffset(cell,50)

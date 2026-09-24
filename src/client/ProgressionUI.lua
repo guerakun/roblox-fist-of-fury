@@ -28,7 +28,10 @@ local function button(parent,value,position,dimensions,callback)
     corners(b); b.Activated:Connect(callback)
     return b
 end
-function UI.Init()
+function UI.Init(options)
+    options=options or {}
+    local inputMode=options.inputMode or require(script.Parent.InputMode).Attach(UserInputService)
+    local CompactHUDLayout=require(script.Parent.CompactHUDLayout)
     if initialized then return end
     initialized=true
     local player=Players.LocalPlayer
@@ -64,11 +67,18 @@ function UI.Init()
     local toast=make("Frame",{Visible=false,AnchorPoint=Vector2.new(.5,0),Position=UDim2.new(.5,0,0,60),Size=UDim2.fromOffset(390,38),BackgroundColor3=C.panel,BorderSizePixel=0},gui)
     corners(toast)
     local toastText=text(toast,"",12,C.cyan,UDim2.fromOffset(12,4),UDim2.new(1,-24,1,-8))
+    local noticeActive=false
+    local function updateNoticeVisibility()
+        local size=gui.AbsoluteSize
+        local _,visible=CompactHUDLayout.ToastVisibility(size.X<650 or size.Y<450,player:GetAttribute("CriticalWarningVisible"),noticeActive)
+        toast.Visible=visible
+    end
+    player:GetAttributeChangedSignal("CriticalWarningVisible"):Connect(updateNoticeVisibility)
     local function notify(message)
         noticeSerial+=1
         local serial=noticeSerial
-        toastText.Text=message;toast.Visible=true
-        task.delay(3.8,function()if serial==noticeSerial then toast.Visible=false end end)
+        toastText.Text=message;noticeActive=true;player:SetAttribute("ProgressionNoticeActive",true);updateNoticeVisibility()
+        task.delay(3.8,function()if serial==noticeSerial then noticeActive=false;player:SetAttribute("ProgressionNoticeActive",false);updateNoticeVisibility() end end)
     end
     local function send(action,value) remote:FireServer(action,value) end
     local function row(height)
@@ -198,7 +208,7 @@ function UI.Init()
         if open then
             ContextActionService:BindActionAtPriority("JournalBack",function(_,state) if state==Enum.UserInputState.Begin then setOpen(false) end return Enum.ContextActionResult.Sink end,false,4000,Enum.KeyCode.ButtonB)
             send("Request");render()
-            if UserInputService:GetLastInputType().Name:match("Gamepad") then task.defer(function()if overlay.Visible then GuiService.SelectedObject=closeButton end end) end
+            if inputMode:Get()=="Gamepad" then task.defer(function()if overlay.Visible then GuiService.SelectedObject=closeButton end end) end
         else
             ContextActionService:UnbindAction("JournalBack")
             if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(gui) then GuiService.SelectedObject=nil end
@@ -211,7 +221,7 @@ function UI.Init()
         if view.X < 1 or view.Y < 1 then view=camera.ViewportSize end
         local insetTop=0
         local height=math.max(160,math.min(600,view.Y-insetTop-16))
-        local touch=UserInputService.TouchEnabled
+        local touch=inputMode:Get()=="Touch"
         local width=math.max(280,math.min(820,view.X-24))
         local nextCompact=width<560
         local layoutChanged=compactLayout~=nextCompact
@@ -241,10 +251,22 @@ function UI.Init()
         -- Compute row mode from the requested width, not a stale AbsoluteSize.
         -- render() preserves the active tab's scroll position and selection key.
         if layoutChanged and overlay.Visible then render() end
+        openButton.AnchorPoint=Vector2.new(.5,0)
+        openButton.Text=inputMode:Get()=="Gamepad"and "PROGRESS L3"or touch and "PROGRESS"or "PROGRESS [P]"
+        openButton.TextSize=12
         openButton.Position=UDim2.new(.5,54,0,touch and view.X>=550 and 10 or view.X<650 and 100 or 20)
         openButton.Size=UDim2.fromOffset(96,touch and 44 or 32)
+        local compact=CompactHUDLayout.Compute(view.X,view.Y,inputMode:Get(),false,player:GetAttribute("CompactHeroChoicesVisible")==true)
+        if compact then CompactHUDLayout.Place(openButton,compact.progress); openButton.Text="PROG"; openButton.TextSize=9 end
         toast.Size=UDim2.fromOffset(math.max(250,math.min(440,view.X-28)),42)
+        toast.AnchorPoint=Vector2.new(.5,0)
         toast.Position=UDim2.new(.5,0,0,view.X<650 and 136 or 60)
+        toastText.TextSize=12; toastText.Position=UDim2.fromOffset(12,4);toastText.Size=UDim2.new(1,-24,1,-8)
+        if compact then
+            CompactHUDLayout.Place(toast,compact.toast);toastText.TextSize=10
+            toastText.Position=UDim2.fromOffset(6,0);toastText.Size=UDim2.new(1,-12,1,0)
+        end
+        updateNoticeVisibility()
     end
     UserInputService.InputBegan:Connect(function(input,processed)
         if processed or UserInputService:GetFocusedTextBox() then return end
@@ -277,9 +299,14 @@ function UI.Init()
         if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize) end
         resize()
     end)
-    gui.Destroying:Connect(function()player:SetAttribute("MenuOpen",false)end)
+    gui.Destroying:Connect(function()player:SetAttribute("MenuOpen",false);player:SetAttribute("ProgressionNoticeActive",false)end)
     gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
-    UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(function()resize();if overlay.Visible then render() end end)
+    player:GetAttributeChangedSignal("CompactHeroChoicesVisible"):Connect(resize)
+    inputMode:Subscribe(function()
+        resize(); if overlay.Visible then render() end
+        if overlay.Visible and inputMode:Get()=="Gamepad"then task.defer(function()if overlay.Visible then GuiService.SelectedObject=closeButton end end)
+        elseif GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(gui)then GuiService.SelectedObject=nil end
+    end)
     resize();send("Request")
 end
 return UI

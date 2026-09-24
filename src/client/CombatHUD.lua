@@ -7,6 +7,7 @@ local GuiService = game:GetService("GuiService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Nightfall"):WaitForChild("Shared"):WaitForChild("Config"))
+local CompactHUDLayout = require(script.Parent.CompactHUDLayout)
 local ReviveHUD = require(script.Parent.ReviveHUD)
 local DistrictHUD = require(script.Parent.DistrictHUD)
 local HUD = {}
@@ -21,12 +22,9 @@ local function corners(item: Instance, radius: number)
 end
 function HUD.new(options: any): any
     local player = Players.LocalPlayer
-    local function gamepadActive()
-        return string.find(UserInputService:GetLastInputType().Name, "Gamepad") ~= nil
-    end
-    local function touchActive()
-        return UserInputService:GetLastInputType() == Enum.UserInputType.Touch or (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled)
-    end
+    local inputMode = options.inputMode or require(script.Parent.InputMode).Attach(UserInputService)
+    local function gamepadActive() return inputMode:Get() == "Gamepad" end
+    local function touchActive() return inputMode:Get() == "Touch" end
     local function visiblySelectable(target: GuiObject?): boolean
         if not target or not target.Parent or not target.Selectable or not target:IsDescendantOf(player:WaitForChild("PlayerGui")) then return false end
         local current: Instance? = target
@@ -74,7 +72,8 @@ function HUD.new(options: any): any
     local cardSerial = 0
     local cardTweens: {Tween} = {}
     local cardExpires = 0
-    local touch = UserInputService.TouchEnabled
+    local touch = touchActive()
+    local compactLayout = nil
 
     local bossPanel = make("Frame", {Name = "BossMeter", Visible = false, AnchorPoint = Vector2.new(0.5, 0),
         Position = UDim2.new(0.5, 0, 0, 112), Size = UDim2.fromOffset(448, 77),
@@ -188,7 +187,7 @@ function HUD.new(options: any): any
     rescueLabel.TextXAlignment = Enum.TextXAlignment.Center
     local rescueName = text(rescueButton, "", 10, colors.text, UDim2.fromOffset(8, 27), UDim2.new(1, -16, 0, 18))
     rescueName.TextXAlignment = Enum.TextXAlignment.Center; rescueName.TextTruncate = Enum.TextTruncate.AtEnd
-    local reviveHUD = ReviveHUD.new({player=player, parent=safeCanvas, colors=colors, actionRemote=options.actionRemote})
+    local reviveHUD = ReviveHUD.new({inputMode=inputMode,player=player, parent=safeCanvas, colors=colors, actionRemote=options.actionRemote})
     local districtHUD = DistrictHUD.new({player=player, parent=safeCanvas, colors=colors})
     local lastRescueRequest = 0
     local function shareStock()
@@ -423,7 +422,9 @@ function HUD.new(options: any): any
         local camera = workspace.CurrentCamera
         if not camera then return end
         local width, height = safeDimensions(camera)
-        touch = UserInputService.TouchEnabled
+        touch = touchActive()
+        compactLayout = CompactHUDLayout.Compute(width,height,inputMode:Get(),false,snapshot.status=="Intermission"or snapshot.status=="Traverse"or snapshot.status=="Advance")
+        bossPanel.AnchorPoint=Vector2.new(.5,0); rallyBanner.AnchorPoint=Vector2.new(.5,0); warning.AnchorPoint=Vector2.new(.5,1); settingsButton.AnchorPoint=Vector2.new(.5,0)
         local compact = width < 650
         lobbyScale.Scale = math.min(1, (width - 24) / 680)
         lobby.Size = UDim2.fromOffset(680, math.min(490, (height - 24) / lobbyScale.Scale))
@@ -455,6 +456,22 @@ function HUD.new(options: any): any
         warningLabel.TextSize = touch and 12 or 16; warningLabel.Position = UDim2.fromOffset(14, touch and 1 or 5)
         warningDetail.TextSize = touch and 8 or 10; warningDetail.Position = UDim2.fromOffset(14, touch and 22 or 28)
         settingsButton.Text = gamepadActive() and "SETTINGS BACK" or touch and "SETTINGS" or "SETTINGS  O"
+        bossRole.Visible=true
+        warningLabel.Size=UDim2.new(1,-28,0,23); warningDetail.Size=UDim2.new(1,-28,0,14)
+        rallyTitle.Size=UDim2.new(1,-28,0,25); rallyDetail.Size=UDim2.new(1,-28,0,17)
+        if compactLayout then
+            CompactHUDLayout.Place(settingsButton,compactLayout.settings); settingsButton.Text="SET"; settingsButton.TextSize=10
+            CompactHUDLayout.Place(bossPanel,compactLayout.boss); CompactHUDLayout.Place(rallyBanner,compactLayout.boss)
+            CompactHUDLayout.Place(warning,compactLayout.warning)
+            bossRole.Visible=false; bossName.Position=UDim2.fromOffset(6,0); bossName.Size=UDim2.new(1,-104,0,24); bossName.TextSize=12
+            bossPhase.Position=UDim2.new(1,-92,0,0); bossValue.Position=UDim2.new(1,-92,0,13)
+            bossTrack.Position=UDim2.fromOffset(6,26); bossTrack.Size=UDim2.new(1,-12,0,4)
+            poiseTrack.Position=UDim2.fromOffset(6,32); poiseTrack.Size=UDim2.new(1,-12,0,2)
+            rallyTitle.Position=UDim2.fromOffset(6,0); rallyTitle.TextSize=10; rallyTitle.Size=UDim2.new(1,-12,0,18)
+            rallyDetail.Position=UDim2.fromOffset(6,18); rallyDetail.TextSize=8; rallyDetail.Size=UDim2.new(1,-12,0,16)
+            warningLabel.Position=UDim2.fromOffset(6,0); warningLabel.TextSize=11; warningLabel.Size=UDim2.new(1,-12,0,14)
+            warningDetail.Position=UDim2.fromOffset(6,14); warningDetail.TextSize=8; warningDetail.Size=UDim2.new(1,-12,0,12)
+        else settingsButton.TextSize=13 end
     end
     function api.updateSnapshot(state: any)
         snapshot = state
@@ -542,7 +559,7 @@ function HUD.new(options: any): any
         rescueButton.Visible = snapshot.canShareStock == true and type(snapshot.rescueTarget) == "table"
             and not player:GetAttribute("MenuOpen") and not player:GetAttribute("SettingsOpen")
         if rescueButton.Visible then rescueName.Text = "TO " .. string.upper(snapshot.rescueTarget.name or "TEAMMATE") end
-        reviveHUD.Render(width, touch, gamepadActive(), rescueButton)
+        reviveHUD.Render(width, touch, gamepadActive(), rescueButton, compactLayout and -8 or nil)
         districtHUD.Render(width, height, touch, options.playerPanel)
         local rallyActive = (snapshot.status == "Traverse" or snapshot.status == "Advance") and type(snapshot.targetX) == "number"
         rallyBanner.Visible = rallyActive
@@ -605,8 +622,9 @@ function HUD.new(options: any): any
             end
         end
         for index = markerIndex + 1, #dangerMarkers do dangerMarkers[index].frame.Visible = false end
-        if touch then warning.Position = UDim2.new(0.5, 0, 0, bossPanel.Visible and 163 or 106) end
+        if touch and not compactLayout then warning.Position = UDim2.new(0.5, 0, 0, bossPanel.Visible and 163 or 106) end
         warning.Visible = highest ~= nil and snapshot.status ~= "Defeat" and snapshot.status ~= "Victory"
+        if player:GetAttribute("CriticalWarningVisible")~=warning.Visible then player:SetAttribute("CriticalWarningVisible",warning.Visible) end
         if highest then
             local event = highest.event
             local action = event.jumpable and "JUMP" or "DODGE"
@@ -648,20 +666,21 @@ function HUD.new(options: any): any
             end
         end
     end
-    UserInputService.LastInputTypeChanged:Connect(function()
+    inputMode:Subscribe(function()
+        reviveHUD.CancelInput()
         api.resize()
         if snapshot.status == "Waiting" then api.updateSnapshot(snapshot) end
         if gamepadActive() then
             if shade.Visible then focusWhenRendered(settingsRows[1].first)
-            elseif lobbyShade.Visible and not player:GetAttribute("MenuOpen") then focusWhenRendered(readyButton) end
+            elseif lobbyShade.Visible and not player:GetAttribute("MenuOpen") then focusWhenRendered(readyButton)
+            elseif not player:GetAttribute("MenuOpen") then focusWhenRendered(settingsButton) end
         else
             local selected = GuiService.SelectedObject
-            if selected and (selected:IsDescendantOf(menu) or selected:IsDescendantOf(lobby)) then GuiService.SelectedObject = nil end
+            if selected and selected:IsDescendantOf(gui) then GuiService.SelectedObject = nil end
         end
     end)
     api.resize()
     safeCanvas:GetPropertyChangedSignal("AbsoluteSize"):Connect(api.resize)
-    UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(api.resize)
     return api
 end
 return HUD

@@ -1,10 +1,12 @@
 --!strict
 -- Nightfall client: input, presentation, and camera only. Damage stays on the server.
+local CompactHUDLayout = require(script.Parent:WaitForChild("CompactHUDLayout"))
 local RescueTouchLayout = require(script.Parent:WaitForChild("RescueTouchLayout"))
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local inputMode = require(script.Parent:WaitForChild("InputMode")).Attach(UserInputService)
 local ContextActionService = game:GetService("ContextActionService")
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
@@ -59,6 +61,7 @@ local desperationHintActive = false
 local localBlocking = false
 local touchInput: InputObject? = nil
 local blockInput: InputObject? = nil
+local blockKey: Enum.KeyCode? = nil
 local touchKnob: Frame? = nil
 local locomotionStart = os.clock()
 local tracks: {[string]: AnimationTrack} = {}
@@ -75,13 +78,14 @@ local stageAudio = require(script.Parent:WaitForChild("StageAudio")).new(prefere
 stageAudio.Update(snapshot)
 local function releaseBlock()
     localBlocking = false
-    blockInput = nil
+    blockInput = nil; blockKey = nil
     actionRemote:FireServer("Block", {held = false})
 end
 local actionCapabilities = ActionCapabilities.new(releaseBlock)
 local focusGuard = FocusGuard.new({input = UserInputService, player = player, releaseBlock = releaseBlock,
     clearHeld = function()
         heldKeys = {}; gamepadMove = Vector2.zero; touchMove = Vector2.zero; touchInput = nil
+        inputMode:ClearPointers()
         if desperationControl then desperationControl:Reset() end
         if touchKnob then touchKnob.Position = UDim2.fromScale(.5, .5) end
     end})
@@ -194,9 +198,17 @@ moveName.TextXAlignment = Enum.TextXAlignment.Right
 local toastLabel = label(canvas, "", 22, COLORS.text, UDim2.new(0.5, -280, 0, 139), UDim2.fromOffset(560, 35))
 toastLabel.TextXAlignment = Enum.TextXAlignment.Center
 local toastSerial = 0
+local function updateToastVisibility()
+    local size=canvas.AbsoluteSize
+    local visible=CompactHUDLayout.ToastVisibility(size.X<650 or size.Y<450,player:GetAttribute("CriticalWarningVisible"),player:GetAttribute("ProgressionNoticeActive"))
+    toastLabel.Visible=visible
+end
+player:GetAttributeChangedSignal("CriticalWarningVisible"):Connect(updateToastVisibility)
+player:GetAttributeChangedSignal("ProgressionNoticeActive"):Connect(updateToastVisibility)
 local function toast(text: string, color: Color3?)
     toastSerial += 1
     local token = toastSerial
+    updateToastVisibility()
     toastLabel.Text = text; toastLabel.TextColor3 = color or COLORS.text; toastLabel.TextTransparency = 0
     task.delay(3, function()
         if toastSerial == token then TweenService:Create(toastLabel, TweenInfo.new(0.6), {TextTransparency = 1}):Play() end
@@ -216,29 +228,26 @@ round(retry, 7)
 retry.Activated:Connect(function() actionRemote:FireServer("Restart", {}) end)
 
 local presentation = require(script.Parent:WaitForChild("CombatHUD")).new({
-    colors = COLORS, settings = preferences, ending = ending, actionRemote = actionRemote, playerPanel = playerPanel,
+    inputMode = inputMode, colors = COLORS, settings = preferences, ending = ending, actionRemote = actionRemote, playerPanel = playerPanel,
     onSettingsChanged = function() stageAudio.UpdatePreferences() end,
 })
 task.spawn(function()
     local module = script.Parent:WaitForChild("ProgressionUI", 20)
     if module and module:IsA("ModuleScript") then
-        local ok, problem = pcall(function() require(module).Init() end)
+        local ok, problem = pcall(function() require(module).Init({inputMode=inputMode}) end)
         if not ok then warn("Nightfall progression UI: " .. tostring(problem)) end
     end
 end)
 local function inputLabels()
-    local last = UserInputService:GetLastInputType()
-    local controller = string.find(last.Name, "Gamepad") ~= nil
-    local touch = last == Enum.UserInputType.Touch or (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled)
-    local keyboardKeys = {"J", "K", "L", "Q", "HOLD F", "E"}
-    local controllerKeys = {"X", "Y", "B", "LT", "HOLD LB", "RB"}
+    local controller = inputMode:Get() == "Gamepad"
+    local touch = inputMode:Get() == "Touch"
+    local captions = inputMode:Captions()
     for index, action in ipairs(abilityNames) do
-        abilityKeyLabels[action].Text = touch and (action == "Block" and "HOLD" or "TAP") or (controller and controllerKeys[index] or keyboardKeys[index])
+        abilityKeyLabels[action].Text = captions[index]
     end
     moveLabel.Text = controller and "LEFT STICK  MOVE / DEPTH    A  JUMP    D-PAD  HERO" or "A D  MOVE    W S  DEPTH    SPACE  JUMP / RECOVERY"
     retry.Text = controller and "PLAY AGAIN / START" or touch and "PLAY AGAIN" or "PLAY AGAIN / R"
 end
-UserInputService.LastInputTypeChanged:Connect(inputLabels)
 inputLabels()
 -- Responsive panels retain legible labels; mobile gets a separate thumb pad and jump button.
 local hudScale = make("UIScale", {Scale = 1}, top)
@@ -253,12 +262,15 @@ local function resize()
     local width = safe.X > 100 and safe.X or camera.ViewportSize.X
     local height = safe.Y > 100 and safe.Y or camera.ViewportSize.Y
     local scale = math.clamp(width / 1040, 0.57, 1)
-    local touch = UserInputService.TouchEnabled
-    if touchPad then touchPad.Visible = touch end
-    if touchJump then touchJump.Visible = touch end
+    local touch = inputMode:Get() == "Touch"
+    if touchPad then touchPad.Visible = touch; touchPad.Active = touch end
+    if touchJump then touchJump.Visible = touch; touchJump.Active = touch end
     local travelReserve = player:GetAttribute("TravelPanelVisible") and 96 or 0
     endingScale.Scale = math.min(1, width / 460, math.max(.25, (height - 24 - travelReserve) / 348))
     ending.Position = UDim2.new(.5, 0, .48, -travelReserve * .48)
+    encounter.AnchorPoint = Vector2.new(1, 0); abilities.AnchorPoint = Vector2.new(1, 1)
+    if touchJump then touchJump.AnchorPoint = Vector2.new(1, 1); touchJump.Size = UDim2.fromOffset(54,54) end
+    if touchPad then touchPad.Size = UDim2.fromOffset(116,116) end
     abilities.Position = UDim2.new(1, -16, 1, -18)
     if touch then
         local sideSpace = (width - 252) * .5
@@ -321,15 +333,53 @@ local function resize()
     local rescueFooter = touch and player:GetAttribute("RescuePanelVisible") == true
     RescueTouchLayout.Apply(rescueFooter, {abilities=abilities, pad=touchPad, jump=touchJump, health=playerPanel})
     heroLabel.Visible = true
-    if rescueFooter and height < 450 then
+    local compactLayout = CompactHUDLayout.Compute(width, height, inputMode:Get(), player:GetAttribute("RescuePanelVisible") == true,
+        snapshot.status == "Intermission" or snapshot.status == "Traverse" or snapshot.status == "Advance")
+    local heroesVisible=compactLayout and compactLayout.showHeroes or false
+    if player:GetAttribute("CompactHeroChoicesVisible")~=heroesVisible then player:SetAttribute("CompactHeroChoicesVisible",heroesVisible) end
+    if compactLayout then
+        hudScale.Scale = 1; encounterScale.Scale = 1; playerScale.Scale = 1; abilityScale.Scale = 1
+        local buttons = {}; for _,action in ipairs(abilityNames) do table.insert(buttons,abilityButtons[action]) end
+        CompactHUDLayout.Main(compactLayout,{top=top,encounter=encounter,health=playerPanel,abilities=abilities,pad=touchPad,jump=touchJump,buttons=buttons})
+        brandLabel.Visible = false; objectiveLabel.Visible = false; damageHint.Visible = false; heroLabel.Visible = false
+        titleLabel.Position=UDim2.fromOffset(6,2); titleLabel.Size=UDim2.new(1,-12,0,20); titleLabel.TextSize=13; titleLabel.TextTruncate=Enum.TextTruncate.AtEnd
+        chapterLabel.Position=UDim2.fromOffset(6,23); chapterLabel.Size=UDim2.new(1,-12,0,15); chapterLabel.TextSize=8
+        progressBack.Position=UDim2.new(0,6,1,-3); progressBack.Size=UDim2.new(1,-12,0,2)
+        waveLabel.Position=UDim2.fromOffset(6,2); waveLabel.Size=UDim2.new(1,-12,0,17); waveLabel.TextSize=8
+        enemyLabel.Position=UDim2.fromOffset(6,21); enemyLabel.Size=UDim2.new(1,-12,0,19); enemyLabel.TextSize=12
+        percentLabel.Position=UDim2.fromOffset(6,0); percentLabel.Size=UDim2.fromOffset(78,28); percentLabel.TextSize=24
+        stocksLabel.Position=UDim2.fromOffset(84,2); stocksLabel.Size=UDim2.fromOffset(56,24); stocksLabel.TextSize=12
+        for index,hero in ipairs(HEROES) do
+            local button=heroButtons[hero]; button.Visible=compactLayout.showHeroes
+            button.Position=UDim2.fromOffset((index-1)*48,56-compactLayout.health.y); button.Size=UDim2.fromOffset(44,44); button.TextSize=8
+        end
+        for _,action in ipairs(abilityNames) do
+            abilityKeyLabels[action].Position=UDim2.fromOffset(2,2); abilityKeyLabels[action].Size=UDim2.new(1,-4,0,15)
+            abilityKeyLabels[action].TextSize=9
+            abilityLabels[action].Position=UDim2.fromOffset(2,18); abilityLabels[action].Size=UDim2.new(1,-4,0,25); abilityLabels[action].TextSize=8
+        end
+    else
+        for _,action in ipairs(abilityNames) do
+            abilityKeyLabels[action].Position=UDim2.fromOffset(6,8); abilityKeyLabels[action].Size=UDim2.fromOffset(61,16); abilityKeyLabels[action].TextSize=10
+            abilityLabels[action].Size=UDim2.fromOffset(67,24); abilityLabels[action].TextSize=10
+        end
+    end
+    if rescueFooter and height < 450 and not compactLayout then
         -- Keep percent/stocks readable above the raised joystick in short landscape.
         playerPanel.Position = UDim2.fromOffset(16, 64); playerPanel.Size = UDim2.fromOffset(178, 44)
         heroLabel.Visible = false
         percentLabel.Position = UDim2.fromOffset(10, 2); stocksLabel.Position = UDim2.fromOffset(99, 8)
     end
-    moveLabel.Visible = width > 830 and not touch; moveName.Visible = width > 830 and not touch
+    moveLabel.Visible = width > 830 and not touch and not compactLayout; moveName.Visible = width > 830 and not touch and not compactLayout
     toastLabel.Position = UDim2.new(0.5, -math.min(280, width * .46), 0, touch and 119 or (width < 650 and 217 or 201))
     toastLabel.Size = UDim2.fromOffset(math.min(560, width * .92), touch and 25 or 35); toastLabel.TextSize = touch and 13 or 19
+    if compactLayout then
+        CompactHUDLayout.Place(toastLabel,compactLayout.toast); toastLabel.TextSize=10
+        toastLabel.TextWrapped=true
+    else
+        toastLabel.AnchorPoint=Vector2.zero; toastLabel.TextWrapped=false
+    end
+    updateToastVisibility()
     presentation.resize()
 end
 local function characterReady(character: Model)
@@ -429,14 +479,13 @@ local function send(action: string, held: boolean?)
     end
 end
 local function desperationTouchMode()
-    local last = UserInputService:GetLastInputType()
-    return UserInputService.TouchEnabled and string.find(last.Name, "Gamepad") == nil
+    return inputMode:Get() == "Touch"
 end
 desperationControl = DesperationControl.new({blocked=function()return focusGuard:Blocked()end,send=function()
     actionRemote:FireServer("Desperation", {direction=facing})
     animate("Special")
 end})
-desperationHUD = DesperationHUD.new({control=desperationControl,special=abilityButtons.Special,colors=COLORS})
+desperationHUD = DesperationHUD.new({inputMode=inputMode,control=desperationControl,special=abilityButtons.Special,colors=COLORS})
 local bindings: any = {
     Light = {Enum.KeyCode.J, Enum.KeyCode.ButtonX}, Heavy = {Enum.KeyCode.K, Enum.KeyCode.ButtonY},
     Special = {Enum.KeyCode.L, Enum.KeyCode.ButtonB}, Dash = {Enum.KeyCode.Q, Enum.KeyCode.ButtonL2},
@@ -444,26 +493,41 @@ local bindings: any = {
     Jump = {Enum.KeyCode.Space, Enum.KeyCode.ButtonA},
 }
 for action, keys in pairs(bindings) do
-    ContextActionService:BindAction("Nightfall_" .. action, function(_, inputState)
+    ContextActionService:BindAction("Nightfall_" .. action, function(_, inputState, input)
+        if inputState == Enum.UserInputState.Begin and input then
+            inputMode:Observe(input.UserInputType.Name,input.KeyCode.Name,input.Position.Magnitude)
+        end
+        if action == "Block" and (inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel) then
+            -- A key whose Begin was deferred cannot release a still-owned touch guard.
+            if blockInput or (blockKey and input and input.KeyCode ~= blockKey) then return Enum.ContextActionResult.Sink end
+        end
         if focusGuard:ReleaseInput(action, inputState) then return Enum.ContextActionResult.Sink end
+        if inputState == Enum.UserInputState.Begin and input and not inputMode:CanBegin(input.UserInputType.Name) then return Enum.ContextActionResult.Sink end
         if desperationControl:Handle(action, inputState) then return Enum.ContextActionResult.Sink end
         if focusGuard:Blocked() then return Enum.ContextActionResult.Pass end
-        if inputState == Enum.UserInputState.Begin then send(action, action == "Block" and true or nil) end
+        if inputState == Enum.UserInputState.Begin then
+            if action == "Block" and input and actionCapabilities:Allows("Block", true) then blockKey = input.KeyCode end
+            send(action, action == "Block" and true or nil)
+        end
         return Enum.ContextActionResult.Sink
     end, false, table.unpack(keys))
 end
 for action, button in pairs(abilityButtons) do
     if action == "Block" then
         button.InputBegan:Connect(function(input)
-            if actionCapabilities:Allows("Block", true) and not focusGuard:Blocked() and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then blockInput = input; send("Block", true) end
+            inputMode:Observe(input.UserInputType.Name,input.KeyCode.Name,input.Position.Magnitude,input)
+            if not blockInput and inputMode:CanBegin(input.UserInputType.Name) and actionCapabilities:Allows("Block", true) and not focusGuard:Blocked() and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then blockInput = input; send("Block", true) end
         end)
         button.InputEnded:Connect(function(input)
             if input == blockInput then send("Block", false) end
         end)
-    else button.Activated:Connect(function() send(action) end) end
+    else button.Activated:Connect(function(input)
+        if input and not inputMode:CanBegin(input.UserInputType.Name) then return end
+        send(action)
+    end) end
 end
 UserInputService.InputBegan:Connect(function(input, processed)
-    if processed or focusGuard:Blocked() then return end
+    if processed or focusGuard:Blocked() or not inputMode:CanBegin(input.UserInputType.Name) then return end
     heldKeys[input.KeyCode] = true
     if input.KeyCode == Enum.KeyCode.One then actionRemote:FireServer("SelectCharacter", {hero = HEROES[1]})
     elseif input.KeyCode == Enum.KeyCode.Two then actionRemote:FireServer("SelectCharacter", {hero = HEROES[2]})
@@ -480,10 +544,10 @@ UserInputService.InputEnded:Connect(function(input)
     if input == blockInput then releaseBlock() end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Thumbstick1 then gamepadMove = not focusGuard:Blocked() and Vector2.new(input.Position.X, -input.Position.Y) or Vector2.zero end
+    if input.KeyCode == Enum.KeyCode.Thumbstick1 then gamepadMove = not focusGuard:Blocked() and inputMode:CanBegin(input.UserInputType.Name) and Vector2.new(input.Position.X, -input.Position.Y) or Vector2.zero end
 end)
 
-touchPad = make("Frame", {Visible = UserInputService.TouchEnabled, Active = true,
+touchPad = make("Frame", {Visible = inputMode:Get() == "Touch", Active = true,
     BackgroundColor3 = COLORS.panel, BackgroundTransparency = 0.3, Position = UDim2.new(0, 25, 1, -280), Size = UDim2.fromOffset(116, 116)}, canvas)
 round(touchPad, 58); outline(touchPad, COLORS.cyan)
 touchKnob = make("Frame", {BackgroundColor3 = COLORS.cyan, BackgroundTransparency = 0.28,
@@ -496,17 +560,24 @@ local function updateTouch(input: InputObject)
     touchMove = delta; touchKnob.Position = UDim2.new(0.5, delta.X * 34, 0.5, delta.Y * 34)
 end
 touchPad.InputBegan:Connect(function(input)
-    if not focusGuard:Blocked() and input.UserInputType == Enum.UserInputType.Touch then touchInput = input; updateTouch(input) end
+    inputMode:Observe(input.UserInputType.Name,input.KeyCode.Name,input.Position.Magnitude,input)
+    if touchPad.Visible and not touchInput and not focusGuard:Blocked() and input.UserInputType == Enum.UserInputType.Touch then touchInput = input; updateTouch(input) end
 end)
-UserInputService.InputChanged:Connect(function(input) if input == touchInput and not focusGuard:Blocked() then updateTouch(input) end end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == touchInput then
+        if input.UserInputState == Enum.UserInputState.Cancel then
+            touchInput = nil; touchMove = Vector2.zero; touchKnob.Position = UDim2.fromScale(.5, .5)
+        elseif not focusGuard:Blocked() then updateTouch(input) end
+    end
+end)
 UserInputService.InputEnded:Connect(function(input)
     if input == touchInput then touchInput = nil; touchMove = Vector2.zero; touchKnob.Position = UDim2.fromScale(0.5, 0.5) end
 end)
-touchJump = make("TextButton", {Visible = UserInputService.TouchEnabled, Text = "JUMP", Font = Enum.Font.GothamBold,
+touchJump = make("TextButton", {Visible = inputMode:Get() == "Touch", Text = "JUMP", Font = Enum.Font.GothamBold,
     TextSize = 12, TextColor3 = COLORS.text, BackgroundColor3 = COLORS.panel,
     AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -30, 1, -123), Size = UDim2.fromOffset(70, 58)}, canvas)
 round(touchJump, 14); outline(touchJump, COLORS.cyan)
-touchJump.Activated:Connect(function() send("Jump") end)
+touchJump.Activated:Connect(function() if touchJump.Visible then send("Jump") end end)
 
 local function particlePart(position: Vector3, color: Color3, size: Vector3): BasePart
     return make("Part", {Anchored = true, CanCollide = false, CanTouch = false, CanQuery = false,
@@ -1018,7 +1089,7 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
         end
         if desperationControl:Available() and not desperationTouchMode() then
             desperationHintActive = true
-            local controller = string.find(UserInputService:GetLastInputType().Name, "Gamepad") ~= nil
+            local controller = inputMode:Get() == "Gamepad"
             abilityKeyLabels.Special.Text = controller and "HOLD B + Y" or "HOLD L + K"
             abilityLabels.Special.Text = "+"..tostring(snapshot.desperationCost).."% SELF"
             abilityLabels.Special.TextColor3 = COLORS.orange
@@ -1033,6 +1104,9 @@ end)
 canvas:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 player:GetAttributeChangedSignal("TravelPanelVisible"):Connect(resize)
 player:GetAttributeChangedSignal("RescuePanelVisible"):Connect(resize)
-UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(function() resize(); inputLabels() end)
+inputMode:Subscribe(function()
+    focusGuard:Reset("input-mode")
+    inputLabels(); resize()
+end)
 resize()
 toast("STAY TOGETHER. BREAK THE CURTAIN.", COLORS.cyan)

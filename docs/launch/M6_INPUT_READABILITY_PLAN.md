@@ -1,6 +1,6 @@
 # M6 input mode and short-landscape readability proposal
 
-Status: **NOT IMPLEMENTED. Production is frozen for the 15 fresh M3 tier runs.** Prepared 2026-09-24 by presentation from an actual city combat still and read-only source review. This proposal does not authorize camera changes or imply physical-device validation.
+Status: **Implemented on disk for review; not installed in the frozen campaign.** Root authorized the bounded source work during the 15 fresh M3 tier runs. The original 2026-09-24 proposal below is preserved, followed by its implementation/evidence checkpoint. No camera changes or physical-device validation are implied.
 
 ## Observed evidence
 
@@ -38,7 +38,7 @@ Add an explicit short-height layout rule instead of depending on viewport width 
 4. Root captures matching before/after short-landscape combat views and performs actual client dispatch checks where tools permit. Test fixtures and desktop captures do not substitute for physical phone/gamepad input; retain that owner gate explicitly.
 5. A different agent reviews authority, fairness, paid-action gesture safety, touch reachability and evidence scope before root commits. Root alone runs Studio, builds and pushes.
 
-No tests listed here have been run for this proposal; no production fix is implemented. Frozen HumanBot action policy and source remain unchanged.
+At proposal time, none of these tests had run and no fix was implemented. The disk checkpoint below supersedes that historical implementation status; installed HumanBot action policy and campaign source remain unchanged.
 
 ## Separate visual follow-up, not part of mode logic
 
@@ -47,3 +47,24 @@ Coordinate with world on a separate bounded scene-contrast review: crossing/wind
 ## Preserved scope and next step
 
 The original touch-first layout, rescued-footer offset, cost-labeled desperation hold and controller captions remain valuable. This proposal reconciles their activation rules instead of discarding those controls. After root releases the tier-run freeze, implement this bounded M6 work order, run its scoped checks, record actual outcomes and unresolved physical-device gates, and commit separately from combat tuning.
+
+## Disk implementation checkpoint (2026-09-24; not installed)
+
+Root authorized source work during the remaining frozen-trial wait. The installed campaign and place artifacts remain `dfb2ae3`; root confirmed its Main/CombatHUD source still matches that commit and InputMode is absent. The historical proposal above remains the rationale. This section records the new disk work, not a runtime or device acceptance claim.
+
+`InputMode` now supplies shared meaningful keyboard/gamepad/touch selection and captions to Main, CombatHUD, rescue/desperation and the journal entry button. Mouse movement and analog drift at or below the existing .15 threshold do not switch modes. Active touch pointers defer other-device layout changes; foreign-device gameplay begins are rejected during that ownership, with no replay after release. Accepted hold releases retain their gesture identity so a key whose Begin was rejected does not release a still-held touch guard/revive/desperation. Focus/modal/life resets cancel pending intent and held state. Controller departure falls back to available devices. No camera solve, smoothing, field of view, combat timing or server authority changed.
+
+`CompactHUDLayout` handles safe canvases below450px high or650px wide. It shares SET/PROG header slots, separate health/style/boss/warning rectangles and at least44px action/Jump targets; touch controls remain distinct from the60px rescue reserve. Main keeps the existing spacious layout. Returning between compact/spacious and input modes resets anchors/scales/positions before applying layout. Decorative toast/scene contrast review remains a separate unfinished quality pass; these source rectangles do not prove every overlay is mutually clear in gameplay.
+
+Root's intermediate idle hub Edit exact-source checks passed InputMode23, service-adapter13 and rectangle381 assertions. Subsequent mixed-gesture ownership changes require the final repeat. New `InputGesture.spec.lua` composes the production hold controllers with the mode policy; `InputReadabilityClient.spec.lua` constructs actual shared widgets across four viewport requests, six mode transitions and two footer states. **Those latest fixtures and complete Main integration are not yet run at this checkpoint.** The shared-widget fixture expressly reports fullMainIntegrationVerified=false; the spacious1280x720 request checks fallback rather than duplicating Main's full layout. Physical phone/controller dispatch, actual short-landscape combat captures, controller focus, menu/result/return overlap and comfort remain root/owner gates.
+
+Files for the isolated work order: InputMode, CompactHUDLayout, Main, CombatHUD, ReviveHUD, DesperationControl/HUD, DistrictHUD, ProgressionUI and the five InputMode/InputModeAdapter/InputGesture/CompactHUDLayout/InputReadabilityClient specs. Existing ReviveControl/FocusGuard fixtures gained optional module injection while preserving their original lookup fallback. Combat independently reviewed the final policy and release-ownership additions PASS, with no runtime/device claim. World independently reviewed the final compact layout and transition restoration PASS after the hero-choice/notification corrections below. Local static checks confirmed camera-solve source equality with dfb2ae3 and no movement-vector arithmetic edits; the IP gate passed233 source/test/doc files. Root alone installs, runs client fixtures and captures gameplay after the frozen series.
+
+### Review corrections and remaining scope
+
+Root identified that short compact hero selection was inaccessible during eligible noncombat states and that Main's toast intersected the touch action cluster with a rescue footer. World also identified the journal's independent notice bar at the same location. These are corrected on disk: three44px hero choices remain visible during Intermission/Traverse/Advance at all supported compact heights, with the rally readout to their right and percent/style below. Critical warnings, journal notices and Main feedback share a reserved row with that priority order; only one is visible. No required action was removed. The actual-widget fixture now includes both notification frames, hero targets and priority permutations. Root/combat/world review is distinct from future installed-client evidence.
+
+Geometry fixtures operate in safe-canvas pixels, with minimum tested height320. A raw749x361 viewport may yield less usable height after Roblox safe insets. Its real canvas size, full Main/CombatHUD/journal/return/result overlays and physical inputs must be inspected after installation; the source/widget checks do not certify smaller safe canvases or every combined overlay. Scene contrast and motion comfort remain separate gates.
+
+
+Root final held-source checkpoint: InputMode23, synthetic adapter13, compact geometry394, composed gestures19, DesperationControl29 checks PASS (478 counted checks), plus existing ReviveControl24requests and FocusGuard8release-callback regressions PASS in idle hub Edit. [Exact scope and hashes](evidence/m6-input-readability-pure.json). The original planned implementation language above is retained as design history; current source includes shared active mode, owned holds/releases, short-height layout, restored compact noncombat hero choices and prioritized shared toast/warning row. Actual InputReadabilityClient and full Main are still unrun. Geometry sizes are safe-canvas sizes, not guarantees about a raw viewport after device/Roblox insets. Root must measure the actual canvas before integration acceptance. Source IP233files/zero prohibited matches and diff whitespace checks passed.

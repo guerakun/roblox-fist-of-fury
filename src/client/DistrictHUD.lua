@@ -4,6 +4,7 @@ local UserInputService=game:GetService("UserInputService")
 local ContextActionService=game:GetService("ContextActionService")
 local GuiService=game:GetService("GuiService")
 local RunService=game:GetService("RunService")
+local CompactHUDLayout=require(script.Parent.CompactHUDLayout)
 local Model=require(script.Parent.DistrictResultModel)
 local HUD={}
 function HUD.new(options)
@@ -120,8 +121,11 @@ function HUD.new(options)
         local origin=options.parent.AbsolutePosition
         local healthY=health and health.AbsolutePosition.Y-origin.Y or height-190
         local healthX=health and health.AbsolutePosition.X-origin.X or 16
+        local compact=CompactHUDLayout.Compute(width,height,touch and "Touch"or "Keyboard",false,player:GetAttribute("CompactHeroChoicesVisible")==true)
+        style.Size=UDim2.fromOffset(178,28)
         style.Position=UDim2.fromOffset(healthX,healthY-34)
-        style.Visible=type(snapshot.style)=="table"and snapshot.status~="Waiting"and not hidden and not shade.Visible and healthY>=94
+        if compact then CompactHUDLayout.Place(style,compact.style)end
+        style.Visible=type(snapshot.style)=="table"and snapshot.status~="Waiting"and not hidden and not shade.Visible and (compact~=nil or healthY>=94)
             and snapshot.status~="Defeat"and snapshot.status~="Victory"
         if not show and (GuiService.SelectedObject==close or GuiService.SelectedObject==toggle)then GuiService.SelectedObject=nil end
     end

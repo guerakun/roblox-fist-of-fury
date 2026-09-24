@@ -1,8 +1,10 @@
 -- Deterministic event-sequence policy fixture; no physical input or camera claim.
-return function()
+return function(Guard)
+    if not Guard then
     local module=game.ServerScriptService:FindFirstChild("FocusGuard")
     if not module then module=game.Players.LocalPlayer.PlayerScripts.NightfallClient.FocusGuard end
-    local Guard=require(module)
+    Guard=require(module)
+    end
     local function signal()
         local callbacks={}
         return {Connect=function(_,fn)
