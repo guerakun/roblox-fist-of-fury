@@ -1,3 +1,47 @@
+# Morning summary
+
+M0 started on launch-program. WO-0.1 closed: all four existing executable specs pass on the tagged baseline. HumanBot baseline not yet measured; no M1-M6 verification claimed. Published/live operations prohibited tonight. Owner names/art approval and human playtests remain pending. Exact next step: implement WO-0.3 telemetry and WO-0.2 HumanBot, then record five fresh seeded solo runs before releasing agents.
+
+## Launch program status
+
+| WO | Owner | Status | Evidence | Next step |
+|---|---|---|---|---|
+| WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup | WO-0.3 telemetry before five WO-0.2 runs |
+| WO-0.2 | root | queued | not run | follow launch phase dependencies |
+| WO-0.3 | root | queued | not run | follow launch phase dependencies |
+| WO-1.1 | presentation | queued | not run | follow launch phase dependencies |
+| WO-1.2 | presentation | queued | not run | follow launch phase dependencies |
+| WO-1.3 | presentation | queued | not run | follow launch phase dependencies |
+| WO-1.4 | world | queued | not run | follow launch phase dependencies |
+| WO-1.5 | root | queued | not run | follow launch phase dependencies |
+| WO-2.1 | combat | queued | not run | follow launch phase dependencies |
+| WO-2.2 | combat | queued | not run | follow launch phase dependencies |
+| WO-2.3 | combat | queued | not run | follow launch phase dependencies |
+| WO-2.4 | combat | queued | not run | follow launch phase dependencies |
+| WO-2.5 | combat | queued | not run | follow launch phase dependencies |
+| WO-2.6 | combat | queued | not run | follow launch phase dependencies |
+| WO-3.1 | combat | queued | not run | follow launch phase dependencies |
+| WO-3.2 | combat | queued | not run | follow launch phase dependencies |
+| WO-3.3 | combat | queued | not run | follow launch phase dependencies |
+| WO-3.4 | root | queued | not run | follow launch phase dependencies |
+| WO-3.5 | combat | queued | not run | follow launch phase dependencies |
+| WO-3.6 | root | queued | not run | follow launch phase dependencies |
+| WO-3.7 | root | queued | not run | follow launch phase dependencies |
+| WO-4.1 | combat | queued | not run | follow launch phase dependencies |
+| WO-4.2 | combat | queued | not run | follow launch phase dependencies |
+| WO-4.3 | combat | queued | not run | follow launch phase dependencies |
+| WO-4.4 | combat | queued | not run | follow launch phase dependencies |
+| WO-4.5 | root | queued | not run | follow launch phase dependencies |
+| WO-4.6 | root | queued | not run | follow launch phase dependencies |
+| WO-5.1 | root | queued | not run | follow launch phase dependencies |
+| WO-5.2 | root | queued | not run | follow launch phase dependencies |
+| WO-5.3 | root | queued | not run | follow launch phase dependencies |
+| WO-5.4 | root | queued | not run | follow launch phase dependencies |
+| WO-5.5 | root | queued | not run | follow launch phase dependencies |
+| WO-5.6 | root | queued | not run | follow launch phase dependencies |
+
+<!-- launch-status-end -->
+
 # Overnight development log — 2026-09-23
 
 ## Current objective
