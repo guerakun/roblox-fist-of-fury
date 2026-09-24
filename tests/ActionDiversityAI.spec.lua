@@ -1,0 +1,27 @@
+return function()
+    local D=require(game.ServerScriptService.NightfallServer.ActionDiversity)
+    local state=D.New();local actor={}
+    D.Engage(state,actor,"Husk",0)
+    D.Action(state,actor,"Husk","Approach",1);D.Action(state,actor,"Husk","Hold",2)
+    D.Action(state,actor,"Husk","HuskJab",5);D.Action(state,actor,"Husk","HuskJab",6)
+    D.Engage(state,actor,"Husk",30)
+    assert(state.byKind.Husk.eligible==1 and state.byKind.Husk.passed==0,"Repeated jab/movement cannot fake diversity")
+    assert(state.byKind.Husk.minDistinct==1,"Distinct means distinct")
+    D.Action(state,actor,"Husk","HuskJab",31);D.Action(state,actor,"Husk","HuskJumpKick",40)
+    D.Engage(state,actor,"Husk",60)
+    assert(state.byKind.Husk.eligible==2 and state.byKind.Husk.passed==1,"Actual second move qualifies window")
+    D.Leave(state,actor,65)
+    assert(state.partialWindows==1,"Short lived remainder stays ineligible")
+    local pitcher={};D.Engage(state,pitcher,"Pitcher",100)
+    D.Action(state,pitcher,"Pitcher","PitcherThrow",102);D.Action(state,pitcher,"Pitcher","Retreat",110)
+    D.Engage(state,pitcher,"Pitcher",130);D.Leave(state,pitcher,130)
+    assert(state.byKind.Pitcher.passed==1,"Actual reactive action counts")
+    D.Engage(state,{},"Leaper",140);D.Flush(state,145)
+    local summary=D.Summary(state)
+    assert(summary.partialWindows==3 and summary.pendingWindows==0 and #summary.windows==3,"Flush reports incomplete honestly")
+    local grabs=D.New();local captor={}
+    D.Action(grabs,captor,"Grappler","Grab",0);D.Action(grabs,captor,"Grappler","Grab",1)
+    D.Action(grabs,captor,"Grappler","Throw",2);D.Engage(grabs,captor,"Grappler",30)
+    assert(grabs.byKind.Grappler.minDistinct==2,"Grab attempt and capture share a label; throw is distinct")
+    return {fullWindows=3,partialWindows=3,excludedMovement=true,repeatedActionsDoNotQualify=true}
+end

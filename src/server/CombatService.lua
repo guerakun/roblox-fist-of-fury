@@ -14,10 +14,13 @@ local ToolboxHitbox = require(ReplicatedStorage.Nightfall.Shared.ToolboxHitbox)
 local Telemetry = require(script.Parent.CombatTelemetry)
 local EnemyAI = require(script.Parent.EnemyAI)
 local AttackDirector = require(script.Parent.AttackDirector)
+local DifficultyPolicy = require(script.Parent.DifficultyPolicy)
 local Combat = {}
 local records, enemies = {}, {}
 local aiDirector = AttackDirector.New()
 local enemySequence = 0
+local difficulty = "Normal"
+local function difficultyProfile() return Config.Difficulties[difficulty] end
 local cameraEstimate, cameraSpan, cameraGoal, cameraGoalSpan
 local lastCameraSample
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
@@ -112,7 +115,7 @@ function Combat.GetSnapshot(player)
     stats.duration = math.floor((data.runFinished or now()) - data.runStart)
     stats.damageDealt, stats.damageTaken = math.floor(stats.damageDealt), math.floor(stats.damageTaken)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
-        stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves,
+        stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = {},
         enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
         downed = data.downed, grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0},
         ready = data.ready, travelLocked = travelLocked, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
@@ -162,6 +165,14 @@ function Combat.SetAdmissionValidator(callback)
     admissionValidator=callback
 end
 function Combat.GetRunStatus() return encounter.status end
+function Combat.SetRunOptions(selected,heat)
+    if not DifficultyPolicy.ValidOptions(Config.Difficulties,selected,heat) then return false end
+    if encounter.status~="Waiting" then return selected==difficulty end
+    difficulty=selected
+    Combat.BroadcastState()
+    return true
+end
+function Combat.GetRunOptions() return {difficulty=difficulty,heat={}} end
 function Combat.SetTravelLocked(locked)
     assert(type(locked)=="boolean","Travel lock must be boolean")
     travelLocked=locked
@@ -523,7 +534,7 @@ function Combat.SpawnEnemy(kind, position, healthScale)
     model.Parent = workspace.Enemies
     model:PivotTo(CFrame.new(position + Vector3.new(0, spec.Scale * 3, 0)) * CFrame.Angles(0, math.pi / 2, 0))
     root(model):SetNetworkOwner(nil)
-    local data = {kind = kind, percent = 0, threshold = spec.Threshold * (healthScale or 1), weight = spec.Weight,
+    local data = {kind = kind, percent = 0, threshold = spec.Threshold * (healthScale or 1) * (spec.Role~="Grunt" and (difficultyProfile().EliteHealthScale or 1) or 1), weight = spec.Weight,
         blocking = false, guard = 0, facing = -1, stunnedUntil = 0, launchedUntil = 0, invulnerableUntil = 0,
         attackAt = now() + 1.6, spec = spec, phase = 1, poise = 0, armoredUntil = 0, recoveryUntil = 0,
         moveIndex = 0, attackSerial = 0, contributors = {}, targetHistory = {}}
@@ -608,7 +619,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     local direction=data.facing
     local attackOrigin=r.Position
     local move=EnemyMoves.Build(moveName,{origin=attackOrigin,target=targetRoot.Position,direction=direction,arena=arena,partyPositions=positions,spec=data.spec,phase=data.phase})
-    move.Windup=math.max(.30,move.Windup)
+    move.Windup=DifficultyPolicy.Windup(move.Windup,difficultyProfile())
     local desperate=moveName==data.spec.DesperationMove
     if data.spec.Role~="Grunt" and data.phase==2 and not desperate and t-(data.lastFeintAt or -100)>=6
         and data.aiRng:NextNumber()<(data.spec.FeintChance or .2) then
@@ -617,7 +628,8 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
         local serial,epoch=data.attackSerial,battleEpoch
         data.resolveAt=t+.4;data.recoveryUntil=t+.6;data.attackAt=t+.8
         AttackDirector.BeginAttack(aiDirector,model,t,data.recoveryUntil)
-        Telemetry.Windup(data.kind,"Feint",.4,attackCount(),AttackDirector.Cap(#alive))
+        Telemetry.Action(model,data.kind,"Feint",t)
+        Telemetry.Windup(data.kind,"Feint",.4,attackCount(),AttackDirector.Cap(#alive,difficultyProfile().TokenBonus))
         humanoid(model):Move(Vector3.zero)
         fx("EnemyFeint",r.Position,{targetModel=model,enemy=data.kind,duration=.4,direction=direction,moveId=moveName})
         task.delay(.4,function()
@@ -637,10 +649,11 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     local serial,epoch=data.attackSerial,battleEpoch
     data.resolveAt=t+move.Windup+(move.Flight or 0)+(move.FollowUp or 0)+(move.Grab and 1 or 0)
     data.recoveryUntil=data.resolveAt+move.Recovery
-    data.attackAt=math.max(t+data.spec.Cooldown,data.recoveryUntil+.15)
+    data.attackAt=math.max(t+DifficultyPolicy.Cooldown(data.spec.Cooldown,difficultyProfile()),data.recoveryUntil+.15)
     AttackDirector.BeginAttack(aiDirector,model,t,data.recoveryUntil)
     data.targetHistory[target]=t
-    Telemetry.Windup(data.kind,moveName,move.Windup,attackCount(),AttackDirector.Cap(#alive))
+    Telemetry.Action(model,data.kind,move.Grab and "Grab" or moveName,t)
+    Telemetry.Windup(data.kind,moveName,move.Windup,attackCount(),AttackDirector.Cap(#alive,difficultyProfile().TokenBonus))
     data.armoredUntil=move.Armored and data.resolveAt or 0
     humanoid(model):Move(Vector3.zero)
     r.CFrame=CFrame.lookAt(r.Position,r.Position+Vector3.new(direction,0,0))
@@ -672,11 +685,13 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
                             data.grabbedPlayer=player;victim.grabbedBy=model;victim.blocking=false
                             victim.grabStunUntil=now()+1;victim.stunnedUntil=victim.grabStunUntil
                             pr.AssemblyLinearVelocity=Vector3.zero
+                            Telemetry.Action(model,data.kind,"Grab",now())
                             fx("EnemyGrab",pr.Position,{targetModel=model,targetUserId=player.UserId,duration=1,moveId=moveName})
                             local life=victim.lifeSerial
                             task.delay(1,function()
                                 if not valid() or records[player]~=victim or victim.lifeSerial~=life or victim.grabbedBy~=model then releaseGrab(model,true);return end
                                 releaseGrab(model,false)
+                                Telemetry.Action(model,data.kind,"Throw",now())
                                 Combat.ApplyHit(model,player,{Damage=data.spec.Damage*.8,Knockback=65,Growth=.5,Lift=24,Stun=.45,Unblockable=true},move.BackThrow and -direction or direction)
                                 fx("Attack",root(model).Position,{direction=direction,enemy=data.kind,action="Heavy",targetModel=model,moveId="GrapplerThrow"})
                             end)
@@ -752,7 +767,7 @@ local function aiStep(t)
         cameraSpan=cameraSpan and cameraSpan+(cameraGoalSpan-cameraSpan)*alpha or cameraGoalSpan
     else cameraEstimate,cameraSpan=nil,nil end
     lastCameraSample=t
-    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, CanAttack = enemyVisible, SummonPhase = Combat.SpawnPhaseAdds,
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, difficulty = difficultyProfile(), RecordAction = Telemetry.Action, CanAttack = enemyVisible, SummonPhase = Combat.SpawnPhaseAdds,
         root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
         Config = Config, arena = arena, encounter = encounter, attributes = attributes,
         fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})
@@ -845,6 +860,7 @@ local function removePlayer(player)
     records[player] = nil
 end
 function Combat.ResetLobby()
+    difficulty="Normal"
     table.clear(disconnectedSurvival)
     Combat.SetArena(Config.Stages[1], 1)
     walkingMaxX = arena.Waves[1].SpawnX + 30
@@ -885,7 +901,9 @@ function Combat.Init()
         if aiAccum >= .1 then
             aiAccum = 0
             local aiStart = os.clock()
+            debug.profilebegin("CurtainBreakEnemyAI")
             aiStep(t)
+            debug.profileend()
             if encounter.status == "Combat" and next(enemies) then Telemetry.AICost(os.clock() - aiStart) end
             Telemetry.Sample(enemies, Combat.GetAlivePlayers(), t, encounter.status == "Combat")
         end

@@ -69,7 +69,8 @@ function Session.Init(combat,progression)
             local ok,accepted,reason=pcall(function()return admission:Admit(p.UserId,p:GetJoinData())end)
             if not ok or not accepted then p:Kick('Deployment validation failed. Rejoin the refuge to queue again.')return false end
             local match=admission.match
-            if combat.SetRunOptions then combat.SetRunOptions(match.difficulty,match.heat)
+            if combat.SetRunOptions then
+                if not combat.SetRunOptions(match.difficulty,match.heat)then admission:Remove(p.UserId)p:Kick('This deployment configuration is unavailable.')return false end
             elseif match.difficulty~='Normal'or #match.heat>0 then admission:Remove(p.UserId)p:Kick('This deployment configuration is unavailable.')return false end
             return true
         end)

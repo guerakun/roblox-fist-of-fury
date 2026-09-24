@@ -1,5 +1,6 @@
 -- Server-owned movement and engagement state; damage remains in CombatService.
 local Director=require(script.Parent.AttackDirector)
+local DifficultyPolicy=require(script.Parent.DifficultyPolicy)
 local Archetypes=require(game.ReplicatedStorage.Nightfall.Shared.EnemyArchetypes)
 local EnemyAI={}
 local ranges={HuskJab=6,HuskJumpKick=16,StriderSlide=17,StriderJab=6,GrapplerGrab=6,GrapplerThrow=6,
@@ -45,6 +46,8 @@ end
 function EnemyAI.Step(t,c)
     local alive=c.Combat.GetAlivePlayers()
     local director=c.director
+    local profile=c.difficulty or {Aggression=1,TokenBonus=0,ReactionDelay=.35,EvadeChance=1/3,WindupScale=1}
+    local function action(model,data,value) if c.RecordAction then c.RecordAction(model,data.kind,value,t)end end
     -- Stagger cancels a captured attack before its token is handed to another actor.
     for model,data in pairs(c.enemies)do
         if (t<data.stunnedUntil or (data.spec.Role=="Grunt" and t<data.launchedUntil)) and data.attacking and t>=(data.armoredUntil or 0) then
@@ -58,7 +61,7 @@ function EnemyAI.Step(t,c)
         local r=c.root(model)
         if r then c.fx("EnemyCancel",r.Position,{targetModel=model,enemy=c.enemies[model].kind})end
     end
-    for _,model in ipairs(Director.Trim(director,Director.Cap(#alive)))do
+    for _,model in ipairs(Director.Trim(director,Director.Cap(#alive,profile.TokenBonus)))do
         local data=c.enemies[model]
         if data then
             data.engaging=false
@@ -110,25 +113,25 @@ function EnemyAI.Step(t,c)
         local slot=Director.Assign(director,model,target,r.Position,pr.Position)
         local archetype=Archetypes.Id(data.kind,data.spec)
         local targetHumanoid=c.humanoid(target.Character)
-        local observed=observe(data,target,c.records[target],t,.35,targetHumanoid and targetHumanoid.FloorMaterial==Enum.Material.Air)
+        local observed=observe(data,target,c.records[target],t,profile.ReactionDelay,targetHumanoid and targetHumanoid.FloorMaterial==Enum.Material.Air)
         if archetype=="Warden" then
             local wasBlocking=data.blocking
             data.blocking=t>=(data.guardBrokenUntil or 0)
             if wasBlocking~=data.blocking then c.attributes(model,data)end
-            if data.blocking then state(model,data,"Block") end
+            if data.blocking then state(model,data,"Block");action(model,data,"Block") end
         end
         if archetype=="Leaper" and observed.action=="Heavy" and observed.attackAt~=data.lastObservedHeavy then
             data.lastObservedHeavy=observed.attackAt;data.observedHeavies=(data.observedHeavies or 0)+1
-            if data.observedHeavies%3==0 then
+            if DifficultyPolicy.Evade(data,profile) then
                 data.evadeUntil=t+.5;data.invulnerableUntil=math.max(data.invulnerableUntil or 0,t+.35)
                 r.AssemblyLinearVelocity=Vector3.new(-data.facing*26,24,0)
                 Director.Release(director,model);data.engaging=false
                 c.fx("EnemyEvade",r.Position,{targetModel=model,duration=.5,direction=-data.facing,enemy=data.kind,moveId="LeaperEvade"})
             end
         end
-        if t<(data.evadeUntil or 0) then state(model,data,"Evade");h:Move(Vector3.zero);continue end
+        if t<(data.evadeUntil or 0) then state(model,data,"Evade");action(model,data,"Evade");h:Move(Vector3.zero);continue end
         if (archetype=="Pitcher" and distance<12) or t<(data.retreatUntil or 0) then
-            state(model,data,"Retreat");Director.Release(director,model);data.engaging=false
+            state(model,data,"Retreat");action(model,data,"Retreat");Director.Release(director,model);data.engaging=false
             local away=r.Position.X>=pr.Position.X and 1 or -1
             h.WalkSpeed=data.spec.Speed
             h:MoveTo(Vector3.new(math.clamp(pr.Position.X+away*17,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(pr.Position.Z+(slot.serial%2==0 and 3 or -3),-11,11)))
@@ -190,7 +193,7 @@ function EnemyAI.Step(t,c)
             h.WalkSpeed=data.spec.Speed;h:MoveTo(destination)
         end
     end
-    for _,model in ipairs(Director.Grant(director,t,Director.Cap(#alive)))do
+    for _,model in ipairs(Director.Grant(director,t,Director.Cap(#alive,profile.TokenBonus)))do
         local candidate,data=candidates[model],c.enemies[model]
         if candidate and data then
             data.engaging=true

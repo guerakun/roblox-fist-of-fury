@@ -1,0 +1,11 @@
+{
+  "recorded":"2026-09-24",
+  "passed":true,
+  "difficultyPolicy":{"warningFloorCases":54,"capCases":12,"normalQuota":9,"invalidOptions":5,"tiers":3},
+  "reaction":{"earlyReactions":0,"tierReactionCases":3},
+  "diversity":{"fullWindows":3,"partialWindows":3,"excludedMovement":true,"repeatedActionsDoNotQualify":true},
+  "telemetryIntegration":{"intermissionExcluded":true,"qualifiedWindows":1,"rangeExitExcluded":true},
+  "runtime":{"gruntHp":true,"eliteHp":true,"lobbyReset":true,"invalidRejected":2,"activeOptionsImmutable":true},
+  "regressions":["EnemyAISlots","AttackDirectorAI","CombatTelemetry"],
+  "limits":"Actual policy/runtime fixtures; aggregate five-run HumanBot targets, every-archetype eligible action coverage, MicroProfiler and human acceptance remain separate."
+}

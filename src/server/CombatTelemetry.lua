@@ -2,8 +2,9 @@
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local Telemetry = {}
+local Diversity=require(script.Parent.ActionDiversity)
 local enabled = RunService:IsStudio()
-local state, windows
+local state, windows, diversity
 local function time() return workspace:GetServerTimeNow() end
 function Telemetry.Reset()
     state = {schema=1, started=time(), eligibleGruntTicks=0, idleGruntTicks=0,
@@ -11,10 +12,12 @@ function Telemetry.Reset()
         flankWindows=0, flankedWindows=0, hits={}, stocks={}, damage={}, encounters={},
         aiSeconds=0, aiSamples=0, aiPeakSeconds=0, cameraFrustum="not measured", rank="not implemented"}
     windows = {}
+    diversity=Diversity.New()
 end
 Telemetry.Reset()
 function Telemetry.BeginEncounter(stage, wave)
     if not enabled then return end
+    Diversity.Flush(diversity,time())
     state.stage, state.wave = stage, wave
     local key = tostring(stage)..":"..tostring(wave)
     state.encounters[key] = state.encounters[key] or {hits=0, stocks=0, damage=0}
@@ -49,11 +52,24 @@ function Telemetry.Windup(kind, move, duration, simultaneous, cap)
     state.actions[kind]=state.actions[kind] or {}
     state.actions[kind][move]=(state.actions[kind][move] or 0)+1
 end
+function Telemetry.Action(model,kind,action,t)
+    if enabled then Diversity.Action(diversity,model,kind or "Unknown",action,t)end
+end
 function Telemetry.Sample(enemies, alive, now, combatActive)
-    if not enabled or not combatActive then return end
+    if not enabled then return end
+    if not combatActive then Diversity.Flush(diversity,now);return end
+    local engaged={}
     for model,data in pairs(enemies) do
         local r=model:FindFirstChild("HumanoidRootPart")
         local h=model:FindFirstChildOfClass("Humanoid")
+        if r and h and h.Health>0 and data.aiState~="Enter" then
+            for _,player in ipairs(alive)do
+                local pr=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if pr and (Vector2.new(pr.Position.X-r.Position.X,pr.Position.Z-r.Position.Z)).Magnitude<=28 then
+                    engaged[model]=true;Diversity.Engage(diversity,model,data.kind or "Unknown",now);break
+                end
+            end
+        end
         if r and h and h.Health>0 and data.spec.Role=="Grunt" and not data.attacking
             and now>=data.stunnedUntil and now>=data.launchedUntil and now>=data.recoveryUntil then
             state.eligibleGruntTicks+=1
@@ -61,6 +77,8 @@ function Telemetry.Sample(enemies, alive, now, combatActive)
             if Vector2.new(v.X,v.Z).Magnitude<.5 and h.MoveDirection.Magnitude<.05 then state.idleGruntTicks+=1 end
         end
     end
+    local departed={};for actor in pairs(diversity.actors)do if not engaged[actor]then table.insert(departed,actor)end end
+    for _,actor in ipairs(departed)do Diversity.Leave(diversity,actor,now)end
     -- A qualified engagement is a continuous five-second window with >=2 nearby grunts.
     for _,player in ipairs(alive) do
         local r=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -91,6 +109,7 @@ end
 function Telemetry.Summary()
     local result=table.clone(state)
     result.elapsed=time()-state.started
+    result.actionDiversity=Diversity.Summary(diversity)
     result.idleRatio=state.eligibleGruntTicks>0 and state.idleGruntTicks/state.eligibleGruntTicks or false
     result.flankRatio=state.flankWindows>0 and state.flankedWindows/state.flankWindows or false
     result.aiMeanMs=state.aiSamples>0 and 1000*state.aiSeconds/state.aiSamples or false
@@ -99,6 +118,7 @@ function Telemetry.Summary()
 end
 function Telemetry.Finish(outcome)
     if not enabled then return end
+    Diversity.Flush(diversity,time())
     local result=Telemetry.Summary();result.outcome=outcome
     local encoded=HttpService:JSONEncode(result)
     workspace:SetAttribute("CombatTelemetry",encoded)

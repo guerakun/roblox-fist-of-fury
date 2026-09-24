@@ -1,5 +1,5 @@
 {
-  "summary": "M0 closed: baseline5/5 clears,mean278.27s,0.80stocks,543damage. M1 original heroes/story/specials implemented and source-IP gate passes; visible art/screenshots and owner names/art approval remain open. M2 through2.5 implemented with runtime/spec evidence;2.6difficulty specs pass and actual runtime/five-bot/performance checks are next. Director-only seed1101 was292.37s,0stocks,430damage,idle10.58%,flank90.91%,cap0; this is not finalM2 aggregate. M5 hub/admission/return implemented; fake policy and real Studio party/readiness/lifecycle tests pass, including two-player checkpoint coin dedupe and fresh campaign afterVictory. Published travel/live persistence/hardware remain unverified; same-ID reconnect blocked byStudiofreshIDs. M6 owner checklist and analytics observer saved; no publication,Dashboard,sales,liveDataStore orplace-setting changes. Exact next: root WO-2.6 runtime thenfiveHumanBot/MicroProfiler;combat awaits M2 checkpoint beforeM3. M3/M4 notstarted. Owner decisions: candidatehero names/art andtestuniverse/device/humanacceptance. Bothplace artifacts currently builtfrom66f5e10; rebuildagain atM2 source milestone.",
+  "summary": "M0 closed: baseline5/5 clears,mean278.27s,0.80stocks,543damage. M1 original heroes/story/specials implemented and source-IP gate passes; visible art/screenshots and owner names/art approval remain open. M2 through2.5 implemented with runtime/spec evidence;2.6difficulty policy and actual runtime checks pass; five-bot/performance checks are next. Director-only seed1101 was292.37s,0stocks,430damage,idle10.58%,flank90.91%,cap0; this is not finalM2 aggregate. M5 hub/admission/return implemented; fake policy and real Studio party/readiness/lifecycle tests pass, including two-player checkpoint coin dedupe and fresh campaign afterVictory. Published travel/live persistence/hardware remain unverified; same-ID reconnect blocked byStudiofreshIDs. M6 owner checklist and analytics observer saved; no publication,Dashboard,sales,liveDataStore orplace-setting changes. Exact next: root fiveHumanBot/MicroProfiler for WO-2.6;combat awaits M2 checkpoint beforeM3. M3/M4 notstarted. Owner decisions: candidatehero names/art andtestuniverse/device/humanacceptance. Bothplace artifacts currently builtfrom66f5e10; rebuildagain atM2 source milestone.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -80,10 +80,10 @@
       "next": "WO-2.6 difficulty/telemetry;fullcampaignpulse/frustum/fivebot remains"
     },
     "WO-2.6": {
-      "owner": "combat",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "owner": "combat + root",
+      "status": "implemented; policy/runtime pass, aggregate acceptance next",
+      "evidence": "2026-09-24:54warningfloors/12caps/9Normalquota/3reactiondelaysPASS;diversitywindows+range/intermissionintegrationPASS;freshPlayimmutableoptions/eliteHP/gruntHP/resetPASS;3regressionsPASS;worldreviewPASS",
+      "next": "root4player12enemyMicroProfiler andfivefullHumanBot/frustumruns; human/devicegates remain"
     },
     "WO-3.1": {
       "owner": "combat",

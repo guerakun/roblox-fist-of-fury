@@ -32,6 +32,12 @@ Config.Stages = {
             {Title = "KILN SOVEREIGN", Kind = "Boss", SpawnX = 495, Enemies = {KilnSovereign = 1}},
         }},
 }
+-- Starting difficulty values; M2/M3 telemetry and human sessions must validate the resulting curve.
+Config.Difficulties={
+    Normal={Aggression=1,TokenBonus=0,ReactionDelay=.35,EvadeChance=1/3,WindupScale=1,EliteHealthScale=1},
+    Hard={Aggression=1.2,TokenBonus=1,ReactionDelay=.22,EvadeChance=.45,WindupScale=.85,EliteHealthScale=1.15},
+    Nightmare={Aggression=1.4,TokenBonus=2,ReactionDelay=.18,EvadeChance=.6,WindupScale=.72,EliteHealthScale=1.3},
+}
 Config.Attacks = {
     Light = {Damage = 8, Knockback = 15, Growth = 0.24, Lift = 8, Range = 7, Width = 7, Windup = 0.10, Cooldown = 0.32, Stun = 0.26},
     Heavy = {Damage = 19, Knockback = 38, Growth = 0.52, Lift = 26, Range = 9, Width = 8, Windup = 0.30, Cooldown = 0.95, Stun = 0.50},
