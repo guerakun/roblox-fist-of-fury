@@ -20,6 +20,8 @@ local runHeat={}
 local function runRules()return HeatConfig.Rules(runHeat)end
 local PressurePolicy = require(script.Parent.PressurePolicy)
 local SurvivalPolicy = require(script.Parent.SurvivalPolicy)
+local StylePolicy=require(script.Parent.StylePolicy)
+local styleEventSequence=0
 local completedDistricts={}
 local activeCampaign=nil
 local reviveSnapshot=function()return false end
@@ -84,14 +86,31 @@ local function releaseGrab(enemy, rescued)
         fx("EnemyGrabRelease",root(enemy) and root(enemy).Position or Vector3.zero,{targetModel=enemy,targetUserId=player.UserId,rescued=rescued==true})
     end
 end
+local function styleState(data,create)
+    if not data or not activeCampaign then return nil end
+    data.styleDistricts=data.styleDistricts or {}
+    local state=data.styleDistricts[stageIndex]
+    if create and not state then
+        state=StylePolicy.New(activeCampaign,stageIndex,now());data.styleDistricts[stageIndex]=state
+    end
+    return state
+end
+local function beginStyleWave(data)
+    local state=styleState(data,true)
+    if not state or state.result or encounter.status~="Combat"then return state end
+    if state.attempt and state.attempt.wave~=encounter.wave then StylePolicy.Retry(state)end
+    if not state.attempt then StylePolicy.BeginWave(state,encounter.wave,encounter.partySize or math.clamp(Combat.GetPlayerCount(),1,4),encounter.encounterKind,now())end
+    return state
+end
 local function freshStats() return {kills = 0, damageDealt = 0, damageTaken = 0, coinsEarned = 0, duration = 0} end
 function Combat.BeginRun(campaignId)
     activeCampaign=type(campaignId)=="string"and campaignId~=""and campaignId or nil
     table.clear(completedDistricts)
     enemySequence=0
+    styleEventSequence=0
     Telemetry.Reset()
     table.clear(disconnectedSurvival)
-    for _, data in pairs(records) do data.runStats = freshStats() data.runStart = now() data.runFinished = nil end
+    for _, data in pairs(records) do data.runStats = freshStats() data.runStart = now() data.runFinished = nil data.styleDistricts={} end
 end
 local SHARE_STATES = {Combat = true, Intermission = true, Traverse = true, Advance = true}
 local function rescueTarget(player, requestedUserId)
@@ -127,10 +146,14 @@ function Combat.GetSnapshot(player)
     end
     local ally = rescueTarget(player)
     local shareCooldown = math.max(0, (data.cooldowns.ShareStock or 0) - now())
+    local style=styleState(data,false)
+    local districtResult=style and style.result or false
+    local districtReceipt=districtResult and Progression.GetDistrictReceipt(player,districtResult.id)or false
     local stats = table.clone(data.runStats)
     stats.duration = math.floor((data.runFinished or now()) - data.runStart)
     stats.damageDealt, stats.damageTaken = math.floor(stats.damageDealt), math.floor(stats.damageTaken)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
+        style=StylePolicy.Snapshot(style),districtResult=districtResult,districtReceipt=districtReceipt,
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = {},
         enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
         downed = data.downed, downedRemaining = math.max(0,(data.downedUntil or 0)-now()), revive=reviveSnapshot(player), grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
@@ -152,12 +175,13 @@ function Combat.SetEncounterState(state)
         Telemetry.Finish(state.status)
     elseif state.status == "Combat" then
         Telemetry.BeginEncounter(stageIndex, encounter.wave)
-        for _, data in pairs(records) do data.runFinished = nil end
+        for _, data in pairs(records) do data.runFinished = nil;beginStyleWave(data)end
     end
     Combat.BroadcastState()
 end
 function Combat.SetArena(stage, index)
     arena, stageIndex = stage, index or stageIndex
+    for _,data in pairs(records)do styleState(data,true)end
     checkpointPosition = Vector3.new(stage.SpawnX, 4, 0)
     walkingMaxX = stage.SpawnX + 30
     workspace:SetAttribute("NightfallStage", stageIndex)
@@ -240,6 +264,45 @@ end
 function Combat.BeginEncounter()
     battleEpoch += 1
     for _, data in pairs(records) do data.contribution = 0 end
+end
+function Combat.CommitStyleWave(campaignId,stage,wave)
+    if campaignId~=activeCampaign or stage~=stageIndex or wave~=encounter.wave then return false end
+    for _,data in pairs(records)do
+        local state=styleState(data,false)
+        if state then StylePolicy.CommitWave(state,wave,true)end
+    end
+    for _,saved in pairs(disconnectedSurvival)do
+        local state=saved.styleDistricts and saved.styleDistricts[stage]
+        if state and state.campaignId==activeCampaign then StylePolicy.CommitWave(state,wave,false)end
+    end
+    return true
+end
+function Combat.FinalizeDistrict(campaignId,stage)
+    local results={}
+    if campaignId~=activeCampaign or stage~=stageIndex then return results end
+    for player,data in pairs(records)do
+        local state=styleState(data,false)
+        if state then
+            local result=StylePolicy.Finalize(state,now(),{difficulty=difficulty,heat=runHeat})
+            if result then results[player]=result end
+        end
+    end
+    for _,saved in pairs(disconnectedSurvival)do
+        local state=saved.styleDistricts and saved.styleDistricts[stage]
+        if state and state.campaignId==activeCampaign then
+            StylePolicy.Finalize(state,now(),{difficulty=difficulty,heat=runHeat})
+        end
+    end
+    return results
+end
+function Combat.AwardStyle(player,kind,id,fields)
+    local data=records[player]
+    if not data or data.downed or data.respawning or encounter.status~="Combat"then return false end
+    local state=beginStyleWave(data)
+    if not state then return false end
+    local event=table.clone(fields or {});event.kind,event.id=kind,id
+    event.gainMultiplier=(Progression.GetCombatModifiers(player)or {}).styleGainMultiplier or 1
+    return StylePolicy.Award(state,event)
 end
 function Combat.GetParticipants()
     local participants = {}
@@ -369,7 +432,13 @@ local function relocatePlayers(position,mode)
 end
 function Combat.ResetPlayers(position)relocatePlayers(position,"Campaign")end
 function Combat.EnterDistrict(position)relocatePlayers(position,"Travel")end
-function Combat.RetryCheckpoint(position)relocatePlayers(position,"Retry")end
+function Combat.RetryCheckpoint(position)
+    for _,data in pairs(records)do local state=styleState(data,false);if state then StylePolicy.Retry(state)end end
+    for _,saved in pairs(disconnectedSurvival)do
+        local state=saved.styleDistricts and saved.styleDistricts[stageIndex];if state then StylePolicy.Retry(state)end
+    end
+    relocatePlayers(position,"Retry")
+end
 function Combat.CompleteDistrict(campaignId,stage)
     if not activeCampaign or campaignId~=activeCampaign or type(stage)~="number"or stage%1~=0
         or stage<1 or stage>#Config.Stages or stage~=stageIndex then return false end
@@ -517,6 +586,9 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     local blocked = not attack.Unblockable and data.blocking and data.facing == -direction
         and (victimPlayer~=nil or (enemyId=="Warden" and light))
     if enemyId=="Warden" and sourcePlayer and sourceData.lastAction=="Heavy" then data.guardBrokenUntil=t+1.1;data.blocking=false end
+    local styleBackHit=sourcePlayer and data.facing==direction
+    local targetHumanoid=humanoid(targetModel)
+    local styleAirHit=sourcePlayer and t<(data.launchedUntil or 0)and targetHumanoid and targetHumanoid.FloorMaterial==Enum.Material.Air
     local damage = attack.Damage * (blocked and .2 or 1)
     local knockbackMultiplier = 1
     if sourcePlayer then
@@ -539,6 +611,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
         data.hitAt = t
         data.revive=nil
         data.runStats.damageTaken += damage
+        local style=beginStyleWave(data);if style then StylePolicy.TakenHit(style,damage)end
         Telemetry.Hit(victimPlayer, damage)
         data.contribution += damage + (blocked and 3 or 0)
     elseif lightArmor or (enemyId=="Brute" and armored) then
@@ -571,6 +644,9 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     r.AssemblyLinearVelocity = Vector3.new(direction * velocity, blocked and 3 or armored and 0 or elite and math.min(attack.Lift, 8) or attack.Lift, r.AssemblyLinearVelocity.Z * .3)
     if sourcePlayer then
         sourceData.runStats.damageDealt += damage
+        if not attack.StyleId then styleEventSequence+=1 end
+        Combat.AwardStyle(sourcePlayer,attack.StyleKind or "Hit",tostring(attack.StyleId or styleEventSequence)..":"..tostring(data.styleId),
+            {damage=damage,backHit=styleBackHit,airHit=styleAirHit})
         sourceData.contribution += damage
         data.contributors[sourcePlayer] = true
     end
@@ -607,6 +683,7 @@ local function performAttack(player, action, data)
         data.lastLight = now()
         if data.combo == 3 then attack.Damage *= 1.5 attack.Knockback += 18 attack.Lift = 18 end
     end
+    styleEventSequence+=1;attack.StyleId=styleEventSequence
     data.lastAction, data.attackStartedAt = action, now()
     data.cooldowns[action], data.busyUntil, data.blocking = now() + attack.Cooldown, now() + attack.Windup + .13, false
     local direction, epoch, lifeSerial = data.facing, battleEpoch, data.lifeSerial
@@ -706,6 +783,7 @@ function Combat.SpawnEnemy(kind, position, healthScale)
         attackAt = now() + 1.6, spec = spec, phase = 1, poise = 0, armoredUntil = 0, recoveryUntil = 0,
         moveIndex = 0, attackSerial = 0, contributors = {}, targetHistory = {}}
     enemySequence+=1
+    data.styleId=enemySequence
     data.aiRng=Random.new(enemySequence*97+stageIndex*1009)
     enemies[model] = data
     model:SetAttribute("EnemyKind", kind)
@@ -1009,7 +1087,16 @@ local function addPlayer(player)
         local data = records[player]
         data.hero, data.stocks, data.percent, data.downed = Config.NormalizeHeroId(saved.hero), saved.stocks, saved.percent, saved.downed
         data.cooldowns, data.runStats, data.runStart, data.runFinished = saved.cooldowns, saved.runStats, saved.runStart, saved.runFinished
+        data.styleDistricts=saved.styleDistricts
         data.resumeSurvival = {stocks = saved.stocks, percent = saved.percent, downed = saved.downed,downedUntil=saved.downedUntil,downedPosition=saved.downedPosition}
+    end
+    if activeCampaign then
+        for _,state in pairs(records[player].styleDistricts or {})do
+            if state.result and state.result.campaignId==activeCampaign and state.result.stage<=stageIndex then
+                Progression.AwardDistrict(player,state.result)
+            end
+        end
+        beginStyleWave(records[player])
     end
     player.CharacterAdded:Connect(function(model) setupCharacter(player, model) end)
     task.spawn(spawnPlayer, player)
@@ -1027,7 +1114,7 @@ local function removePlayer(player)
     disconnectedSurvival[player.UserId] = {
         hero = data.hero, stocks = data.stocks, percent = data.respawning and 0 or data.percent,
         downed = data.downed or data.stocks <= 0, downedUntil=data.downedUntil,downedPosition=data.downedPosition,cooldowns = table.clone(data.cooldowns),
-        runStats = table.clone(data.runStats), runStart = data.runStart, runFinished = data.runFinished,
+        runStats = table.clone(data.runStats), runStart = data.runStart, runFinished = data.runFinished,styleDistricts=data.styleDistricts,
         disconnectedAt = now(),
     }
     records[player] = nil

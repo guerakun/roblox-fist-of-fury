@@ -207,7 +207,7 @@ round(retry, 7)
 retry.Activated:Connect(function() actionRemote:FireServer("Restart", {}) end)
 
 local presentation = require(script.Parent:WaitForChild("CombatHUD")).new({
-    colors = COLORS, settings = preferences, ending = ending, actionRemote = actionRemote,
+    colors = COLORS, settings = preferences, ending = ending, actionRemote = actionRemote, playerPanel = playerPanel,
     onSettingsChanged = function() stageAudio.UpdatePreferences() end,
 })
 task.spawn(function()

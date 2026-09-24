@@ -72,12 +72,8 @@ local function waitForWave(token,pulses,spawnPulse,settings)
 end
 local function awardClear(stageNumber, waveNumber, kind)
     local participants = combat.GetParticipants()
-    local before = {}
-    for _, player in ipairs(participants) do before[player] = Progression.GetSnapshot(player).coins or 0 end
+    combat.CommitStyleWave(campaignId,stageNumber,waveNumber)
     Progression.AwardEncounterClear(participants, stageNumber, kind, campaignId .. ":" .. stageNumber .. ":" .. waveNumber)
-    for _, player in ipairs(participants) do
-        combat.AddCoinsEarned(player, math.max(0, (Progression.GetSnapshot(player).coins or 0) - before[player]))
-    end
 end
 local function waitForTraverse(stage, wave, token)
     local targetX = math.max(stage.SpawnX, wave.SpawnX - 25)
@@ -157,7 +153,7 @@ local function run(startStage, startWave, token,startingMode)
             end
             spawnPulse(1)
             setState({status = "Combat", wave = waveNumber, waveTitle = wave.Title, encounterKind = wave.Kind,
-                enemiesRemaining = enemyCount(), nextWaveAt = 0, targetX = wave.SpawnX, objective = "CLEAR / " .. wave.Title})
+                enemiesRemaining = enemyCount(), partySize=partySize, nextWaveAt = 0, targetX = wave.SpawnX, objective = "CLEAR / " .. wave.Title})
             fx("Wave", stage, {title = wave.Title, role = wave.Kind})
             if not waitForWave(token,pulses,spawnPulse,wave.Pulse) then return end
             awardClear(stageNumber, waveNumber, wave.Kind)
@@ -174,6 +170,8 @@ local function run(startStage, startWave, token,startingMode)
                 if not waitForTraverse(stage, stage.Waves[waveNumber + 1], token) then return end
             end
         end
+        local results=combat.FinalizeDistrict(campaignId,stageNumber)
+        for player,result in pairs(results)do Progression.AwardDistrict(player,result)end
         combat.CompleteDistrict(campaignId,stageNumber)
         setGate(stageNumber, true)
         fx("StageClear", stage, {title = stage.Name})

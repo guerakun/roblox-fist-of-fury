@@ -13,6 +13,7 @@ local state={status="Waiting",stage=1,wave=0,cooldowns={}}
 local began,combatBegan=os.clock(),nil
 local pending,decisions,transitions={},{},{}
 local seenTells={}
+local districtResults,districtById={},{} -- Observation only; does not enter action policy.
 local responseMovement,responseUntil=Vector3.zero,0
 local scheduledTotal=0
 local movement=Vector3.zero
@@ -33,6 +34,14 @@ R.State.OnClientEvent:Connect(function(packet)
     end
     previousStocks=packet.stocks or previousStocks
     state=packet
+    local district=packet.districtResult
+    if type(district)=="table"and type(district.id)=="string"then
+        local observed=districtById[district.id]
+        if not observed then
+            observed=table.clone(district);districtById[district.id]=observed;table.insert(districtResults,observed)
+        end
+        if type(packet.districtReceipt)=="table"then observed.receipt=table.clone(packet.districtReceipt)end
+    end
     if packet.status=="Combat" and not combatBegan then combatBegan=os.clock() end
 end)
 R.FX.OnClientEvent:Connect(function(packet)
@@ -65,7 +74,8 @@ local function report(finished)
     local result={schema=1,seed=seed,done=finished,clear=state.status=="Victory",outcome=state.status,
         seconds=os.clock()-(combatBegan or began),wallSeconds=os.clock()-began,stage=state.stage,wave=state.wave,
         stocksLostByDistrict=stocksLost,damageTaken=state.runStats and state.runStats.damageTaken or 0,
-        rank=state.rank or "not implemented",runStats=state.runStats,choices=choices,
+        rank=type(state.districtResult)=="table"and state.districtResult.rank or "no current district result",
+        districtResults=districtResults,reportRevision="M3 rank observer",runStats=state.runStats,choices=choices,
         reactionMean=delayCount>0 and delayTotal/delayCount or false,scheduledReactionMean=choices.recognized>0 and scheduledTotal/choices.recognized or false,transitions=transitions,telemetry=parsed}
     player:SetAttribute("HumanBotReport",Http:JSONEncode(result))
     if finished then print("HUMANBOT_RESULT "..Http:JSONEncode(result)) end

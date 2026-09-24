@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Nightfall"):WaitForChild("Shared"):WaitForChild("Config"))
 local ReviveHUD = require(script.Parent.ReviveHUD)
+local DistrictHUD = require(script.Parent.DistrictHUD)
 local HUD = {}
 local function make(class: string, properties: any, parent: Instance?): any
     local item = Instance.new(class)
@@ -188,6 +189,7 @@ function HUD.new(options: any): any
     local rescueName = text(rescueButton, "", 10, colors.text, UDim2.fromOffset(8, 27), UDim2.new(1, -16, 0, 18))
     rescueName.TextXAlignment = Enum.TextXAlignment.Center; rescueName.TextTruncate = Enum.TextTruncate.AtEnd
     local reviveHUD = ReviveHUD.new({player=player, parent=safeCanvas, colors=colors, actionRemote=options.actionRemote})
+    local districtHUD = DistrictHUD.new({player=player, parent=safeCanvas, colors=colors})
     local lastRescueRequest = 0
     local function shareStock()
         if not snapshot.canShareStock or type(snapshot.rescueTarget) ~= "table" then return end
@@ -457,6 +459,7 @@ function HUD.new(options: any): any
     function api.updateSnapshot(state: any)
         snapshot = state
         reviveHUD.Update(state)
+        districtHUD.Update(state)
         local stage = tonumber(state.stage) or 1
         if state.status ~= "Waiting" and (stage ~= previousStage or previousStatus == "Waiting" or previousStatus == "Defeat" or previousStatus == "Victory") then
             introduceStage(stage, state.stageName or ({"CITY STREETS", "ABANDONED STATION", "ABANDONED FACTORY"})[stage] or "CURTAIN BREAK")
@@ -540,6 +543,7 @@ function HUD.new(options: any): any
             and not player:GetAttribute("MenuOpen") and not player:GetAttribute("SettingsOpen")
         if rescueButton.Visible then rescueName.Text = "TO " .. string.upper(snapshot.rescueTarget.name or "TEAMMATE") end
         reviveHUD.Render(width, touch, gamepadActive(), rescueButton)
+        districtHUD.Render(width, height, touch, options.playerPanel)
         local rallyActive = (snapshot.status == "Traverse" or snapshot.status == "Advance") and type(snapshot.targetX) == "number"
         rallyBanner.Visible = rallyActive
         rallyDisc.Transparency = rallyActive and 0.45 or 1; rallyBillboard.Enabled = rallyActive

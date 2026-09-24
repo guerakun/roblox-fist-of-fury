@@ -1,0 +1,453 @@
+{
+  "telemetry": {
+    "windupPeak": 2,
+    "idleGruntTicks": 294,
+    "windups": 240,
+    "aiPeakSeconds": 0.000584700028412044,
+    "flankedWindows": 34,
+    "serverBoundsRejected": 0,
+    "flankWindows": 36,
+    "schema": 1,
+    "outcome": "Victory",
+    "actionDiversity": {
+      "byKind": [],
+      "pendingWindows": 0,
+      "windowSeconds": 30,
+      "policy": "10Hz sampled proximity within 28 studs; actual attacks/block/evade/retreat/grab/throw; partial windows ineligible",
+      "windows": [],
+      "partialWindows": 78
+    },
+    "capViolations": 0,
+    "encounters": {
+      "3:2": {
+        "stocks": 0,
+        "hits": 4,
+        "damage": 67.06800000000001
+      },
+      "2:2": {
+        "stocks": 0,
+        "hits": 5,
+        "damage": 70.656
+      },
+      "1:4": {
+        "stocks": 1,
+        "hits": 11,
+        "damage": 138.23000000000002
+      },
+      "2:4": {
+        "stocks": 0,
+        "hits": 4,
+        "damage": 61.41000000000001
+      },
+      "3:4": {
+        "stocks": 1,
+        "hits": 5,
+        "damage": 94.72319999999999
+      },
+      "1:1": {
+        "stocks": 0,
+        "hits": 2,
+        "damage": 7.452
+      },
+      "2:1": {
+        "stocks": 0,
+        "hits": 8,
+        "damage": 54.46400000000001
+      },
+      "1:3": {
+        "stocks": 0,
+        "hits": 11,
+        "damage": 55.32880000000001
+      },
+      "2:3": {
+        "stocks": 1,
+        "hits": 13,
+        "damage": 107.08800000000004
+      },
+      "1:2": {
+        "stocks": 0,
+        "hits": 6,
+        "damage": 55.384
+      },
+      "3:1": {
+        "stocks": 1,
+        "hits": 7,
+        "damage": 97.38200000000002
+      },
+      "3:3": {
+        "stocks": 0,
+        "hits": 12,
+        "damage": 97.15200000000002
+      }
+    },
+    "actions": {
+      "Warden": {
+        "WardenKick": 20,
+        "WardenCounter": 3
+      },
+      "Husk": {
+        "HuskJab": 36,
+        "HuskJumpKick": 34
+      },
+      "Brute": {
+        "BruteFlop": 17,
+        "BruteSwing": 5
+      },
+      "Strider": {
+        "StriderJab": 9,
+        "StriderSlide": 9
+      },
+      "Grappler": {
+        "GrapplerGrab": 12,
+        "GrapplerThrow": 10
+      },
+      "Executioner": {
+        "CrossingSweep": 2,
+        "Cleaver": 6,
+        "Feint": 1
+      },
+      "FurnaceHound": {
+        "Bite": 3,
+        "CinderHowl": 1,
+        "Pounce": 2,
+        "CinderTrail": 1,
+        "Feint": 1
+      },
+      "PlatformWidow": {
+        "RailLunge": 3,
+        "TicketCut": 4,
+        "WidowSpiral": 1,
+        "PlatformMark": 1
+      },
+      "KilnSovereign": {
+        "CoreMeltdown": 1,
+        "SlagPunch": 3,
+        "FurnaceVent": 3,
+        "ForgeCrush": 3,
+        "TwinVent": 2
+      },
+      "SirenMarshal": {
+        "Cleaver": 3,
+        "AlarmRing": 4,
+        "SirenLine": 5,
+        "AlarmCollapse": 1,
+        "SplitAlarm": 1
+      },
+      "Pitcher": {
+        "PitcherThrow": 8,
+        "PitcherShove": 4
+      },
+      "Leaper": {
+        "LeaperJab": 4,
+        "LeaperVaultKick": 5
+      },
+      "LastConductor": {
+        "GhostTrain": 5,
+        "DepartureCross": 2,
+        "BellStrike": 3,
+        "Feint": 1,
+        "FinalDeparture": 1
+      }
+    },
+    "aiMeanMs": 0.08608946921211455,
+    "stocks": {
+      "Player1": {
+        "1": 1,
+        "2": 1,
+        "3": 2
+      }
+    },
+    "aiPeakMs": 0.584700028412044,
+    "eligibleGruntTicks": 3085,
+    "started": 1790253344.262402,
+    "elapsed": 465.91572189331055,
+    "cameraFrustum": "not measured",
+    "hits": {
+      "Player1": 88
+    },
+    "aiSamples": 3628,
+    "aiSeconds": 0.3123325943015516,
+    "wave": 4,
+    "minWindup": 0.4,
+    "flankRatio": 0.9444444444444444,
+    "damage": {
+      "Player1": 906.3379999999999
+    },
+    "idleRatio": 0.0952998379254457,
+    "stage": 3,
+    "rank": "not implemented"
+  },
+  "damageTaken": 906,
+  "outcome": "Victory",
+  "runStats": {
+    "kills": 56,
+    "duration": 465,
+    "damageDealt": 5223,
+    "damageTaken": 906,
+    "coinsEarned": 897
+  },
+  "stocksLostByDistrict": {
+    "1": 1,
+    "2": 1,
+    "3": 2
+  },
+  "clear": true,
+  "seconds": 462.1805417999858,
+  "transitions": [
+    {
+      "state": "1:0:Waiting",
+      "seconds": 1.2134837999474257
+    },
+    {
+      "state": "1:0:Intermission",
+      "seconds": 1.550246199942194
+    },
+    {
+      "state": "1:1:Combat",
+      "seconds": 5.347762799938209
+    },
+    {
+      "state": "1:1:Intermission",
+      "seconds": 30.546610299963504
+    },
+    {
+      "state": "1:1:Traverse",
+      "seconds": 34.64539139997214
+    },
+    {
+      "state": "1:2:Combat",
+      "seconds": 35.76473799999803
+    },
+    {
+      "state": "1:2:Intermission",
+      "seconds": 60.47897399996873
+    },
+    {
+      "state": "1:2:Traverse",
+      "seconds": 65.51136939995922
+    },
+    {
+      "state": "1:3:Combat",
+      "seconds": 66.6140964999795
+    },
+    {
+      "state": "1:3:Intermission",
+      "seconds": 97.67819089989644
+    },
+    {
+      "state": "1:3:Traverse",
+      "seconds": 101.70949389995076
+    },
+    {
+      "state": "1:4:Combat",
+      "seconds": 103.29501689993776
+    },
+    {
+      "state": "1:4:Advance",
+      "seconds": 144.160405099974
+    },
+    {
+      "state": "2:0:Intermission",
+      "seconds": 147.22540499991737
+    },
+    {
+      "state": "2:1:Combat",
+      "seconds": 151.32552229997236
+    },
+    {
+      "state": "2:1:Intermission",
+      "seconds": 181.8580970999319
+    },
+    {
+      "state": "2:2:Combat",
+      "seconds": 185.9592756999191
+    },
+    {
+      "state": "2:2:Intermission",
+      "seconds": 209.38850319990888
+    },
+    {
+      "state": "2:2:Traverse",
+      "seconds": 214.4380812998861
+    },
+    {
+      "state": "2:3:Combat",
+      "seconds": 215.55781279993244
+    },
+    {
+      "state": "2:3:Intermission",
+      "seconds": 262.1542820999166
+    },
+    {
+      "state": "2:3:Traverse",
+      "seconds": 266.20246119995136
+    },
+    {
+      "state": "2:4:Combat",
+      "seconds": 269.1028694999404
+    },
+    {
+      "state": "2:4:Advance",
+      "seconds": 303.27015509991907
+    },
+    {
+      "state": "3:0:Intermission",
+      "seconds": 305.66941619990394
+    },
+    {
+      "state": "3:1:Combat",
+      "seconds": 309.8014675999293
+    },
+    {
+      "state": "3:1:Intermission",
+      "seconds": 344.03368599992245
+    },
+    {
+      "state": "3:2:Combat",
+      "seconds": 348.0529508999316
+    },
+    {
+      "state": "3:2:Intermission",
+      "seconds": 368.68334339989815
+    },
+    {
+      "state": "3:2:Traverse",
+      "seconds": 373.79858759988565
+    },
+    {
+      "state": "3:3:Combat",
+      "seconds": 374.498498299974
+    },
+    {
+      "state": "3:3:Intermission",
+      "seconds": 421.7639362999471
+    },
+    {
+      "state": "3:3:Traverse",
+      "seconds": 425.7807070999406
+    },
+    {
+      "state": "3:4:Combat",
+      "seconds": 427.13242839998566
+    },
+    {
+      "state": "3:4:Victory",
+      "seconds": 467.2120690998854
+    }
+  ],
+  "stage": 3,
+  "done": true,
+  "wave": 4,
+  "choices": {
+    "Mistake": 70,
+    "Jump": 8,
+    "Special": 46,
+    "Heavy": 111,
+    "telegraphs": 257,
+    "Dash": 9,
+    "Block": 29,
+    "recognized": 202,
+    "Light": 292
+  },
+  "reportRevision": "M3 rank observer",
+  "wallSeconds": 467.52741939993575,
+  "districtResults": [
+    {
+      "scoreTarget": 6500,
+      "heat": [],
+      "campaignId": "23e32c89-1a41-4993-9397-5445dd2c2425:1",
+      "id": "23e32c89-1a41-4993-9397-5445dd2c2425:1:1",
+      "duration": 142.8621048927307,
+      "damageTaken": 256.3948,
+      "bossDamageTaken": 138.23000000000002,
+      "difficulty": "Normal",
+      "receipt": {
+        "difficultyMultiplier": 1,
+        "basePaidCoins": 230,
+        "baseXP": 265,
+        "basePaidXP": 265,
+        "xp": 79,
+        "coins": 69,
+        "revision": 5,
+        "heatMultiplier": 1,
+        "status": "paid",
+        "resultId": "23e32c89-1a41-4993-9397-5445dd2c2425:1:1",
+        "baseCoins": 230,
+        "rankMultiplier": 1.3
+      },
+      "score": 9265,
+      "eligibleWaves": 4,
+      "parTime": 180,
+      "rating": 85,
+      "stage": 1,
+      "rank": "A"
+    },
+    {
+      "scoreTarget": 8500,
+      "heat": [],
+      "campaignId": "23e32c89-1a41-4993-9397-5445dd2c2425:1",
+      "id": "23e32c89-1a41-4993-9397-5445dd2c2425:1:2",
+      "duration": 156.05968594551086,
+      "damageTaken": 293.618,
+      "bossDamageTaken": 61.41000000000001,
+      "difficulty": "Normal",
+      "receipt": {
+        "difficultyMultiplier": 1,
+        "basePaidCoins": 230,
+        "baseXP": 265,
+        "basePaidXP": 265,
+        "xp": 79,
+        "coins": 69,
+        "revision": 5,
+        "heatMultiplier": 1,
+        "status": "paid",
+        "resultId": "23e32c89-1a41-4993-9397-5445dd2c2425:1:2",
+        "baseCoins": 230,
+        "rankMultiplier": 1.3
+      },
+      "score": 11704,
+      "eligibleWaves": 4,
+      "parTime": 210,
+      "rating": 85,
+      "stage": 2,
+      "rank": "A"
+    },
+    {
+      "scoreTarget": 10000,
+      "heat": [],
+      "campaignId": "23e32c89-1a41-4993-9397-5445dd2c2425:1",
+      "id": "23e32c89-1a41-4993-9397-5445dd2c2425:1:3",
+      "duration": 161.54301714897156,
+      "damageTaken": 356.3252000000001,
+      "bossDamageTaken": 94.72319999999999,
+      "difficulty": "Normal",
+      "receipt": {
+        "difficultyMultiplier": 1,
+        "basePaidCoins": 230,
+        "baseXP": 265,
+        "basePaidXP": 265,
+        "xp": 79,
+        "coins": 69,
+        "revision": 5,
+        "heatMultiplier": 1,
+        "status": "paid",
+        "resultId": "23e32c89-1a41-4993-9397-5445dd2c2425:1:3",
+        "baseCoins": 230,
+        "rankMultiplier": 1.3
+      },
+      "score": 15310,
+      "eligibleWaves": 4,
+      "parTime": 240,
+      "rating": 85,
+      "stage": 3,
+      "rank": "A"
+    }
+  ],
+  "seed": 1101,
+  "scheduledReactionMean": 0.25108036379712867,
+  "reactionMean": 0.2590166292064547,
+  "schema": 1,
+  "rank": "A",
+  "privacy": "Account identifiers replaced with run-local Player labels; measurements unchanged.",
+  "evidenceScope": "Single WO-3.3 diagnostic, not final M3 balance acceptance. HumanBot action policy unchanged; additive district result reporting."
+}

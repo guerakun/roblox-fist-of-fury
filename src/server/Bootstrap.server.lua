@@ -13,6 +13,7 @@ local Progression = require(script.Parent.ProgressionService)
 local Combat = require(script.Parent.CombatService)
 local Encounters = require(script.Parent.EncounterService)
 Progression.Init()
+Progression.SetRewardObserver(Combat.AddCoinsEarned) -- Actual paid delta, including deferred and rank settlements.
 require(script.Parent.CampaignSession).Init(Combat, Progression)
 Combat.Init()
 Encounters.Init(Combat)

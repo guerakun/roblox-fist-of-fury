@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-24",
+  "policy": {"passed": true, "checks": 73, "rankTuningProvisional": true},
+  "cacheSeam": {"passed": true, "cachedAttemptPreserved": true, "cachedFinalResult": true, "absentBaseExcluded": true, "absentBossBadgeExcluded": true, "rejoinSettlementIdempotent": true, "staleCampaignRejected": true, "realReconnectVerified": false},
+  "actualOneClient": {"passed": true, "acceptedHits": true, "bossRetryDamage": true, "immutableResult": true, "actualReceipt": true, "rewardObserverExact": true, "replayNoPayment": true, "nextDistrictClear": true, "score": 1900, "rank": "B", "coins": 264},
+  "clientModel": {"passed": true, "checks": 25, "immutablePerformance": true, "revisionOrdering": true, "actualBaseAndBonusSeparate": true, "expiredClear": true},
+  "actualClientHUD": {"passed": true, "viewports": 4, "returnReserveCases": 2, "minimumCloseTarget": 44, "actualPaymentLabels": true, "receiptRefreshWithoutReveal": true, "rankHiddenDuringCombat": true, "physicalInputVerified": false},
+  "ordinaryCampaign": {"report": "m3-style-1101.json", "observer": "m3-style-campaign.json", "seed": 1101, "outcome": "Victory", "seconds": 462.1805417999858, "stocksLost": 4, "damageTaken": 906, "ranks": ["A", "A", "A"], "paidCoins": 897, "observerFailures": 0},
+  "comparison": {"scope": "Same seed diagnostic only; do not compare one run as a five-run aggregate", "baseline1101": {"seconds": 273.32, "stocksLost": 1, "damageTaken": 497}, "frozenM2_1101": {"seconds": 430.9641434, "stocksLost": 4, "damageTaken": 991}},
+  "review": "Independent world source review passed final server/client implementation, cache seam and complete campaign observer; combat also reviewed receipt UI. HumanBot changes only add result observation, not decisions or random draws.",
+  "remaining": ["Full final M3 Normal/Hard/Nightmare HumanBot suite", "Human playtest and physical input checks", "Real same-account reconnect", "Rank target S-frequency across full suite"]
+}
