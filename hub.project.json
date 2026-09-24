@@ -1,0 +1,14 @@
+{
+  "name": "CurtainBreakHub",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Nightfall": {"$className":"Folder", "Shared":{"$path":"src/shared"}},
+      "HubRemotes":{"$className":"Folder", "Request":{"$className":"RemoteEvent"}, "State":{"$className":"RemoteEvent"}}
+    },
+    "ServerScriptService":{"HubServer":{"$path":"src/hub/server"}},
+    "StarterPlayer":{"StarterPlayerScripts":{"HubClient":{"$path":"src/hub/client"}}},
+    "Workspace":{"$properties":{"StreamingEnabled":false}},
+    "StarterGui":{"$properties":{"ScreenOrientation":"LandscapeSensor"}}
+  }
+}

@@ -1,0 +1,2 @@
+-- WO-5.3 replaces this placeholder with the party/deploy interface.
+-- World proximity prompts are visual affordances until matchmaking integration.

@@ -1,5 +1,5 @@
 {
-  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; WO-1.4 original story/docs and Ashgate signage saved; WO-1.2 native original art instantiated with valid rigs; visible likeness/screenshots blocked by blank capture output. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.3 specials, WO-2.2 director, WO-5.5 fixed3/4/lifecycle/latency tests. Names/art approval and human runs remain owner gates.",
+  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; WO-1.4 original story/docs and Ashgate signage saved; WO-1.2 native original art instantiated with valid rigs; visible likeness/screenshots blocked by blank capture output. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.3 specials, WO-2.2 director, WO-5.5 fixed3/4/lifecycle/latency tests. Names/art approval and human runs remain owner gates. Hub source built/instantiated (WO-5.1), IDs remain zero; party/deploy functionality is next in WO-5.2. Fixed 2/3-client runs passed.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -28,7 +28,7 @@
     "WO-1.2": {
       "owner": "presentation",
       "status": "implemented; visual gate blocked",
-      "evidence": "2026-09-24: Studio Gale35/Piston44/Tide39parts, each7queryable/6motors/0external meshes; world source review PASS. Native capture unavailable; Studio capture twice blank. ORIGINAL_ART_EVIDENCE.md",
+      "evidence": "2026-09-24: Studio Gale35/Piston44/Tide39parts, each7queryable/6motors/0external meshes; world source review PASS. Native capture unavailable; Studio capture twice blank. ORIGINAL_ART_EVIDENCE.md; commitd5364f2",
       "next": "continue1.3; retry gameplay screenshots; owner art approval pending"
     },
     "WO-1.3": {
@@ -165,9 +165,9 @@
     },
     "WO-5.1": {
       "owner": "root",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "closed (source place)",
+      "evidence": "2026-09-24: hub Rojo build PASS; Studio Build returns23children with arrivalspawn/deployterminal; world independent review PASS; PlaceIds0",
+      "next": "WO-5.2 fake-adapter matchmaking;5.3 functioningUI; no publishedplaceclaim"
     },
     "WO-5.2": {
       "owner": "root",
@@ -190,7 +190,7 @@
     "WO-5.5": {
       "owner": "root",
       "status": "in progress",
-      "evidence": "2026-09-24: actual2-to-4client PASS15 assertions/12encounters152.07s; fixed2 PASS12encounters147.44s; fixed3 running; lifecycle/lag still pending",
+      "evidence": "2026-09-24: actual2-to-4PASS15assertions152.07s; fixed2PASS147.44s; fixed3PASS140.46s; all12encounters; fixed4running, lifecycle/lagpending",
       "next": "run generalized harness at2/3/4, lifecycle and150/250ms"
     },
     "WO-5.6": {
