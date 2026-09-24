@@ -15,7 +15,13 @@ local Telemetry = require(script.Parent.CombatTelemetry)
 local EnemyAI = require(script.Parent.EnemyAI)
 local AttackDirector = require(script.Parent.AttackDirector)
 local DifficultyPolicy = require(script.Parent.DifficultyPolicy)
+local HeatConfig=require(ReplicatedStorage.Nightfall.Shared.HeatConfig)
+local runHeat={}
+local function runRules()return HeatConfig.Rules(runHeat)end
 local PressurePolicy = require(script.Parent.PressurePolicy)
+local SurvivalPolicy = require(script.Parent.SurvivalPolicy)
+local completedDistricts={}
+local reviveSnapshot=function()return false end
 local Combat = {}
 local records, enemies = {}, {}
 local aiDirector = AttackDirector.New()
@@ -78,7 +84,8 @@ local function releaseGrab(enemy, rescued)
     end
 end
 local function freshStats() return {kills = 0, damageDealt = 0, damageTaken = 0, coinsEarned = 0, duration = 0} end
-function Combat.BeginRun()
+function Combat.BeginRun(campaignId)
+    table.clear(completedDistricts)
     enemySequence=0
     Telemetry.Reset()
     table.clear(disconnectedSurvival)
@@ -87,7 +94,7 @@ end
 local SHARE_STATES = {Combat = true, Intermission = true, Traverse = true, Advance = true}
 local function rescueTarget(player, requestedUserId)
     local data, donorRoot, donorHumanoid = records[player], root(player.Character), humanoid(player.Character)
-    if not data or not SHARE_STATES[encounter.status] or data.downed or data.respawning or data.stocks < 2
+    if not runRules().stockSharing or not data or not SHARE_STATES[encounter.status] or data.downed or data.respawning or data.stocks < 2
         or player.Parent ~= Players or not donorRoot or not donorHumanoid or donorHumanoid.Health <= 0 then return nil end
     if requestedUserId ~= nil and (type(requestedUserId) ~= "number" or requestedUserId ~= requestedUserId
         or math.abs(requestedUserId) == math.huge or requestedUserId % 1 ~= 0) then return nil end
@@ -124,7 +131,7 @@ function Combat.GetSnapshot(player)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = {},
         enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
-        downed = data.downed, grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
+        downed = data.downed, downedRemaining = math.max(0,(data.downedUntil or 0)-now()), revive=reviveSnapshot(player), grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
         ready = data.ready, travelLocked = travelLocked, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
         rescueTarget = ally and {name = ally.DisplayName, userId = ally.UserId} or false,
         canShareStock = ally ~= nil and shareCooldown <= 0, shareStockCooldown = shareCooldown,
@@ -172,6 +179,7 @@ function Combat.SetAdmissionValidator(callback)
     admissionValidator=callback
 end
 function Combat.GetRunStatus() return encounter.status end
+function Combat.GetRunRules()return runRules()end
 function Combat.SetRunOptions(selected,heat)
     if not DifficultyPolicy.ValidOptions(Config.Difficulties,selected,heat) then return false end
     if encounter.status~="Waiting" then return selected==difficulty end
@@ -265,11 +273,12 @@ local function setVisualIdentity(model, hero)
     highlight.FillTransparency, highlight.OutlineTransparency = .92, .65
     highlight.Parent = model
 end
-local function resetPosition(player, position)
+local function resetPosition(player, position, percent)
     local model, data = player.Character, records[player]
     local r, h = root(model), humanoid(model)
     if not data or not r or not h then return end
-    data.percent, data.blocking, data.downed, data.respawning = 0, false, false, false
+    data.percent, data.blocking, data.downed, data.respawning = percent or 0, false, false, false
+    data.revive,data.downedUntil,data.downedPosition=nil,nil,nil
     data.stunnedUntil, data.launchedUntil, data.recovered = 0, 0, false
     data.recentHits = {}
     data.invulnerableUntil = now() + 2
@@ -303,6 +312,7 @@ function Combat.ShareStock(player, requestedUserId)
     donor.stocks -= 1
     donor.cooldowns.ShareStock = t + 10
     recipient.stocks, recipient.percent, recipient.downed, recipient.respawning = 1, 0, false, true
+    recipient.downedUntil,recipient.downedPosition,recipient.revive=nil,nil,nil
     recipient.lifeSerial += 1
     recipient.preserveSpawn, recipient.resumeSurvival = nil, nil
     recipient.busyUntil, recipient.guard = 0, 0
@@ -321,23 +331,117 @@ function Combat.ShareStock(player, requestedUserId)
     Combat.BroadcastState()
     return true
 end
-function Combat.ResetPlayers(position)
-    for _, saved in pairs(disconnectedSurvival) do
-        saved.stocks, saved.percent, saved.downed, saved.cooldowns = Config.Stocks, 0, false, {}
+local function relocatePlayers(position,mode)
+    for _,saved in pairs(disconnectedSurvival)do
+        saved.stocks,saved.percent=SurvivalPolicy.Reset(mode,saved.stocks,saved.percent,Config.Survival,runRules().stockCap)
+        saved.downed=saved.stocks<=0;saved.cooldowns={}
+        if not saved.downed then saved.downedUntil,saved.downedPosition=nil,nil end
     end
     local index = 0
     for player, data in pairs(records) do
         data.lifeSerial += 1
         data.resumeSurvival = nil
-        data.stocks, data.cooldowns, data.downed, data.respawning = Config.Stocks, {}, false, false
-        data.spawnPosition = position
+        data.stocks,data.percent=SurvivalPolicy.Reset(mode,data.stocks,data.percent,Config.Survival,runRules().stockCap)
+        data.cooldowns,data.downed,data.respawning,data.revive={},data.stocks<=0,false,nil
+        data.spawnPosition,data.spawnPercent = position,data.percent
         index += 1
         if humanoid(player.Character) and humanoid(player.Character).Health > 0 then
             data.spawnPosition = nil
-            resetPosition(player, position + Vector3.new(0, 0, (index - 1) * 3 - 4))
+            resetPosition(player, position + Vector3.new(0, 0, (index - 1) * 3 - 4),data.percent)
+            data.spawnPercent=nil
         else task.spawn(spawnPlayer, player) end
     end
     Combat.BroadcastState()
+end
+function Combat.ResetPlayers(position)relocatePlayers(position,"Campaign")end
+function Combat.EnterDistrict(position)relocatePlayers(position,"Travel")end
+function Combat.RetryCheckpoint(position)relocatePlayers(position,"Retry")end
+function Combat.CompleteDistrict(campaignId,stage)
+    local key=tostring(campaignId)..":"..stage
+    if completedDistricts[key]then return false end
+    completedDistricts[key]=true
+    for _,saved in pairs(disconnectedSurvival)do
+        saved.stocks,saved.percent=SurvivalPolicy.Reset("Clear",saved.stocks,saved.downed and 0 or saved.percent,Config.Survival,runRules().stockCap)
+        saved.downed,saved.downedUntil,saved.downedPosition=false,nil,nil
+    end
+    for player,data in pairs(records)do
+        data.stocks,data.percent=SurvivalPolicy.Reset("Clear",data.stocks,(data.downed or data.respawning)and 0 or data.percent,Config.Survival,runRules().stockCap)
+        if data.downed or data.respawning then
+            data.lifeSerial+=1;data.spawnPosition=checkpointPosition;data.spawnPercent=data.percent
+            data.downed,data.downedUntil,data.revive,data.respawning=false,nil,nil,false
+            if root(player.Character)and humanoid(player.Character)and humanoid(player.Character).Health>0 then
+                resetPosition(player,checkpointPosition,data.percent);data.spawnPosition,data.spawnPercent=nil,nil
+            else task.spawn(spawnPlayer,player)end
+        end
+        attributes(player.Character,data)
+    end
+    Combat.BroadcastState();return true
+end
+local function reviveTarget(player,requested)
+    local data=records[player];local r=root(player.Character);local h=humanoid(player.Character)
+    if not h or h.Health<=0 then return nil end
+    if not data or data.downed or data.respawning or data.grabbedBy or not r or not SHARE_STATES[encounter.status]
+        or travelLocked or now()<data.stunnedUntil or now()<data.busyUntil then return nil end
+    if requested~=nil and(type(requested)~="number"or requested~=requested or requested%1~=0)then return nil end
+    local target,best=nil,Config.Survival.ReviveRange+.001
+    for other,victim in pairs(records)do
+        local otherRoot=root(other.Character)
+        if other~=player and victim.downed and victim.stocks==0 and now()<(victim.downedUntil or 0)
+            and otherRoot and(requested==nil or requested==other.UserId)then
+            local d=(Vector2.new(r.Position.X,r.Position.Z)-Vector2.new(otherRoot.Position.X,otherRoot.Position.Z)).Magnitude
+            if d<best then target,best=other,d end
+        end
+    end
+    return target
+end
+reviveSnapshot=function(player)
+    local data=records[player];local channel=data and data.revive
+    local target=channel and channel.target or reviveTarget(player)
+    local victim=target and records[target]
+    if not victim then return false end
+    return {targetUserId=target.UserId,name=target.DisplayName,canStart=reviveTarget(player,target.UserId)~=nil,
+        channeling=channel~=nil,progress=channel and math.clamp((now()-channel.started)/Config.Survival.ReviveDuration,0,1)or 0,
+        remaining=math.max(0,(victim.downedUntil or 0)-now())}
+end
+function Combat.Revive(player,held,requested)
+    local data=records[player]
+    if not data then return false end
+    if held==false then data.revive=nil;return true end
+    if held~=true then return false end
+    local target=reviveTarget(player,requested)
+    if not target then return false end
+    if data.revive and data.revive.target==target then return true end
+    data.blocking=false
+    data.revive={target=target,started=now(),position=root(player.Character).Position,life=data.lifeSerial,
+        targetLife=records[target].lifeSerial,hitAt=data.hitAt}
+    attributes(player.Character,data);return true
+end
+local function stepRevives(t)
+    for player,data in pairs(records)do
+        local channel=data.revive
+        if not channel then continue end
+        local victim=records[channel.target];local r=root(player.Character);local other=root(channel.target.Character)
+        local alive=player.Parent==Players and channel.target.Parent==Players and victim and victim.downed
+            and data.lifeSerial==channel.life and victim.lifeSerial==channel.targetLife and not data.downed and not data.respawning
+            and not data.grabbedBy and not travelLocked and SHARE_STATES[encounter.status]and r and other
+            and humanoid(player.Character)and humanoid(player.Character).Health>0
+        local distance=alive and Vector2.new(r.Position.X-other.Position.X,r.Position.Z-other.Position.Z).Magnitude or math.huge
+        local moved=alive and(r.Position-channel.position).Magnitude or math.huge
+        if not SurvivalPolicy.CanChannel(t,victim and victim.downedUntil or 0,distance,moved,data.hitAt~=channel.hitAt,alive)then
+            data.revive=nil
+        elseif t-channel.started>=Config.Survival.ReviveDuration then
+            data.revive=nil;victim.lifeSerial+=1
+            victim.stocks,victim.percent=1,Config.Survival.RevivePercent
+            victim.spawnPosition,victim.spawnPercent=other.Position,Config.Survival.RevivePercent
+            victim.downed,victim.downedUntil,victim.downedPosition,victim.respawning=false,nil,nil,false
+            if humanoid(channel.target.Character)and humanoid(channel.target.Character).Health>0 then
+                resetPosition(channel.target,other.Position,Config.Survival.RevivePercent)
+                victim.spawnPosition,victim.spawnPercent=nil,nil
+            else spawnPlayer(channel.target)end
+            fx("Revive",other.Position,{playerUserId=player.UserId,targetUserId=channel.target.UserId,targetModel=channel.target.Character})
+            Combat.BroadcastState()
+        end
+    end
 end
 local function knockOut(model)
     local knockedData, knockedPlayer=recordOf(model)
@@ -359,12 +463,16 @@ local function knockOut(model)
     Telemetry.StockLoss(player)
     data.stocks, data.blocking, data.respawning = math.max(0, data.stocks - 1), false, true
     data.lifeSerial += 1
+    data.revive=nil
     local lifeSerial = data.lifeSerial
     if r then r.Anchored = true end
     if data.stocks <= 0 then
         data.downed, data.respawning = true, false
+        data.downedUntil=now()+Config.Survival.DownedDuration
+        local position=r and r.Position or checkpointPosition
+        data.downedPosition=Vector3.new(math.clamp(position.X,arena.MinX+6,walkingMaxX-2),3,math.clamp(position.Z,Config.LaneMin+2,Config.LaneMax-2))
         attributes(model, data)
-        if r then model:PivotTo(CFrame.new(checkpointPosition + Vector3.new(0, 20, 0))) end
+        if r then model:PivotTo(CFrame.new(data.downedPosition))end
         local h = humanoid(model)
         if h then h.WalkSpeed, h.JumpPower = 0, 0 end
     else
@@ -413,6 +521,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
         data.invulnerableUntil=t+duration
         if breaker then fx("ComboBreaker",r.Position,{targetUserId=victimPlayer.UserId,targetModel=targetModel,duration=duration})end
         data.hitAt = t
+        data.revive=nil
         data.runStats.damageTaken += damage
         Telemetry.Hit(victimPlayer, damage)
         data.contribution += damage + (blocked and 3 or 0)
@@ -493,8 +602,12 @@ local function performAttack(player, action, data)
         if action == "Heavy" or action == "Special" then Destruction.BreakNearby(r.Position + Vector3.new(direction * attack.Range / 2, 0, 0), math.clamp(attack.Width, 8, 14), direction) end
     end)
 end
-local allowedActions = {Light = true, Heavy = true, Special = true, Dash = true, Block = true, Recovery = true, Jump = true, SelectCharacter = true, Restart = true, Ready = true, ShareStock = true}
+local allowedActions = {Light = true, Heavy = true, Special = true, Dash = true, Block = true, Recovery = true, Jump = true, SelectCharacter = true, Restart = true, Ready = true, ShareStock = true, Revive = true}
 local function actionReceived(player, action, payload)
+    -- Cancellation is cheap and cannot grant an action; never lose release to the request throttle.
+    if action=="Revive"and type(payload)=="table"and payload.held==false then
+        local releasing=records[player];if releasing then releasing.revive=nil end;return
+    end
     if travelLocked then return end
     local data = records[player]
     if not data or type(action) ~= "string" or not allowedActions[action] or (payload ~= nil and type(payload) ~= "table") then return end
@@ -503,7 +616,8 @@ local function actionReceived(player, action, payload)
     if t - data.rateStart >= 1 then data.rateStart, data.rateCount = t, 0 end
     data.rateCount += 1
     if data.rateCount > 30 then return end
-    if action == "ShareStock" then Combat.ShareStock(player, payload.targetUserId) return end
+    if action == "Revive"then Combat.Revive(player,payload.held,payload.targetUserId);return end
+    if action == "ShareStock" then data.revive=nil;Combat.ShareStock(player, payload.targetUserId) return end
     if action == "Ready" then
         if admissionValidator then return end -- Only the server arrival gate readies reserved matches.
         if encounter.status == "Waiting" and (payload.ready == nil or type(payload.ready) == "boolean") then
@@ -531,6 +645,7 @@ local function actionReceived(player, action, payload)
     end
     if action == "Block" and payload.held == false then data.blocking = false attributes(player.Character, data) return end
     if data.downed or data.respawning or data.grabbedBy then return end
+    data.revive=nil
     local movementAction = action == "Dash" or action == "Recovery" or action == "Jump"
     if encounter.status ~= "Combat" and not (movementAction and (encounter.status == "Intermission" or encounter.status == "Advance" or encounter.status == "Traverse" or encounter.status == "Waiting")) then return end
     local pressure=difficultyProfile().Pressure
@@ -821,8 +936,8 @@ local function setupCharacter(player, model)
     setVisualIdentity(model, data.hero)
     local preserved = data.preserveSpawn
     data.preserveSpawn = nil
-    resetPosition(player, preserved and preserved.position or data.spawnPosition or checkpointPosition)
-    data.spawnPosition = nil
+    resetPosition(player, preserved and preserved.position or data.spawnPosition or checkpointPosition,data.spawnPercent)
+    data.spawnPosition,data.spawnPercent = nil,nil
     if preserved then
         data.percent, data.invulnerableUntil, data.recovered = preserved.percent, preserved.invulnerableUntil, preserved.recovered
         attributes(model, data)
@@ -831,6 +946,7 @@ local function setupCharacter(player, model)
         data.percent = data.resumeSurvival.percent
         data.stocks = data.resumeSurvival.stocks
         data.downed = data.resumeSurvival.downed
+        data.downedUntil,data.downedPosition=data.resumeSurvival.downedUntil,data.resumeSurvival.downedPosition
         data.resumeSurvival = nil
         attributes(model, data)
     end
@@ -838,7 +954,7 @@ local function setupCharacter(player, model)
         data.downed = true
         r.Anchored = true
         h.WalkSpeed, h.JumpPower = 0, 0
-        model:PivotTo(CFrame.new(checkpointPosition + Vector3.new(0, 20, 0)))
+        model:PivotTo(CFrame.new(data.downedPosition or checkpointPosition))
         attributes(model, data)
     end
     h.Died:Connect(function() if player.Character == model and not data.respawning then knockOut(model) end end)
@@ -877,7 +993,7 @@ local function addPlayer(player)
         local data = records[player]
         data.hero, data.stocks, data.percent, data.downed = Config.NormalizeHeroId(saved.hero), saved.stocks, saved.percent, saved.downed
         data.cooldowns, data.runStats, data.runStart, data.runFinished = saved.cooldowns, saved.runStats, saved.runStart, saved.runFinished
-        data.resumeSurvival = {stocks = saved.stocks, percent = saved.percent, downed = saved.downed}
+        data.resumeSurvival = {stocks = saved.stocks, percent = saved.percent, downed = saved.downed,downedUntil=saved.downedUntil,downedPosition=saved.downedPosition}
     end
     player.CharacterAdded:Connect(function(model) setupCharacter(player, model) end)
     task.spawn(spawnPlayer, player)
@@ -894,7 +1010,7 @@ local function removePlayer(player)
     if count >= MAX_DISCONNECTED_SURVIVORS and oldestId then disconnectedSurvival[oldestId] = nil end
     disconnectedSurvival[player.UserId] = {
         hero = data.hero, stocks = data.stocks, percent = data.respawning and 0 or data.percent,
-        downed = data.downed or data.stocks <= 0, cooldowns = table.clone(data.cooldowns),
+        downed = data.downed or data.stocks <= 0, downedUntil=data.downedUntil,downedPosition=data.downedPosition,cooldowns = table.clone(data.cooldowns),
         runStats = table.clone(data.runStats), runStart = data.runStart, runFinished = data.runFinished,
         disconnectedAt = now(),
     }
@@ -922,6 +1038,7 @@ function Combat.Init()
     local aiAccum, stateAccum = 0, 0
     RunService.Heartbeat:Connect(function(dt)
         local t = now()
+        stepRevives(t)
         for player, data in pairs(records) do
             local model = player.Character
             local r, h = root(model), humanoid(model)

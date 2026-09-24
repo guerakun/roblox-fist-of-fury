@@ -56,3 +56,10 @@ Root owns Config/progression and combat enforces `canBlock`, `canDash`, damage/w
 ## Closing evidence and handoff
 
 Each work order needs independent source review, root's scoped fixture output, PROGRESS evidence and a separate commit/push. M2 baseline comparisons must remain untouched; M3 numbers are captured after authoritative systems and matching HUD contracts land. No source/static UI fixture substitutes for human Normal/Hard/Nightmare playtests, owner art approval, physical input or published permission tests. No publication, sales, live settings or v1.1 backlog is part of this client sequence.
+
+
+## WO-3.2 client implementation checkpoint — 2026-09-24
+
+After root released the M2 freeze and saved M6 focus cleanup as `ee39b9c`, presentation implemented `ReviveControl` and `ReviveHUD`, integrated through CombatHUD. The exact server snapshot is `revive=false` or `{targetUserId,name,canStart,channeling,progress,remaining}`, with `downedRemaining` for the recipient; both remaining values are relative seconds, not clocks to interpolate. Controls are V/L3/contextual pointer hold. Begin sends only held=true and the selected target ID; cancellation sends held=false. Display progress never completes the action locally. Repeated Begin/End, changed target, channel interruption, expired window, downed/end/lobby state, focus/modal changes and character lifecycle cancel the hold. Stock sharing now labels its target `TO`, preserving its separate R/R3 intent.
+
+The rescue controls share the existing bottom HUD row; each is 50 pixels high, with width bounded for a 320-pixel safe frame. Server warning placement and camera calculations are unchanged. `tests/ReviveControl.spec.lua` covers intent/clear/cancellation policy; `tests/ReviveHUDClient.spec.lua` covers actual widgets at 320/360/650/1280 safe widths, touch/desktop layout, modal release, server progress and recipient expiry. These tests are queued for root Studio execution, not yet recorded as passed. Physical touch/controller hold, full-scene occlusion and human co-op readability remain separate gates.

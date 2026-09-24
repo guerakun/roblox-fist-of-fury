@@ -119,7 +119,7 @@ local function waitForRally(stage, token)
     end
     return false
 end
-local function run(startStage, startWave, token)
+local function run(startStage, startWave, token,startingMode)
     for stageNumber = startStage, #Config.Stages do
         if token ~= generation then return end
         local stage = Config.Stages[stageNumber]
@@ -133,7 +133,9 @@ local function run(startStage, startWave, token)
         for gateIndex = 1, #Config.Stages do setGate(gateIndex, gateIndex < stageNumber) end
         setState({status = "Intermission", wave = firstWave - 1, waves = #stage.Waves, enemiesRemaining = 0,
             waveTitle = stage.Name, encounterKind = "Wave", targetX = 0, objective = "PREPARE / NEXT ENCOUNTER", nextWaveAt = workspace:GetServerTimeNow() + 4, resultReason = ""})
-        combat.ResetPlayers(checkpoint)
+        if stageNumber==startStage and startingMode=="Campaign"then combat.ResetPlayers(checkpoint)
+        elseif stageNumber==startStage and startingMode=="Retry"then combat.RetryCheckpoint(checkpoint)
+        else combat.EnterDistrict(checkpoint)end
         fx("StageIntro", stage, {stage = stageNumber, title = stage.Name, subtitle = firstWave > 1 and "CHECKPOINT RESTORED" or "STAY TOGETHER. BREAK THE CURTAIN."})
         if not waitCancelable(4, token) then return end
         for waveNumber = firstWave, #stage.Waves do
@@ -159,7 +161,7 @@ local function run(startStage, startWave, token)
             fx("Wave", stage, {title = wave.Title, role = wave.Kind})
             if not waitForWave(token,pulses,spawnPulse,wave.Pulse) then return end
             awardClear(stageNumber, waveNumber, wave.Kind)
-            if wave.Kind == "Miniboss" then
+            if wave.Kind == "Miniboss" and combat.GetRunRules().midCheckpoint then
                 checkpointStage, checkpointWave = stageNumber, waveNumber + 1
                 local midPosition, midLabel = checkpointFor(stage, waveNumber + 1)
                 combat.SetCheckpoint(midPosition, midLabel)
@@ -172,6 +174,7 @@ local function run(startStage, startWave, token)
                 if not waitForTraverse(stage, stage.Waves[waveNumber + 1], token) then return end
             end
         end
+        combat.CompleteDistrict(campaignId,stageNumber)
         setGate(stageNumber, true)
         fx("StageClear", stage, {title = stage.Name})
         if stageNumber < #Config.Stages then
@@ -184,17 +187,19 @@ local function run(startStage, startWave, token)
 end
 function Encounter.Restart()
     if active or not combat or combat.GetPlayerCount() == 0 then return end
+    local startingMode="Retry"
     if campaignId == "" or status == "Victory" or status == "Waiting" then
+        startingMode="Campaign"
         campaignNumber += 1
         campaignId = (game.JobId ~= "" and game.JobId or HttpService:GenerateGUID(false)) .. ":" .. campaignNumber
         checkpointStage, checkpointWave = 1, 1
-        combat.BeginRun()
+        combat.BeginRun(campaignId)
         if Progression.BeginCampaign then Progression.BeginCampaign(Players:GetPlayers(),campaignId)end
     end
     generation += 1
     active = true
     local token = generation
-    task.spawn(run, checkpointStage, checkpointWave, token)
+    task.spawn(run, checkpointStage, checkpointWave, token,startingMode)
 end
 function Encounter.Init(combatService)
     if initialized then return end
