@@ -2,6 +2,7 @@
 -- DataStore adapter is injected so locking/retries can be tested without live player data.
 local HttpService = game:GetService("HttpService")
 local Config = require(game.ReplicatedStorage.Nightfall.Shared.ProgressionConfig)
+local Heroes = require(game.ReplicatedStorage.Nightfall.Shared.Config)
 local ProfileStore = {}
 ProfileStore.__index = ProfileStore
 local LEASE_SECONDS = 180
@@ -16,12 +17,13 @@ local function integer(value, cap)
     return math.clamp(math.floor(value), 0, cap)
 end
 function ProfileStore.Default()
-    return {version = Config.SchemaVersion, coins = 0, xp = 0, clears = 0,
+    return {version = Config.SchemaVersion, hero = "Gale", coins = 0, xp = 0, clears = 0,
         owned = {None = true}, claimed = {}, premiumClaimed = {}, trail = "None", title = "None", boon = "Guardian"}
 end
 function ProfileStore.Sanitize(raw)
     local data = ProfileStore.Default()
     if type(raw) ~= "table" then return data end
+    data.hero = Heroes.NormalizeHeroId(raw.hero)
     data.coins = integer(raw.coins, 100000000)
     data.xp = integer(raw.xp, 100000000)
     data.clears = integer(raw.clears, 10000000)

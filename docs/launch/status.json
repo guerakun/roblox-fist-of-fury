@@ -1,5 +1,5 @@
 {
-  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. Original-hero migration and world/docs scrub implemented, integration pending. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: integrate WO-1.1, save WO-1.4, continue WO-5.5 and release WO-2.2.",
+  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; world/docs scrub ready to save. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.2 art, WO-1.4 save, WO-2.2 director, and WO-5.5 fixed-count/lifecycle/latency tests.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -21,9 +21,9 @@
     },
     "WO-1.1": {
       "owner": "presentation",
-      "status": "implemented, integration pending",
-      "evidence": "metadata/art keys/client paths plus profile migration in source; independent source review PASS; runtime spec pending",
-      "next": "atomic integration after extraction save"
+      "status": "closed",
+      "evidence": "2026-09-24: Studio HeroMigration spec PASS (stable IDs, old keys/case/defaults, coins and kit values); ProfileStore11calls and EnemyMoves38patterns PASS; world independent review; normal client selection Tide snapshot confirmed",
+      "next": "WO-1.2 original art and WO-1.3 specials; names pending owner approval"
     },
     "WO-1.2": {
       "owner": "presentation",
@@ -52,7 +52,7 @@
     "WO-2.1": {
       "owner": "combat",
       "status": "closed",
-      "evidence": "2026-09-24: 25 legacy/extracted traces, nine caps, clock boundary and EnemyMoves PASS; source structural equivalence reviewed by presentation/world; extraction-seed1101.json Victory265.15s/1stock/448damage (baseline273.32s/1/497)",
+      "evidence": "2026-09-24: 25 legacy/extracted traces, nine caps, clock boundary and EnemyMoves PASS; source structural equivalence reviewed by presentation/world; extraction-seed1101.json Victory265.15s/1stock/448damage (baseline273.32s/1/497); commit b38e04b",
       "next": "WO-1.1 Combat defaults, then WO-2.2 slots/tokens"
     },
     "WO-2.2": {

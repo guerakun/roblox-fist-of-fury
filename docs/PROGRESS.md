@@ -1,6 +1,6 @@
 # Morning summary
 
-M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. Original-hero migration and world/docs scrub implemented, integration pending. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: integrate WO-1.1, save WO-1.4, continue WO-5.5 and release WO-2.2.
+M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; world/docs scrub ready to save. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.2 art, WO-1.4 save, WO-2.2 director, and WO-5.5 fixed-count/lifecycle/latency tests.
 
 ## Launch program status
 
@@ -9,12 +9,12 @@ M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 st
 | WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup; commit ebd49d4, tag pushed | baseline preserved; tag is rollback reference |
 | WO-0.2 | root | closed | 2026-09-24: five fresh seeds 1101-1105; 5/5 clears; mean278.27s, 0.80 stocks, 543 damage; anonymous reports; closing commit be91f0f | release Phase B; compare WO-2.1 extraction seed1101 before syncing M1 changes |
 | WO-0.3 | root (combat handoff after M0) | closed | 2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations; commit c1a037d | hand off telemetry ownership to combat for M2 |
-| WO-1.1 | presentation | implemented, integration pending | metadata/art keys/client paths plus profile migration in source; independent source review PASS; runtime spec pending | atomic integration after extraction save |
+| WO-1.1 | presentation | closed | 2026-09-24: Studio HeroMigration spec PASS (stable IDs, old keys/case/defaults, coins and kit values); ProfileStore11calls and EnemyMoves38patterns PASS; world independent review; normal client selection Tide snapshot confirmed | WO-1.2 original art and WO-1.3 specials; names pending owner approval |
 | WO-1.2 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.3 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.4 | world | implemented, review pending | world/docs scrub and two retired screenshots removed; scoped scan zero; stage signs Ashgate | independent review and commit |
 | WO-1.5 | root | queued | not run | follow launch phase dependencies |
-| WO-2.1 | combat | closed | 2026-09-24: 25 legacy/extracted traces, nine caps, clock boundary and EnemyMoves PASS; source structural equivalence reviewed by presentation/world; extraction-seed1101.json Victory265.15s/1stock/448damage (baseline273.32s/1/497) | WO-1.1 Combat defaults, then WO-2.2 slots/tokens |
+| WO-2.1 | combat | closed | 2026-09-24: 25 legacy/extracted traces, nine caps, clock boundary and EnemyMoves PASS; source structural equivalence reviewed by presentation/world; extraction-seed1101.json Victory265.15s/1stock/448damage (baseline273.32s/1/497); commit b38e04b | WO-1.1 Combat defaults, then WO-2.2 slots/tokens |
 | WO-2.2 | combat | queued | not run | follow launch phase dependencies |
 | WO-2.3 | combat | queued | not run | follow launch phase dependencies |
 | WO-2.4 | combat | queued | not run | follow launch phase dependencies |

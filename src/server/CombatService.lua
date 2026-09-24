@@ -587,7 +587,7 @@ local function setupCharacter(player, model)
 end
 local function addPlayer(player)
     if records[player] then return end
-    records[player] = {hero = "Naruto", percent = 0, stocks = Config.Stocks, cooldowns = {}, stunnedUntil = 0,
+    records[player] = {hero = "Gale", percent = 0, stocks = Config.Stocks, cooldowns = {}, stunnedUntil = 0,
         launchedUntil = 0, invulnerableUntil = 0, busyUntil = 0, selectAt = 0, facing = 1, combo = 0, lastLight = 0,
         blocking = false, guard = 0, downed = false, recovered = false, rateStart = now(), rateCount = 0,
         hitAt = 0, lifeSerial = 0, contribution = 0, ready = false, runStats = freshStats(), runStart = now()}
@@ -595,7 +595,7 @@ local function addPlayer(player)
     if saved then
         disconnectedSurvival[player.UserId] = nil
         local data = records[player]
-        data.hero, data.stocks, data.percent, data.downed = saved.hero, saved.stocks, saved.percent, saved.downed
+        data.hero, data.stocks, data.percent, data.downed = Config.NormalizeHeroId(saved.hero), saved.stocks, saved.percent, saved.downed
         data.cooldowns, data.runStats, data.runStart, data.runFinished = saved.cooldowns, saved.runStats, saved.runStart, saved.runFinished
         data.resumeSurvival = {stocks = saved.stocks, percent = saved.percent, downed = saved.downed}
     end

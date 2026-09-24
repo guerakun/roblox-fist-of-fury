@@ -6,6 +6,7 @@ local ContextActionService = game:GetService("ContextActionService")
 local GuiService = game:GetService("GuiService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Nightfall"):WaitForChild("Shared"):WaitForChild("Config"))
 local HUD = {}
 local function make(class: string, properties: any, parent: Instance?): any
     local item = Instance.new(class)
@@ -328,24 +329,25 @@ function HUD.new(options: any): any
         Position = UDim2.fromOffset(20, 86), Size = UDim2.new(1, -40, 1, -174),
         CanvasSize = UDim2.fromOffset(0, 309), ScrollBarThickness = 4, ScrollBarImageColor3 = colors.cyan,
         ScrollingDirection = Enum.ScrollingDirection.Y}, lobby)
-    local heroDefinitions = {
-        {name = "Naruto", role = "WIND DISCIPLE", special = "SPIRAL BURST", tip = "Balanced reach. Charge a rotating burst.", color = colors.orange},
-        {name = "Luffy", role = "RUBBER VANGUARD", special = "ELASTIC CANNON", tip = "Long reach. Send a stretched fist forward.", color = colors.red},
-        {name = "Tanjiro", role = "TIDE SWORDSMAN", special = "TIDAL ARC", tip = "Wide coverage. Sweep a water crescent.", color = colors.green},
-    }
+    local heroDefinitions = {}
+    for _, id in ipairs(Config.CharacterOrder) do
+        local spec = Config.Characters[id]
+        table.insert(heroDefinitions, {id = id, name = spec.Name, role = spec.Title,
+            special = spec.SpecialName, tip = spec.Tip, color = spec.Color})
+    end
     local lobbyHeroButtons: {[string]: any} = {}
     local lobbyAccept: {[GuiObject]: () -> ()} = {}
     for index, hero in ipairs(heroDefinitions) do
         local card = button(lobbyContent, "", UDim2.fromOffset((index - 1) * 212, 0), UDim2.fromOffset(204, 133))
         local stroke = make("UIStroke", {Color = hero.color, Transparency = 0.7, Thickness = 2}, card)
-        local title = text(card, hero.name:upper(), 21, hero.color, UDim2.fromOffset(13, 12), UDim2.fromOffset(181, 26))
+        local title = text(card, hero.name:upper(), 18, hero.color, UDim2.fromOffset(13, 12), UDim2.fromOffset(181, 26))
         text(card, hero.role, 9, colors.muted, UDim2.fromOffset(14, 43), UDim2.fromOffset(180, 17))
         text(card, hero.special, 10, colors.text, UDim2.fromOffset(14, 67), UDim2.fromOffset(180, 19))
         local tip = text(card, hero.tip, 10, colors.muted, UDim2.fromOffset(14, 89), UDim2.fromOffset(175, 31))
         tip.TextWrapped = true
-        local function choose() options.actionRemote:FireServer("SelectCharacter", {hero = hero.name}) end
+        local function choose() options.actionRemote:FireServer("SelectCharacter", {hero = hero.id}) end
         card.Activated:Connect(choose); lobbyAccept[card] = choose
-        lobbyHeroButtons[hero.name] = {button = card, stroke = stroke, title = title}
+        lobbyHeroButtons[hero.id] = {button = card, stroke = stroke, title = title}
     end
     text(lobbyContent, "HOW TO SURVIVE", 13, colors.text, UDim2.fromOffset(3, 152), UDim2.fromOffset(300, 21))
     local instructions = text(lobbyContent, "MOVE  A/D + W/S   ·   JUMP  SPACE\nLIGHT  J   ·   HEAVY  K   ·   SPECIAL  L\nDASH  Q   ·   HOLD GUARD  F   ·   RECOVER  E", 11, colors.cyan,
@@ -381,13 +383,13 @@ function HUD.new(options: any): any
         return Enum.ContextActionResult.Sink
     end, false, 3101, Enum.KeyCode.ButtonA)
     for index, hero in ipairs(heroDefinitions) do
-        local card = lobbyHeroButtons[hero.name].button
-        card.NextSelectionLeft = lobbyHeroButtons[heroDefinitions[(index - 2) % 3 + 1].name].button
-        card.NextSelectionRight = lobbyHeroButtons[heroDefinitions[index % 3 + 1].name].button
+        local card = lobbyHeroButtons[hero.id].button
+        card.NextSelectionLeft = lobbyHeroButtons[heroDefinitions[(index - 2) % #heroDefinitions + 1].id].button
+        card.NextSelectionRight = lobbyHeroButtons[heroDefinitions[index % #heroDefinitions + 1].id].button
         card.NextSelectionDown = readyButton; card.NextSelectionUp = lobbySettings
     end
-    readyButton.NextSelectionUp = lobbyHeroButtons.Naruto.button
-    lobbySettings.NextSelectionDown = lobbyHeroButtons.Tanjiro.button
+    readyButton.NextSelectionUp = lobbyHeroButtons[Config.CharacterOrder[1]].button
+    lobbySettings.NextSelectionDown = lobbyHeroButtons[Config.CharacterOrder[#Config.CharacterOrder]].button
     local results = make("Frame", {Name = "RunStatistics", BackgroundColor3 = colors.panel, BorderSizePixel = 0,
         Position = UDim2.fromOffset(24, 139), Size = UDim2.fromOffset(372, 108)}, options.ending)
     corners(results, 8)
@@ -471,7 +473,7 @@ function HUD.new(options: any): any
                 local selected = name == state.hero
                 card.stroke.Transparency = selected and 0 or 0.7
                 card.button.BackgroundColor3 = selected and Color3.fromRGB(35, 51, 64) or colors.panel
-                card.title.Text = string.upper(name) .. (selected and "  ✓" or "")
+                card.title.Text = string.upper(Config.Characters[name].Name) .. (selected and "  ✓" or "")
             end
             if enteringLobby and controller and not player:GetAttribute("MenuOpen") and not player:GetAttribute("SettingsOpen") then focusWhenRendered(readyButton) end
         elseif GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(lobby) then GuiService.SelectedObject = nil end

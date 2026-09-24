@@ -21,10 +21,14 @@ local COLORS = {
     cyan = Color3.fromRGB(95, 232, 231), orange = Color3.fromRGB(255, 166, 76),
     red = Color3.fromRGB(255, 92, 112), green = Color3.fromRGB(88, 224, 167),
 }
-local HEROES = { "Naruto", "Luffy", "Tanjiro" }
-local HERO_COLORS = { Naruto = COLORS.orange, Luffy = COLORS.red, Tanjiro = COLORS.green }
-local HERO_MOVES = { Naruto = "SPIRAL BURST", Luffy = "ELASTIC CANNON", Tanjiro = "TIDAL ARC" }
-local snapshot: any = {hero = "Naruto", percent = 0, stocks = 3, stage = 1, wave = 0,
+local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
+local HEROES = Config.CharacterOrder
+local HERO_COLORS, HERO_MOVES = {}, {}
+for _, id in ipairs(HEROES) do
+    HERO_COLORS[id] = Config.Characters[id].Color
+    HERO_MOVES[id] = Config.Characters[id].SpecialName
+end
+local snapshot: any = {hero = "Gale", percent = 0, stocks = 3, stage = 1, wave = 0,
     waves = 3, enemiesRemaining = 0, status = "Waiting", cooldowns = {}}
 local facing = 1
 local humanoid: Humanoid? = nil
@@ -125,14 +129,14 @@ local objectiveLabel = label(encounter, "Clear each arena. Keep moving →", 10,
 local playerPanel = make("Frame", {BackgroundColor3 = COLORS.ink, BackgroundTransparency = 0.05,
     Position = UDim2.new(0, 22, 1, -174), Size = UDim2.fromOffset(280, 151)}, canvas)
 round(playerPanel, 10); outline(playerPanel, COLORS.orange)
-local heroLabel = label(playerPanel, "NARUTO", 17, COLORS.orange, UDim2.fromOffset(15, 10), UDim2.fromOffset(245, 22))
+local heroLabel = label(playerPanel, string.upper(Config.Characters[HEROES[1]].Name), 17, HERO_COLORS[HEROES[1]], UDim2.fromOffset(15, 10), UDim2.fromOffset(245, 22))
 local percentLabel = label(playerPanel, "0%", 46, COLORS.text, UDim2.fromOffset(14, 32), UDim2.fromOffset(170, 55))
 local stocksLabel = label(playerPanel, "● ● ●", 19, COLORS.cyan, UDim2.fromOffset(180, 47), UDim2.fromOffset(86, 28))
 local damageHint = label(playerPanel, "HIGHER % = BIGGER LAUNCH", 9, COLORS.muted, UDim2.fromOffset(16, 85), UDim2.fromOffset(249, 15))
 local heroButtons: {[string]: TextButton} = {}
 for index, hero in ipairs(HEROES) do
-    local button = make("TextButton", {Name = hero, Text = tostring(index) .. "  " .. string.upper(hero),
-        TextColor3 = HERO_COLORS[hero], TextSize = 10, Font = Enum.Font.GothamBold,
+    local button = make("TextButton", {Name = hero, Text = tostring(index) .. "  " .. string.upper(Config.Characters[hero].Name),
+        TextScaled = true, TextWrapped = true, TextColor3 = HERO_COLORS[hero], TextSize = 10, Font = Enum.Font.GothamBold,
         AutoButtonColor = true, BackgroundColor3 = COLORS.panel, BorderSizePixel = 0,
         Position = UDim2.fromOffset(12 + (index - 1) * 87, 110), Size = UDim2.fromOffset(82, 29)}, playerPanel)
     round(button, 5); heroButtons[hero] = button
@@ -158,7 +162,7 @@ end
 local moveLabel = label(canvas, "A D  MOVE    W S  DEPTH    SPACE  JUMP / DOUBLE JUMP", 10, COLORS.muted,
     UDim2.new(1, -490, 1, -126), UDim2.fromOffset(468, 20))
 moveLabel.TextXAlignment = Enum.TextXAlignment.Right
-local moveName = label(canvas, "SPIRAL BURST", 12, COLORS.cyan, UDim2.new(1, -490, 1, -149), UDim2.fromOffset(468, 20))
+local moveName = label(canvas, HERO_MOVES[HEROES[1]], 12, COLORS.cyan, UDim2.new(1, -490, 1, -149), UDim2.fromOffset(468, 20))
 moveName.TextXAlignment = Enum.TextXAlignment.Right
 local toastLabel = label(canvas, "", 22, COLORS.text, UDim2.new(0.5, -280, 0, 139), UDim2.fromOffset(560, 35))
 toastLabel.TextXAlignment = Enum.TextXAlignment.Center
@@ -411,9 +415,9 @@ end
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed or player:GetAttribute("MenuOpen") or player:GetAttribute("SettingsOpen") then return end
     heldKeys[input.KeyCode] = true
-    if input.KeyCode == Enum.KeyCode.One then actionRemote:FireServer("SelectCharacter", {hero = "Naruto"})
-    elseif input.KeyCode == Enum.KeyCode.Two then actionRemote:FireServer("SelectCharacter", {hero = "Luffy"})
-    elseif input.KeyCode == Enum.KeyCode.Three then actionRemote:FireServer("SelectCharacter", {hero = "Tanjiro"})
+    if input.KeyCode == Enum.KeyCode.One then actionRemote:FireServer("SelectCharacter", {hero = HEROES[1]})
+    elseif input.KeyCode == Enum.KeyCode.Two then actionRemote:FireServer("SelectCharacter", {hero = HEROES[2]})
+    elseif input.KeyCode == Enum.KeyCode.Three then actionRemote:FireServer("SelectCharacter", {hero = HEROES[3]})
     elseif input.KeyCode == Enum.KeyCode.R and ending.Visible then actionRemote:FireServer("Restart", {})
     elseif input.KeyCode == Enum.KeyCode.DPadRight or input.KeyCode == Enum.KeyCode.DPadLeft then
         local current = table.find(HEROES, snapshot.hero) or 1
@@ -488,19 +492,10 @@ local specialEffects: {any} = {}
 local specialConnection: RBXScriptConnection? = nil
 local function startSpecial(position: Vector3, hero: string, direction: number): boolean
     if preferences.effects <= 0 or #specialEffects >= 8 or activeEffects >= 24 then return false end
-    if hero ~= "Naruto" and hero ~= "Luffy" and hero ~= "Tanjiro" then return false end
+    if hero ~= "Gale" and hero ~= "Piston" and hero ~= "Tide" then return false end
     direction = direction >= 0 and 1 or -1
-    local windup, reach = 0.22, 15
-    if hero == "Luffy" then windup, reach = 0.38, 23
-    elseif hero == "Tanjiro" then windup, reach = 0.18, 12 end
-    -- Match current balancing without making imported visual code part of damage execution.
-    local shared = package:FindFirstChild("Shared")
-    local configModule = shared and shared:FindFirstChild("Config")
-    if configModule and configModule:IsA("ModuleScript") then
-        local ok, config = pcall(require, configModule)
-        local spec = ok and config.Characters and config.Characters[hero]
-        if spec then windup = spec.Special.Windup; reach = spec.Special.Range end
-    end
+    local spec = Config.Characters[hero]
+    local windup, reach = spec.Special.Windup, spec.Special.Range
     local holder = Instance.new("Folder")
     holder.Name = hero .. "Special"
     holder.Parent = effectsFolder
@@ -522,7 +517,7 @@ local function startSpecial(position: Vector3, hero: string, direction: number):
             Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.12), NumberSequenceKeypoint.new(1, 1)})}, part)
     end
     local update: (number) -> ()
-    if hero == "Naruto" then
+    if hero == "Gale" then
         local core = piece(Color3.fromRGB(212, 252, 255), Vector3.one * 0.5, Enum.PartType.Ball)
         local shell = piece(Color3.fromRGB(58, 200, 255), Vector3.one * 0.8, Enum.PartType.Ball)
         shell.Transparency = 0.65
@@ -547,7 +542,7 @@ local function startSpecial(position: Vector3, hero: string, direction: number):
                 dot.Transparency = fade
             end
         end
-    elseif hero == "Luffy" then
+    elseif hero == "Piston" then
         local skin = Color3.fromRGB(242, 181, 137)
         local fist = piece(skin, Vector3.new(1.65, 1.55, 1.5), Enum.PartType.Ball)
         fist.Material = Enum.Material.SmoothPlastic
@@ -836,7 +831,7 @@ stateRemote.OnClientEvent:Connect(function(state: any)
     for key, value in pairs(state) do snapshot[key] = value end
     local hero = snapshot.hero
     local color = HERO_COLORS[hero] or COLORS.cyan
-    heroLabel.Text = string.upper(hero); heroLabel.TextColor3 = color
+    heroLabel.Text = string.upper((Config.Characters[hero] or Config.Characters[HEROES[1]]).Name); heroLabel.TextColor3 = color
     local percent = math.floor(snapshot.percent or 0)
     percentLabel.Text = tostring(percent) .. "%"
     percentLabel.TextColor3 = percent >= 100 and COLORS.red or (percent >= 60 and COLORS.orange or COLORS.text)
