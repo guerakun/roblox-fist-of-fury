@@ -1,0 +1,16 @@
+# Frozen M3 combat stills: scene and HUD readability
+
+2026-09-24. Independent world review of two direct root Studio captures from production source `dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4`. No camera, world or action overrides were used for these captures. Both supplied images are775x356 pixels. This is a bounded still-image review, not a motion-comfort, combat fairness, device performance or final-quality verdict. No production change is proposed for the active15-trial freeze.
+
+| Actual scene | Evidence | Scope |
+|---|---|---|
+| City, Normal1102 wave3 | [City combat](evidence/m3-live-city-combat.jpg) | Two enemies remain; player at103 percent. Keyboard captions appear alongside virtual joystick and touch-sized controls. |
+| Factory, Normal1103 wave1 | [Factory combat](evidence/m3-live-factory-combat.jpg) | Two enemies remain; player at197 percent. The originally intended station capture had already progressed to the factory; the image is correctly labeled factory. |
+
+The city has a clear urban identity through storefronts, signals, street lamps and a crossing. The cyan crossing/windows carry the strongest values in the frame, while the small pale player stands against the crossing. The centered CURSES INCOMING toast intersects the immediate character/action area. Percent, stocks and enemy names/bars are legible in this still, but their panels and the six action tiles leave limited open vertical space. Keyboard captions and the simultaneously visible joystick illustrate the source-diagnosed active-input mismatch described in [the proposed M6 input work](M6_INPUT_READABILITY_PLAN.md).
+
+The factory has a distinct warmer identity: rust-colored walls, a bright furnace, elevated rails, machinery and hazard stripes. Its dark floor gives the pale cyan player outline better local separation than the city crossing does. The large dark enemy beside the hero is identifiable by its body and nameplate, while fine clothing and facial detail remain too small to judge. The197-percent health panel and remaining-enemy counter are readable. STYLE+40 sits directly above the player, and the right-side enemy bar shares a crowded region with the large action controls. The joystick and action row still occupy much of the lower viewport. These observations do not establish the timing or readability of every attack warning, hit effect or incoming wave cue.
+
+After the freeze, compare any proposed contrast changes with these unchanged originals. A separate world/presentation pass may reduce competition from decorative crossing/window/furnace values while preserving stage identity and keeping critical tells dominant. Input-mode and short-height HUD changes have their own scoped proposal; they do not authorize camera reframing. Evaluate toast placement against real action and telegraph locations before choosing a change. Do not weaken or hide critical warnings to make screenshots cleaner.
+
+Required follow-up remains representative station combat, all three heroes in action, miniboss/boss warnings, four-player crowd/effect overlap, actual touch/controller reachability and minimum-device frame time. Still-image character size, a visible outline or a readable counter cannot substitute for those checks. Owner art approval and the original reference-quality target remain open.
