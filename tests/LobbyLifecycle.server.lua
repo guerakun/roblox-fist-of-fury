@@ -14,6 +14,10 @@ end
 task.delay(180,function()finish('deadline')end)
 local worked,err=xpcall(function()
     await('two clients initialized',function()local ps=P:GetPlayers()if #ps~=2 then return false end for _,p in ipairs(ps)do if not hello[p]or not C.GetSnapshot(p)or not p.Character then return false end end return true end,45)
+    assert(type(args.sourceCommit)=='string'and #args.sourceCommit>0,'Pass frozen sourceCommit provenance')
+    result.sourceCommit=args.sourceCommit;result.difficulty='Normal';result.heat={}
+    assert(C.GetRunStatus()=='Waiting'and C.SetRunOptions('Normal',{}),'Fresh unmanaged lobby required')
+    task.wait(2)
     local ps=P:GetPlayers()local a,b=ps[1],ps[2]local oldIds={[a.UserId]=true,[b.UserId]=true}
     qa:FireClient(a,'Ready',true)
     await('one ready waits',function()return C.GetReadyCount()==1 and C.GetRunStatus()=='Waiting'end,5)
@@ -42,7 +46,15 @@ local worked,err=xpcall(function()
     T:AddPlayers(1)
     await('fresh identity joins reset lobby',function()
         local p=P:GetPlayers()[1]local s=p and C.GetSnapshot(p)
-        return s and not oldIds[p.UserId] and hello[p]and s.stage==1 and s.wave==0 and s.status=='Waiting'and s.readyCount==0 and s.stocks==Config.Stocks and s.percent==0 and s.runStats.damageTaken==0
+        return s and not oldIds[p.UserId] and hello[p]and s.stage==1 and s.wave==0 and s.status=='Waiting'and s.readyCount==0 and s.stocks==Config.Stocks and s.percent==0 and s.runStats.damageTaken==0 and s.difficulty=='Normal'and #s.heat==0 and s.style.score==0
+            and s.districtResult==false and s.districtReceipt==false
     end,40)
+    local options=C.GetRunOptions()
+    assert(not options.locked and not options.admissionLocked,'Unmanaged empty lobby should release its run lock')
+    for _,gate in ipairs(workspace.NightfallCity.Gates:GetChildren())do
+        if gate:IsA('BasePart')then assert(gate:GetAttribute('Opened')==false,'Fresh lobby curtain remained open')end
+    end
+    table.insert(result.assertions,'empty unmanaged server clears score, results, options lock and gates')
+    result.managedAdmissionResetCoveredHere=false -- Sticky published admission has its own Heat/admission fixture.
 end,debug.traceback)
 if worked then finish()else finish(tostring(err))end

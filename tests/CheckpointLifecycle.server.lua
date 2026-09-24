@@ -15,12 +15,27 @@ end
 task.delay(300,function()finish('deadline')end)
 local worked,err=xpcall(function()
     await('two clients initialized',function()if #P:GetPlayers()~=2 then return false end for _,p in ipairs(P:GetPlayers())do if not hello[p]or not C.GetSnapshot(p)or Progression.GetSnapshot(p).loading then return false end end return true end,45)
+    assert(type(args.sourceCommit)=='string'and #args.sourceCommit>0,'Pass frozen sourceCommit provenance')
+    result.sourceCommit=args.sourceCommit;result.difficulty='Normal';result.heat={}
+    assert(C.GetRunStatus()=='Waiting'and C.SetRunOptions('Normal',{}),'Fresh unmanaged Normal lobby required')
+    task.wait(2)
     local ps=P:GetPlayers()local a,b=ps[1],ps[2]
+    local districts={};for _,p in ipairs(ps)do districts[p]={}end
+    local function observe(s,p)
+        assert(s.difficulty=='Normal'and #s.heat==0,'Run options changed')
+        if type(s.districtResult)=='table'then
+            local entry=districts[p][s.stage]
+            if entry then assert(entry.id==s.districtResult.id and entry.score==s.districtResult.score and entry.rank==s.districtResult.rank,'Frozen result changed')
+            else entry={id=s.districtResult.id,score=s.districtResult.score,rank=s.districtResult.rank};districts[p][s.stage]=entry end
+            if type(s.districtReceipt)=='table'then assert(s.districtReceipt.resultId==entry.id,'Receipt identity');entry.receipt=table.clone(s.districtReceipt)end
+        end
+    end
     qa:FireClient(a,'Ready',true)qa:FireClient(b,'Ready',true)
     local function driveUntil(label,predicate,seconds)
         local deadline=os.clock()+seconds
         repeat
             local snap=C.GetSnapshot(a)
+            for _,p in ipairs(ps)do observe(C.GetSnapshot(p),p)end
             if predicate(snap)then table.insert(result.assertions,label)return end
             for enemy in pairs(C.GetEnemies())do
                 C.ApplyHit(a,enemy,{Damage=1,Knockback=0,Growth=0,Lift=0,Stun=0},1)
@@ -32,8 +47,12 @@ local worked,err=xpcall(function()
             task.wait(.1)
         until os.clock()>deadline error(label..' timed out')
     end
-    driveUntil('cleared miniboss and wave3 before boss',function(s)return s.stage==1 and s.wave==4 and s.status=='Combat'end,90)
+    driveUntil('wave3 score committed before boss',function(s)return s.stage==1 and s.wave==3 and s.status=='Intermission'end,90)
+    local committed={C.GetSnapshot(a).style.score,C.GetSnapshot(b).style.score}
+    assert(committed[1]>0 and committed[2]>0,'Both clients must have eligible committed score')
+    driveUntil('cleared miniboss and wave3 before boss' ,function(s)return s.stage==1 and s.wave==4 and s.status=='Combat'end,90)
     local before={Progression.GetSnapshot(a).coins,Progression.GetSnapshot(b).coins}
+    local beforeXP={Progression.GetSnapshot(a).xp,Progression.GetSnapshot(b).xp}
     local enemy for m,d in pairs(C.GetEnemies())do enemy=m d.stunnedUntil=workspace:GetServerTimeNow()+120 d.attackAt=d.stunnedUntil end
     assert(enemy,'boss exists for registered test damage')
     local deadline=os.clock()+35
@@ -47,19 +66,32 @@ local worked,err=xpcall(function()
     await('full party wipe produces Defeat',function()return C.GetRunStatus()=='Defeat'end,10)
     qa:FireClient(b,'Restart')
     await('retry restores mid-district checkpoint',function()
-        for _,p in ipairs(ps)do local s=C.GetSnapshot(p)if not(s.status=='Intermission'and s.stage==1 and s.wave==2 and s.stocks==(Config.RetryStocks or Config.Stocks)and s.percent==0 and not s.downed)then return false end end return true
+        for _,p in ipairs(ps)do local s=C.GetSnapshot(p)if not(s.status=='Intermission'and s.stage==1 and s.wave==2 and s.stocks==math.min(Config.Survival.RetryStocks,C.GetRunRules().stockCap)and s.percent==0 and not s.downed
+            and s.style.multiplier==1 and s.style.progress==0)then return false end end return true
     end,10)
+    for index,p in ipairs(ps)do assert(C.GetSnapshot(p).style.score==committed[index],'Retry lost or duplicated completed-wave best score')end
+    table.insert(result.assertions,'retry resets multiplier while retaining completed-wave best score')
     driveUntil('retry resumes wave3 and reaches boss again',function(s)return s.stage==1 and s.wave==4 and s.status=='Combat'end,40)
-    assert(Progression.GetSnapshot(a).coins==before[1]and Progression.GetSnapshot(b).coins==before[2],'checkpoint replay paid duplicate encounter rewards')
+    assert(Progression.GetSnapshot(a).coins==before[1]and Progression.GetSnapshot(b).coins==before[2]
+        and Progression.GetSnapshot(a).xp==beforeXP[1]and Progression.GetSnapshot(b).xp==beforeXP[2],'checkpoint replay paid duplicate encounter rewards')
     table.insert(result.assertions,'same-campaign cleared encounter pays no duplicate coins')
     driveUntil('full campaign reaches Victory',function(s)return s.status=='Victory'end,140)
+    for _,p in ipairs(ps)do
+        observe(C.GetSnapshot(p),p)
+        for stage=1,3 do assert(districts[p][stage]and districts[p][stage].receipt,'Missing rank result/receipt at Victory')end
+    end
+    result.districts={districts[a],districts[b]}
     local victoryCoins={Progression.GetSnapshot(a).coins,Progression.GetSnapshot(b).coins}
+    -- Clear observer history for the next run; this fixture stops before its first district result.
+    districts[a],districts[b]={},{}
     qa:FireClient(a,'Restart')
     await('fresh campaign resets run state',function()
-        for _,p in ipairs(ps)do local s=C.GetSnapshot(p)if not(s.status=='Intermission'and s.stage==1 and s.wave==0 and s.stocks==Config.Stocks and s.percent==0 and not s.downed and s.runStats.damageTaken==0 and s.runStats.coinsEarned==0)then return false end end return true
+        for _,p in ipairs(ps)do local s=C.GetSnapshot(p)if not(s.status=='Intermission'and s.stage==1 and s.wave==0 and s.stocks==Config.Stocks and s.percent==0 and not s.downed and s.runStats.damageTaken==0 and s.runStats.coinsEarned==0 and s.style.score==0 and s.style.multiplier==1 and s.style.progress==0
+            and s.districtResult==false and s.districtReceipt==false)then return false end end return true
     end,10)
     driveUntil('fresh campaign clears first encounter',function(s)return s.stage==1 and s.wave==1 and s.status=='Intermission'end,30)
     assert(Progression.GetSnapshot(a).coins>victoryCoins[1]and Progression.GetSnapshot(b).coins>victoryCoins[2],'fresh campaign did not receive new reward keys')
     table.insert(result.assertions,'new campaign legitimately awards same content again')
+    result.realReconnectVerified=false;result.newDistrictResultIdentityVerified=false
 end,debug.traceback)
 if worked then finish()else finish(tostring(err))end

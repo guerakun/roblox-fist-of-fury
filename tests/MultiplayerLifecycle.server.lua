@@ -7,6 +7,7 @@ if not ok or type(args)~='table' or args.test~='CurtainBreakLifecycle' then retu
 local P=game.Players
 local C=require(game.ServerScriptService.NightfallServer.CombatService)
 local R=game.ReplicatedStorage
+local Config=require(R.Nightfall.Shared.Config)
 local qa=Instance.new('RemoteEvent',R) qa.Name='NightfallCampaignQA' qa:SetAttribute('TestName','NightfallMultiplayerCampaign')
 local hellos={} qa.OnServerEvent:Connect(function(p,kind) if kind=='Hello' then hellos[p]=true end end)
 local result={test=args.test,assertions={},blocked={},passed=false}
@@ -33,12 +34,22 @@ local function run()
         for _,p in ipairs(P:GetPlayers()) do if not C.GetSnapshot(p) or not p.Character or not p.Character:FindFirstChild('HumanoidRootPart') then return false end end
         return true
     end,50),'clients initialized')
+    assert(type(args.sourceCommit)=='string'and #args.sourceCommit>0,'Pass frozen sourceCommit provenance')
+    result.sourceCommit=args.sourceCommit;result.difficulty='Normal';result.heat={}
+    task.wait(2) -- CharacterAdded setup can still finish after the first snapshot.
     local players=P:GetPlayers() table.sort(players,function(a,b)return a.UserId<b.UserId end)
     local a,b=players[1],players[2]
     -- Isolate survival/stock transfer from automatic campaign advances.
     C.SetReadyCallback(function()end)
-    C.SetEncounterState({status='Intermission',wave=0})
-    local enemy=C.SpawnEnemy('Grunt',Vector3.new(70,4,0),1)
+    C.ClearEnemies();C.ResetLobby();C.SetEncounterState({status='Waiting',wave=0})
+    assert(C.SetRunOptions('Normal',{}))
+    local campaign='lifecycle:'..game:GetService('HttpService'):GenerateGUID(false)
+    C.BeginRun(campaign);C.SetArena(Config.Stages[1],1);C.SetWalkingLimit(170)
+    C.SetCheckpoint(Vector3.new(90,4,0),'LIFECYCLE FIXTURE')
+    C.ResetPlayers(Vector3.new(90,4,0));C.SetEncounterState({status='Intermission',wave=0})
+    local enemy=C.SpawnEnemy('Husk',Vector3.new(85,0,0),1)
+    enemy.HumanoidRootPart.Anchored=true
+    task.wait(2.2)
     local function hit(player,damage)
         assert(await(function() return C.ApplyHit(enemy,player,{Damage=damage,Stun=0,Knockback=0,Growth=0,Lift=0},1) end,8),'accepted test hit')
     end
@@ -56,10 +67,23 @@ local function run()
     check('stock transfer conserves total',sa.stocks+sb.stocks==before,{before=before,after=sa.stocks+sb.stocks})
     check('recipient restored once',sa.stocks==1 and not sa.downed and sa.percent==0 and not a.Character.HumanoidRootPart.Anchored)
     check('duplicate transfer rejected',not C.ShareStock(b,a.UserId))
-    C.SetArena(require(R.Nightfall.Shared.Config).Stages[2],2)
-    C.ResetPlayers(Vector3.new(230,4,0))
-    check('baseline district reset stocks and percent',C.GetSnapshot(a).stocks==3 and C.GetSnapshot(a).percent==0 and C.GetSnapshot(b).stocks==3)
-    enemy=C.SpawnEnemy('Grunt',Vector3.new(270,4,0),1)
+    -- Real accepted damage, then a one-time earned clear. Travel itself grants nothing.
+    hit(a,40);hit(b,40)
+    local damagedA,damagedB=C.GetSnapshot(a),C.GetSnapshot(b)
+    check('registered damage retained before clear',damagedA.percent>15 and damagedB.percent>15)
+    check('district clear accepted once',C.CompleteDistrict(campaign,1))
+    local clearedA,clearedB=C.GetSnapshot(a),C.GetSnapshot(b)
+    check('district clear adds one stock and heals fifteen',
+        clearedA.stocks==math.min(3,damagedA.stocks+1)and clearedB.stocks==math.min(3,damagedB.stocks+1)
+        and clearedA.percent==math.max(0,damagedA.percent-15)and clearedB.percent==math.max(0,damagedB.percent-15))
+    check('duplicate district clear rejected',not C.CompleteDistrict(campaign,1))
+    check('duplicate clear has no survival benefit',C.GetSnapshot(a).percent==clearedA.percent and C.GetSnapshot(a).stocks==clearedA.stocks
+        and C.GetSnapshot(b).percent==clearedB.percent and C.GetSnapshot(b).stocks==clearedB.stocks)
+    C.ClearEnemies();C.SetArena(Config.Stages[2],2);C.SetWalkingLimit(300)
+    C.SetCheckpoint(Vector3.new(230,4,0),'DISTRICT TRAVEL FIXTURE');C.EnterDistrict(Vector3.new(230,4,0))
+    check('new district preserves stocks and percent',C.GetSnapshot(a).stocks==clearedA.stocks and C.GetSnapshot(a).percent==clearedA.percent
+        and C.GetSnapshot(b).stocks==clearedB.stocks and C.GetSnapshot(b).percent==clearedB.percent)
+    enemy=C.SpawnEnemy('Husk',Vector3.new(225,0,0),1);enemy.HumanoidRootPart.Anchored=true
     hit(a,25)
     local beforeLeave=C.GetSnapshot(a)
     local oldId=a.UserId
@@ -78,7 +102,7 @@ local function run()
         check('new identity gets first-join stocks',C.GetSnapshot(replacement).stocks==3)
     end
     result.identityReused=replacement.UserId==oldId
-    result.coverage='Stock transfer conservation, KO/downed state, baseline district reset, real disconnect/replacement. Full campaign ready/late membership covered by separate harness. Other lifecycle assertions remain explicitly unverified.'
+    result.coverage='Stock transfer conservation, KO/downed state, one-time earned district benefit and survival-preserving travel, real disconnect/replacement. Scripted accepted hits; no human difficulty or same-identity reconnect claim unless identityReused=true.'
 end
 local success,err=xpcall(run,debug.traceback)
 if success then finish() else finish(tostring(err)) end

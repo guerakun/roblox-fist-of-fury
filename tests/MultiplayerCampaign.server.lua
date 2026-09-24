@@ -1,6 +1,6 @@
 -- TEST ONLY: install temporarily in ServerScriptService, never in the Rojo tree.
 -- Install MultiplayerDriver.client.lua in StarterPlayerScripts first, then launch:
--- StudioTestService:ExecuteMultiplayerTestAsync(2,{test="NightfallMultiplayerCampaign",timeout=600})
+-- StudioTestService:ExecuteMultiplayerTestAsync(2,{test="NightfallMultiplayerCampaign",timeout=600,initialPlayers=2,latePlayers=0,sourceCommit="<frozen commit>"})
 -- API: https://create.roblox.com/docs/reference/engine/classes/StudioTestService
 local RunService = game:GetService("RunService")
 if not RunService:IsStudio() or not RunService:IsServer() then return end
@@ -25,7 +25,8 @@ qa.Name = "NightfallCampaignQA"
 qa:SetAttribute("TestName", args.test)
 qa.Parent = ReplicatedStorage
 local hellos, clientReports, slots, initialPlayers = {}, {}, {}, {}
-local Combat
+local Combat, Progression
+local m3Players={}
 local function snapshot(player)
     return Combat and player and Combat.GetSnapshot(player)
 end
@@ -34,6 +35,36 @@ local function state()
         local value=snapshot(player)
         if value then return value end
     end
+end
+local function observeM3(player)
+    local snap=snapshot(player)
+    if not snap then return end
+    local record=m3Players[player]
+    if not record then
+        local profile=Progression.GetSnapshot(player)
+        assert(profile.loading~=true,"Observe M3 only after profile load")
+        record={initialCoins=profile.coins,initialXP=profile.xp,districts={}}
+        m3Players[player]=record
+    end
+    assert(snap.difficulty=="Normal"and #snap.heat==0,"Fixed Normal/no-Heat options changed")
+    local style=snap.style
+    assert(type(style)=="table"and style.score>=0 and style.multiplier>=1 and style.multiplier<=4
+        and style.progress>=0 and style.progress<=1,"Invalid authoritative style snapshot")
+    local district,receipt=snap.districtResult,snap.districtReceipt
+    if type(district)=="table"then
+        assert(district.stage==snap.stage and district.difficulty=="Normal"and #district.heat==0,"Wrong district result context")
+        local prior=record.districts[district.stage]
+        if prior then
+            for _,key in ipairs({"id","rank","score","duration","damageTaken","bossDamageTaken"})do
+                assert(prior.result[key]==district[key],"Immutable district result changed: "..key)
+            end
+        else prior={result=table.clone(district)};record.districts[district.stage]=prior end
+        if type(receipt)=="table"then
+            assert(receipt.resultId==district.id,"Receipt/result identity mismatch")
+            assert(not prior.receipt or receipt.revision>=prior.receipt.revision,"Receipt revision regressed")
+            prior.receipt=table.clone(receipt)
+        end
+    else assert(district==false and receipt==false,"Expired district state must explicitly clear")end
 end
 local function check(name, passed, detail)
     table.insert(result.assertions,{name=name,passed=passed==true,detail=detail})
@@ -50,7 +81,7 @@ local function finish(reason)
     result.connectedPlayers=#Players:GetPlayers()
     for _, player in ipairs(Players:GetPlayers()) do
         local key=tostring(player.UserId)
-        result.clients[key]={name=player.Name,slot=slots[player],server=snapshot(player),driver=clientReports[player]}
+        result.clients[key]={name=player.Name,slot=slots[player],server=snapshot(player),driver=clientReports[player],m3=m3Players[player]}
     end
     result.passed=reason=="Victory" and #result.failures==0
     qa:FireAllClients({kind="Stop"})
@@ -83,7 +114,7 @@ local function command(player,packet)
 end
 local function allReadyForTest(players)
     for _,player in ipairs(players) do
-        if not hellos[player] or not snapshot(player) or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return false end
+        if not hellos[player] or (Progression and Progression.GetSnapshot(player).loading) or not snapshot(player) or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return false end
     end
     return true
 end
@@ -100,6 +131,12 @@ local function run()
     local server=game.ServerScriptService:WaitForChild("NightfallServer",30)
     if not server then error("NightfallServer missing") end
     Combat=require(server:WaitForChild("CombatService",15))
+    Progression=require(server.ProgressionService)
+    assert(type(args.sourceCommit)=="string"and #args.sourceCommit>0,"Pass frozen sourceCommit provenance")
+    assert(Combat.GetRunStatus()=="Waiting"and Combat.SetRunOptions("Normal",{}),"Fresh unmanaged Normal lobby required")
+    result.provenance={sourceCommit=args.sourceCommit,difficulty="Normal",heat={},initialPlayers=initialCount,latePlayers=lateCount,
+        inputPolicy="existing MultiplayerDriver (not HumanBot)",humanDifficultyVerified=false}
+
     if not awaitCondition("all initial client drivers",function()
         local players=Players:GetPlayers()
         return #players==initialCount and allReadyForTest(players)
@@ -113,6 +150,7 @@ local function run()
     if not awaitCondition("different heroes selected",function()
         for index,player in ipairs(initialPlayers) do if snapshot(player).hero~=heroIds[(index-1)%#heroIds+1] then return false end end return true
     end,20) then return end
+    for _,player in ipairs(initialPlayers)do observeM3(player)end
     check("configured hero selections match assignments",true,initialCount)
     if not check("initial waiting state",state().status=="Waiting",state().status) then finish("Unexpected initial state");return end
     command(initialPlayers[1],{kind="Ready"})
@@ -141,6 +179,9 @@ local function run()
     local lateTaskError
     while not done do
         local current=state()
+        for _,player in ipairs(Players:GetPlayers())do
+            if snapshot(player)and Progression.GetSnapshot(player).loading~=true then observeM3(player)end
+        end
         if not current then error("All server player records disappeared") end
         local transition=current.stage..":"..current.wave..":"..current.status
         if transition~=lastTransition then
@@ -179,7 +220,7 @@ local function run()
                                 if snap and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and not checkedStocks[player] then
                                     checkedStocks[player]=true
                                     table.insert(result.lateJoin.players,{userId=player.UserId,name=player.Name,stocks=snap.stocks,percent=snap.percent})
-                                    check("late client starts with three stocks: "..player.Name,snap.stocks==3,snap.stocks)
+                                    check("late client starts with three stocks: "..player.Name,snap.stocks==math.min(Config.Stocks,Combat.GetRunRules().stockCap),snap.stocks)
                                 end
                             end
                         end
@@ -190,6 +231,7 @@ local function run()
                     table.sort(late,function(a,b)return a.UserId<b.UserId end)
                     for index,player in ipairs(late) do
                         slots[player]=index+initialCount
+                        observeM3(player) -- Capture loaded balances before this late driver can contribute.
                         command(player,{kind="Setup",slot=index+initialCount,hero=heroIds[1]})
                         command(player,{kind="Drive",enabled=true})
                     end
@@ -213,6 +255,24 @@ local function run()
             check("all twelve encounters observed",#result.encounters==12,#result.encounters)
             check("late join scenario completed or disabled",lateCount==0 or lateComplete,lateComplete)
             check("expected clients remain at victory",#Players:GetPlayers()==expectedTotal and Combat.GetPlayerCount()==expectedTotal,Combat.GetPlayerCount())
+            task.wait(.3)
+            for _,player in ipairs(Players:GetPlayers())do
+                observeM3(player)
+                local record=m3Players[player]
+                local coins,xp=0,0
+                for stage=1,3 do
+                    local district=record.districts[stage]
+                    assert(district and district.receipt,"Missing district result/receipt for "..player.Name..":"..stage)
+                    local receipt=district.receipt
+                    coins+=receipt.basePaidCoins+receipt.coins+(receipt.bountyCoins or 0)
+                    xp+=receipt.basePaidXP+receipt.xp+(receipt.bountyXP or 0)
+                end
+                local profile=Progression.GetSnapshot(player)
+                check("three district receipts reconcile: "..player.Name,coins==snapshot(player).runStats.coinsEarned
+                    and coins==profile.coins-record.initialCoins and xp==profile.xp-record.initialXP,
+                    {receiptCoins=coins,runCoins=snapshot(player).runStats.coinsEarned,coinDelta=profile.coins-record.initialCoins,
+                        receiptXP=xp,xpDelta=profile.xp-record.initialXP})
+            end
             qa:FireAllClients({kind="ReportNow"})
             awaitCondition("all clients converge to final Victory",function()
                 for _,player in ipairs(Players:GetPlayers()) do

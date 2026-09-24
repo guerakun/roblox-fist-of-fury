@@ -19,7 +19,8 @@ local frames,totalDt,maxDt,longFrames=0,0,0,0
 local lastAction,lastJump,lastReport,lastReady,lastSelect,lastHello=0,0,0,0,0,0
 local previous=""
 local tells={}
-local function tellKey(packet)return tostring(packet.position)..":"..tostring(packet.enemy)..":"..tostring(packet.mechanic)end
+-- Per-owner tables prevent identical simultaneous footprints from sharing an observation key.
+local function tellKey(packet)return tostring(packet.moveId)..":"..tostring(packet.position)..":"..tostring(packet.size)..":"..tostring(packet.mechanic)end
 local timing={pairs=0,earlyImpacts=0,minDelta=nil,maxDelta=nil,sumDelta=0}
 local function send(action,payload)
     actionCounts[action]=(actionCounts[action] or 0)+1
@@ -29,7 +30,7 @@ local function report()
     qa:FireServer("Report",{slot=slot,elapsed=os.clock()-began,status=state.status,stage=state.stage,wave=state.wave,
         stocks=state.stocks,percent=state.percent,hero=state.hero,frames=frames,meanDt=frames>0 and totalDt/frames or 0,
         maxDt=maxDt,framesOver50ms=longFrames,runStats=state.runStats,actionRequests=actionCounts,transitions=transitions,
-        controlledInputsOnly=true,telegraphTiming=timing})
+        controlledInputsOnly=true,telegraphTiming=timing,telegraphObserverRevision="owner-footprint-v2"})
 end
 qa.OnClientEvent:Connect(function(packet)
     if type(packet)~="table" then return end
@@ -57,19 +58,24 @@ remotes.State.OnClientEvent:Connect(function(packet)
 end)
 remotes.FX.OnClientEvent:Connect(function(packet)
     if packet.kind=="Telegraph" and typeof(packet.position)=="Vector3" and typeof(packet.size)=="Vector3" then
-        tells[tellKey(packet)]={received=os.clock(),duration=packet.duration or 1}
+        local owner=packet.targetModel
+        if owner then
+            tells[owner]=tells[owner]or {}
+            tells[owner][tellKey(packet)]={received=os.clock(),duration=packet.duration or 1}
+        end
         table.insert(hazards,{position=packet.position,size=packet.size,radius=packet.radius,shape=packet.shape,
             jumpable=packet.jumpable,finish=os.clock()+(packet.duration or 1),owner=packet.targetModel})
     elseif packet.kind=="EnemyImpact" then
         local key=tellKey(packet)
-        local tell=tells[key]
+        local ownerTells=tells[packet.targetModel]
+        local tell=ownerTells and ownerTells[key]
         if tell then
             local delta=os.clock()-tell.received-tell.duration
             timing.pairs+=1 timing.sumDelta+=delta
             timing.minDelta=math.min(timing.minDelta or delta,delta)
             timing.maxDelta=math.max(timing.maxDelta or delta,delta)
             if delta<-.05 then timing.earlyImpacts+=1 end
-            tells[key]=nil
+            ownerTells[key]=nil
         end
     elseif packet.kind=="BossStagger" or packet.kind=="EnemyCancel" then
         tells[packet.targetModel]=nil
