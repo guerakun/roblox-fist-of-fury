@@ -1,7 +1,7 @@
 -- Client module test; root owns execution and records actual results.
 return function(Presentation)
     Presentation = Presentation or require(game.Players.LocalPlayer.PlayerScripts:FindFirstChild("EnemyPresentation", true))
-    local ids = {"HuskJab","HuskJumpKick","StriderSlide","StriderJab","GrapplerGrab","GrapplerThrow","PitcherThrow","PitcherShove","WardenCounter","WardenKick","LeaperVaultKick","LeaperJab","BruteFlop","BruteSwing","LeaperEvade"}
+    local ids = {"HuskJab","HuskJumpKick","StriderSlide","StriderJab","GrapplerGrab","GrapplerThrow","PitcherThrow","PitcherShove","WardenCounter","WardenKick","LeaperVaultKick","LeaperJab","BruteFlop","BruteSwing","LeaperEvade","MutatedCrossfire"}
     for _, id in ipairs(ids) do
         for _, tell in ipairs({true, false}) do
             local pose = Presentation.Pose(id, .5, tell)
@@ -42,5 +42,5 @@ return function(Presentation)
     api.Emit({kind="EnemyGrabRelease",targetUserId=player.UserId})
     assert(not root:FindFirstChild("CoopGrabRescue"), "Rescue cue remains")
     folder:Destroy()
-    return {poses=30,criticalProjectileAtEffectsZero=true,cleanup=true,cancel=true,ownerRemoval=true,grabRelease=true,entryCue=true,entryKinds=4}
+    return {poses=#ids*2,criticalProjectileAtEffectsZero=true,cleanup=true,cancel=true,ownerRemoval=true,grabRelease=true,entryCue=true,entryKinds=4}
 end

@@ -70,6 +70,15 @@ return function()
             s:Queue(1,'Normal',{},'Solo');local m=s:Step('Normal')
             a.records['Match:'..m.id].heat={'Frenzy'}
             check(s:ValidateJoin(1,m.id,m.privateServerId)==nil,'unimplemented Heat match rejected at admission')
+        else
+            s:Create(1)
+            check(s:Queue(1,'Normal',{'OneLife','Frenzy'},'Solo'),'enabled Heat queues')
+            local m=s:Step('Normal')
+            check(m.heat[1]=='Frenzy' and m.heat[2]=='OneLife' and #m.heat==2,'match stores canonical Heat')
+            check(m.heatPoints==6 and m.heatRewardPercent==45,'match derives points and reward from authoritative metadata')
+            check(s:ValidateJoin(1,m.id,m.privateServerId)~=nil,'enabled canonical Heat admitted')
+            a.records['Match:'..m.id].heat={'Forged'}
+            check(s:ValidateJoin(1,m.id,m.privateServerId)==nil,'enabled rollout still rejects unknown contracts')
         end
     end
     return 'PASS: '..count..' party, lease, timeout, forgery, membership and injected-throttle assertions'

@@ -19,7 +19,12 @@ function Moves.Build(name, context)
     local function safePoint(position)
         return Vector3.new(math.clamp(position.X, arena.MinX + 12, arena.MaxX - 12), 0, math.clamp(position.Z, -10, 10))
     end
-    if name == "HuskJab" or name == "StriderJab" or name == "LeaperJab" then
+    if name=="MutatedCrossfire"then
+        result.Name,result.Windup,result.Recovery,result.Pose="MUTATED CROSSFIRE / FIND A CORNER",.95,1.2,"Heavy"
+        result.TellStyle="Floor"
+        local locked=safePoint(target)
+        box(locked,24,4,false,1.1);box(locked,4,20,false,1.1)
+    elseif name == "HuskJab" or name == "StriderJab" or name == "LeaperJab" then
         result.Windup,result.Recovery,result.Armored,result.Pose=.48,.55,false,"Light"
         box(forward(3.5),7,6,false,.75)
         if name=="HuskJab" then result.FollowUp=.46 end

@@ -34,7 +34,9 @@ local records, enemies = {}, {}
 local aiDirector = AttackDirector.New()
 local enemySequence = 0
 local difficulty = "Normal"
-local function difficultyProfile() return Config.Difficulties[difficulty] end
+local runOptionsLocked,admissionOptionsLocked=false,false
+local effectiveProfile=DifficultyPolicy.Profile(Config.Difficulties,difficulty,runHeat)
+local function difficultyProfile() return effectiveProfile end
 local cameraEstimate, cameraSpan, cameraGoal, cameraGoalSpan
 local lastCameraSample
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
@@ -114,6 +116,7 @@ local function desperationAllowed(player,data,t)
         busyUntil=data.busyUntil,desperationReadyAt=data.cooldowns.Desperation,specialReadyAt=data.cooldowns.Special})
 end
 function Combat.BeginRun(campaignId)
+    runOptionsLocked=true
     activeCampaign=type(campaignId)=="string"and campaignId~=""and campaignId or nil
     if pickups then pickups:Clear()end
     table.clear(bountyWaves)
@@ -184,7 +187,7 @@ function Combat.GetSnapshot(player)
         style=StylePolicy.Snapshot(style),districtResult=districtResult,districtReceipt=districtReceipt,
         canDesperation=desperationAllowed(player,data,now()),desperationCost=Risk.DesperationCost,
         desperationCooldown=math.max(0,(data.cooldowns.Desperation or 0)-now()),
-        stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = {},
+        stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = table.clone(runHeat), heatPoints=runRules().points, runOptionsLocked=runOptionsLocked,
         enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
         downed = data.downed, downedRemaining = math.max(0,(data.downedUntil or 0)-now()), revive=reviveSnapshot(player), grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
         ready = data.ready, travelLocked = travelLocked, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
@@ -237,14 +240,21 @@ function Combat.SetAdmissionValidator(callback)
 end
 function Combat.GetRunStatus() return encounter.status end
 function Combat.GetRunRules()return runRules()end
-function Combat.SetRunOptions(selected,heat)
-    if not DifficultyPolicy.ValidOptions(Config.Difficulties,selected,heat) then return false end
-    if encounter.status~="Waiting" then return selected==difficulty end
-    difficulty=selected
+function Combat.SetRunOptions(selected,heat,lockOnAdmission)
+    if lockOnAdmission~=nil and type(lockOnAdmission)~="boolean"then return false end
+    if not DifficultyPolicy.ValidOptions(Config.Difficulties,selected,heat)then return false end
+    local normalized=HeatConfig.Normalize(heat)
+    if runOptionsLocked or encounter.status~="Waiting"then
+        if not DifficultyPolicy.SameOptions(difficulty,runHeat,selected,normalized)then return false end
+    else
+        difficulty,runHeat=selected,normalized
+        effectiveProfile=DifficultyPolicy.Profile(Config.Difficulties,difficulty,runHeat)
+    end
+    if lockOnAdmission then admissionOptionsLocked=true;runOptionsLocked=true end
     Combat.BroadcastState()
     return true
 end
-function Combat.GetRunOptions() return {difficulty=difficulty,heat={}} end
+function Combat.GetRunOptions()return {difficulty=difficulty,heat=table.clone(runHeat),locked=runOptionsLocked,admissionLocked=admissionOptionsLocked}end
 function Combat.SetTravelLocked(locked)
     assert(type(locked)=="boolean","Travel lock must be boolean")
     travelLocked=locked
@@ -275,7 +285,7 @@ function Combat.GetEnemies() return enemies end
 function Combat.GetAIDiagnostics()
     if not RunService:IsStudio() then return nil end
     local function vector(v) return v and {x=v.X,y=v.Y,z=v.Z} or false end
-    local t=now();local result={time=t,cameraGoal=vector(cameraGoal),cameraEstimate=vector(cameraEstimate),cameraSpan=cameraSpan,cameraGoalSpan=cameraGoalSpan,actors={},players={}}
+    local t=now();local result={time=t,tokenCap=AttackDirector.Cap(#Combat.GetAlivePlayers(),difficultyProfile().TokenBonus),windupScale=difficultyProfile().WindupScale,cameraGoal=vector(cameraGoal),cameraEstimate=vector(cameraEstimate),cameraSpan=cameraSpan,cameraGoalSpan=cameraGoalSpan,actors={},players={}}
     for _,player in ipairs(Combat.GetAlivePlayers())do table.insert(result.players,{id=player.UserId,position=vector(root(player.Character).Position)})end
     for model,data in pairs(enemies)do
         local r,h=root(model),humanoid(model);local slot,token=aiDirector.slots[model],aiDirector.tokens[model]
@@ -861,12 +871,13 @@ function Combat.SpawnEnemy(kind, position, healthScale)
     model.Parent = workspace.Enemies
     model:PivotTo(CFrame.new(position + Vector3.new(0, spec.Scale * 3, 0)) * CFrame.Angles(0, math.pi / 2, 0))
     root(model):SetNetworkOwner(nil)
-    local data = {kind = kind, percent = 0, threshold = spec.Threshold * (healthScale or 1) * (spec.Role~="Grunt" and (difficultyProfile().EliteHealthScale or 1) or 1), weight = spec.Weight,
+    local data = {kind = kind, percent = 0, threshold = spec.Threshold * (healthScale or 1) * DifficultyPolicy.EnemyHealthScale(spec.Role,difficultyProfile(),runHeat), weight = spec.Weight,
         blocking = false, guard = 0, facing = -1, stunnedUntil = 0, launchedUntil = 0, invulnerableUntil = 0,
         attackAt = now() + 1.6, spec = spec, phase = 1, poise = 0, armoredUntil = 0, recoveryUntil = 0,
         moveIndex = 0, attackSerial = 0, contributors = {}, targetHistory = {}}
     enemySequence+=1
     data.styleId=enemySequence
+    if spec.Role~="Grunt"and runRules().mutatedElites then data.mutatedMove="MutatedCrossfire"end
     data.aiRng=Random.new(enemySequence*97+stageIndex*1009)
     enemies[model] = data
     model:SetAttribute("EnemyKind", kind)
@@ -973,6 +984,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     local attackOrigin=r.Position
     local move=EnemyMoves.Build(moveName,{origin=attackOrigin,target=targetRoot.Position,direction=direction,arena=arena,partyPositions=positions,spec=data.spec,phase=data.phase})
     move.Windup=DifficultyPolicy.Windup(move.Windup,difficultyProfile())
+    if move.FollowUp then move.FollowUp=DifficultyPolicy.Windup(move.FollowUp,difficultyProfile())end
     local desperate=moveName==data.spec.DesperationMove
     if data.spec.Role~="Grunt" and data.phase==2 and not desperate and t-(data.lastFeintAt or -100)>=6
         and data.aiRng:NextNumber()<(data.spec.FeintChance or .2) then
@@ -996,6 +1008,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     end
     data.plannedMove=nil;data.nextMove=nil;data.lastMove=moveName
     if moveName==(data.spec.PhaseMoves or {})[1] then data.lastSignatureAt=t end
+    if moveName==data.mutatedMove then data.lastMutationAt=t end
     if desperate then data.desperationUsed=true end
     local tellStyle=move.TellStyle or (data.spec.Role=="Grunt" and "Body" or "Floor")
     data.attacking,data.attackSerial,data.moveIndex=true,data.attackSerial+1,data.moveIndex+1
@@ -1190,7 +1203,7 @@ local function addPlayer(player)
     end
     if player.Parent~=Players or pendingAdmissions[player]~=ticket then return end
     pendingAdmissions[player]=nil
-    records[player] = {hero = preferred, percent = 0, stocks = Config.Stocks, cooldowns = {}, stunnedUntil = 0,
+    records[player] = {hero = preferred, percent = 0, stocks = math.min(Config.Stocks,runRules().stockCap), cooldowns = {}, stunnedUntil = 0,
         launchedUntil = 0, invulnerableUntil = 0, busyUntil = 0, selectAt = 0, facing = 1, combo = 0, lastLight = 0,
         blocking = false, guard = 0, downed = false, recovered = false, rateStart = now(), rateCount = 0,
         hitAt = 0, lifeSerial = 0, contribution = 0, ready = false, runStats = freshStats(), runStart = now()}
@@ -1236,7 +1249,10 @@ function Combat.ResetLobby()
     if pickups then pickups:Clear();pickups=nil end
     table.clear(bountyWaves)
     activeCampaign=nil
-    difficulty="Normal"
+    if not admissionOptionsLocked then
+        difficulty,runHeat,runOptionsLocked="Normal",{},false
+        effectiveProfile=DifficultyPolicy.Profile(Config.Difficulties,difficulty,runHeat)
+    end
     table.clear(disconnectedSurvival)
     Combat.SetArena(Config.Stages[1], 1)
     walkingMaxX = arena.Waves[1].SpawnX + 30

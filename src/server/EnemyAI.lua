@@ -27,6 +27,7 @@ function EnemyAI.ChooseEliteMove(spec,data,context,roll)
         if seen[name] then return end;seen[name]=true
         local close=closeMoves[name]
         local weight=close and (context.distance<=spec.Reach and 5 or .25) or (context.distance>spec.Reach and 4 or 1.5)
+        if name==data.mutatedMove and context.time-(data.lastMutationAt or -100)<8 then weight=0 end
         if name==signature then
             if context.time-(data.lastSignatureAt or -100)<(spec.SignatureCooldown or 8) then weight=0 else weight*=2 end
         end
@@ -36,7 +37,10 @@ function EnemyAI.ChooseEliteMove(spec,data,context,roll)
         if weight>0 then total+=weight;table.insert(pool,{name=name,ceiling=total})end
     end
     for _,name in ipairs(spec.Moves or {"Melee"})do add(name)end
-    if data.phase==2 then for _,name in ipairs(spec.PhaseMoves or {})do add(name)end end
+    if data.phase==2 then
+        for _,name in ipairs(spec.PhaseMoves or {})do add(name)end
+        if data.mutatedMove then add(data.mutatedMove)end
+    end
     if total<=0 then return (spec.Moves or {"Melee"})[1] end
     local point=math.clamp(roll or .5,0,.999999)*total
     for _,entry in ipairs(pool)do if point<entry.ceiling then return entry.name end end

@@ -1,6 +1,6 @@
 -- Earned risk/reward only. Shared metadata; all options are validated again on the server.
 local Heat = {}
-Heat.Enabled = false -- Enable only after all authoritative combat effects and admission tests pass.
+Heat.Enabled = true -- Scoped combat, immutable admission and UI fixtures passed; live travel remains unverified.
 Heat.Order = {'Frenzy','ShortFuse','IronHide','NoSafetyNet','OneLife','MutatedElites'}
 Heat.Contracts = {
     Frenzy={Id='Frenzy',Name='FRENZY',Description='One extra attack token',Points=1,RewardPercent=10},

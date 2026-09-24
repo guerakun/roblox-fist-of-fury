@@ -8,7 +8,7 @@ local actionKinds = {
     HuskJab = "Jab", HuskJumpKick = "Kick", StriderSlide = "Slide", StriderJab = "Jab",
     GrapplerGrab = "Grab", GrapplerThrow = "Throw", PitcherThrow = "Throw", PitcherShove = "Jab",
     WardenCounter = "Guard", WardenKick = "Kick", LeaperVaultKick = "Kick", LeaperJab = "Jab",
-    BruteFlop = "Flop", BruteSwing = "Swing", LeaperEvade = "Evade",
+    BruteFlop = "Flop", BruteSwing = "Swing", LeaperEvade = "Evade", MutatedCrossfire = "Swing",
 }
 function Presentation.Pose(moveId: string?, progress: number, anticipation: boolean): any
     local kind = moveId and actionKinds[moveId]

@@ -1,0 +1,92 @@
+{
+  "date": "2026-09-24",
+  "scope": "WO-3.6 enabled source; actual disposable two-client combat fixture and hub widgets; published transport and physical controls not verified",
+  "pure": {
+    "mutation": {
+      "checks": 59,
+      "lockedCross": true,
+      "phaseAndCooldown": true,
+      "diagonalSafePocket": true,
+      "passed": true,
+      "elites": 6
+    },
+    "compositionChecks": 2696,
+    "enemyMoves": "38 original pattern entries passed",
+    "enabled": {
+      "matchmaking": "PASS: 44 party, lease, timeout, forgery, membership and injected-throttle assertions",
+      "heat": {
+        "scope": "pure selection/rules; not combat enforcement or badge service",
+        "passed": true,
+        "checks": 22
+      }
+    }
+  },
+  "actualTwoClient": {
+    "ok": true,
+    "result": {
+      "disabledGate": true,
+      "ironHide": true,
+      "actualOneLifeRevive": true,
+      "actualMutation": true,
+      "shortFuseFollowup": 0.368,
+      "actualNoSafetyMiniClear": true,
+      "heatPoints": 15,
+      "copiedSelections": true,
+      "publishedTeleportVerified": false,
+      "oneLifeCap": true,
+      "humanInputVerified": false,
+      "shortFuseWarning": 0.76,
+      "immutableAdmission": true,
+      "lateAdmission": true,
+      "passed": true,
+      "stickyEmptyLobby": true,
+      "frenzyWindups": 4,
+      "shortFusePrimary": 0.384
+    }
+  },
+  "actualEnabledHub": {
+    "widgets": {
+      "productionEnabled": true,
+      "pointsAndRewardSeparate": true,
+      "metadataRendererCases": 18,
+      "physicalInputVerified": false,
+      "passed": true,
+      "actualHeatButtons": 6
+    },
+    "policy": {
+      "definitions": 6,
+      "leaderQueueGates": true,
+      "allRewardPercent": 105,
+      "checks": 35,
+      "productionEnabled": true,
+      "disabledGate": true,
+      "passed": true,
+      "allPoints": 15
+    }
+  },
+  "clientPoses": {
+    "ownerRemoval": true,
+    "cancel": true,
+    "cleanup": true,
+    "entryCue": true,
+    "criticalProjectileAtEffectsZero": true,
+    "grabRelease": true,
+    "entryKinds": 4,
+    "poses": 32
+  },
+  "contract": {
+    "enabled": true,
+    "immutable": "Validated first admission locks canonical copied options for campaign server lifetime; exact later arrivals accepted, different choices rejected; unmanaged solo locks at BeginRun",
+    "warnings": "Primary and secondary warnings scale once, final floor .30 s",
+    "heatPoints": 15,
+    "rewardPercent": 105,
+    "mutatedCrossfire": "Phase two only; eight-second cooldown; locked 24x4 and 4x20 crossing volumes, diagonal safe pockets"
+  },
+  "review": "Presentation/world independently reviewed authority, original identity, money-never-buys-power and fairness; root enabled queue test reviewed by world",
+  "remaining": [
+    "Production cross-place transport",
+    "Physical hub touch/controller selection",
+    "Full M3 tier/rank HumanBot curve and co-op regression",
+    "Human playtests and visual polish"
+  ]
+}
