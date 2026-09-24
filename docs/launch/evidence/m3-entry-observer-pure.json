@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-24",
+  "passed": true,
+  "assertions": 33,
+  "revision": "entry-elite-samples-v1",
+  "execution": "Root executed exact source closures in idle hub Studio Edit; no instances or production mutated; campaign session untouched",
+  "scope": "Pure supplied-state reducer only; actual campaign sampling/client integration remains unverified",
+  "peerReview": "presentation source review PASS",
+  "files": {
+    "tests/StyleCampaignEntryObserver.lua": "0b466102d254ac08025d8ae4fe9a8b8d0149f72f47fdb6722cc0568fa3540b22",
+    "tests/StyleCampaignEntryObserver.spec.lua": "9802c8e65905669ba04220ed2c02aa7fa7091be82700ce734a265ed1e646458f"
+  }
+}
