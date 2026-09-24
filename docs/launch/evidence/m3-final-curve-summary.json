@@ -1,0 +1,560 @@
+{
+  "schema": 1,
+  "scope": "Solo bot difficulty/rank curve only; not full M3 acceptance",
+  "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+  "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+  "provenanceConsistent": true,
+  "tiers": {
+    "Normal": {
+      "runs": 5,
+      "uniqueSeeds": true,
+      "missingSeeds": [],
+      "complete": true,
+      "clears": 1,
+      "clearRate": 0.2,
+      "requiredClearsOutOfFive": [
+        3,
+        4
+      ],
+      "clearRateTargetPassed": false,
+      "meanSeconds": 459.26768503999335,
+      "meanStocksLost": 4.6,
+      "meanDamageTaken": 1031.8,
+      "meanStocksLostByDistrict": {
+        "1": 0.8,
+        "2": 1.4,
+        "3": 2.4
+      },
+      "districtClears": 11,
+      "sRanks": 0,
+      "sRankFrequency": 0.0,
+      "terminalDefeatsByStage": {
+        "1": 0,
+        "2": 0,
+        "3": 4
+      }
+    },
+    "Hard": {
+      "runs": 5,
+      "uniqueSeeds": true,
+      "missingSeeds": [],
+      "complete": true,
+      "clears": 0,
+      "clearRate": 0.0,
+      "requiredClearsOutOfFive": [
+        2
+      ],
+      "clearRateTargetPassed": false,
+      "meanSeconds": 403.08579545998947,
+      "meanStocksLost": 4.6,
+      "meanDamageTaken": 977.4,
+      "meanStocksLostByDistrict": {
+        "1": 1.2,
+        "2": 2.2,
+        "3": 1.2
+      },
+      "districtClears": 8,
+      "sRanks": 0,
+      "sRankFrequency": 0.0,
+      "terminalDefeatsByStage": {
+        "1": 0,
+        "2": 2,
+        "3": 3
+      }
+    },
+    "Nightmare": {
+      "runs": 5,
+      "uniqueSeeds": true,
+      "missingSeeds": [],
+      "complete": true,
+      "clears": 0,
+      "clearRate": 0.0,
+      "requiredClearsOutOfFive": [
+        0
+      ],
+      "clearRateTargetPassed": true,
+      "meanSeconds": 315.2258803799981,
+      "meanStocksLost": 4.2,
+      "meanDamageTaken": 879.6,
+      "meanStocksLostByDistrict": {
+        "1": 1.8,
+        "2": 2,
+        "3": 0.4
+      },
+      "districtClears": 6,
+      "sRanks": 0,
+      "sRankFrequency": 0.0,
+      "terminalDefeatsByStage": {
+        "1": 0,
+        "2": 4,
+        "3": 1
+      }
+    }
+  },
+  "errors": [],
+  "rows": [
+    {
+      "file": "docs\\launch\\evidence\\m3-final-normal-1101.json",
+      "difficulty": "Normal",
+      "seed": 1101,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 472.0149410000304,
+      "damageTaken": 1104,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 1,
+        "3": 3
+      },
+      "stocksLost": 5,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-normal-1102.json",
+      "difficulty": "Normal",
+      "seed": 1102,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 469.61409349995665,
+      "damageTaken": 1067,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 1,
+        "3": 3
+      },
+      "stocksLost": 5,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-normal-1103.json",
+      "difficulty": "Normal",
+      "seed": 1103,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 461.02813510003034,
+      "damageTaken": 1093,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 2,
+        "3": 2
+      },
+      "stocksLost": 5,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-normal-1104.json",
+      "difficulty": "Normal",
+      "seed": 1104,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Victory",
+      "seconds": 472.1311697999481,
+      "damageTaken": 1027,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 1,
+        "3": 2
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        },
+        {
+          "stage": 3,
+          "rank": "A",
+          "id": "RunRef1:1:3"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-normal-1105.json",
+      "difficulty": "Normal",
+      "seed": 1105,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 421.5500858000014,
+      "damageTaken": 868,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 0,
+        "2": 2,
+        "3": 2
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-hard-1101.json",
+      "difficulty": "Hard",
+      "seed": 1101,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 474.86367539991625,
+      "damageTaken": 1091,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 2,
+        "3": 2
+      },
+      "stocksLost": 5,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-hard-1102.json",
+      "difficulty": "Hard",
+      "seed": 1102,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 473.4955452999566,
+      "damageTaken": 1053,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 2,
+        "3": 2
+      },
+      "stocksLost": 5,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-hard-1103.json",
+      "difficulty": "Hard",
+      "seed": 1103,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 435.5644671000773,
+      "damageTaken": 1067,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 2,
+        "3": 2
+      },
+      "stocksLost": 5,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-hard-1104.json",
+      "difficulty": "Hard",
+      "seed": 1104,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 309.53448959998786,
+      "damageTaken": 842,
+      "stage": 2,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 2,
+        "2": 2,
+        "3": 0
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-hard-1105.json",
+      "difficulty": "Hard",
+      "seed": 1105,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 321.9707999000093,
+      "damageTaken": 834,
+      "stage": 2,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 3,
+        "3": 0
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-nightmare-1101.json",
+      "difficulty": "Nightmare",
+      "seed": 1101,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 289.0231740999734,
+      "damageTaken": 839,
+      "stage": 2,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 2,
+        "2": 2,
+        "3": 0
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-nightmare-1102.json",
+      "difficulty": "Nightmare",
+      "seed": 1102,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 290.00304400001187,
+      "damageTaken": 838,
+      "stage": 2,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 2,
+        "2": 2,
+        "3": 0
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-nightmare-1103.json",
+      "difficulty": "Nightmare",
+      "seed": 1103,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 419.5973265999928,
+      "damageTaken": 1065,
+      "stage": 3,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 1,
+        "2": 2,
+        "3": 2
+      },
+      "stocksLost": 5,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        },
+        {
+          "stage": 2,
+          "rank": "A",
+          "id": "RunRef1:1:2"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-nightmare-1104.json",
+      "difficulty": "Nightmare",
+      "seed": 1104,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 292.3372152999509,
+      "damageTaken": 841,
+      "stage": 2,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 2,
+        "2": 2,
+        "3": 0
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        }
+      ]
+    },
+    {
+      "file": "docs\\launch\\evidence\\m3-final-nightmare-1105.json",
+      "difficulty": "Nightmare",
+      "seed": 1105,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "outcome": "Defeat",
+      "seconds": 285.16864190006163,
+      "damageTaken": 815,
+      "stage": 2,
+      "errors": [],
+      "stocksLostByDistrict": {
+        "1": 2,
+        "2": 2,
+        "3": 0
+      },
+      "stocksLost": 4,
+      "districtRanks": [
+        {
+          "stage": 1,
+          "rank": "A",
+          "id": "RunRef1:1:1"
+        }
+      ]
+    }
+  ],
+  "gates": {
+    "completeEvidence": true,
+    "tierClearRates": false,
+    "normalMeanStocksAtLeastTwo": true,
+    "sRanksBelowQuarter": true
+  },
+  "allDistrictClearsIncludingPartialDefeats": 25,
+  "sRanks": 0,
+  "sRankFrequency": 0.0,
+  "measuredCurvePassed": false,
+  "limits": [
+    "Five trials per tier have 20 percentage-point resolution; no statistical certification.",
+    "Timeouts, missing ranks, missing metrics, mixed revisions and contradictory supplied evidence prevent a pass.",
+    "Legacy top-level reports remain supported; absent optional captured provenance/reconciliation is not independently verified.",
+    "All recorded trials enter means; defeated campaigns still contribute already-cleared district ranks.",
+    "Early-stock rarity and final-boss wipe concentration are qualitative review, not invented thresholds.",
+    "Real human tests per tier, multiplayer, camera/device and reward-security evidence remain separate."
+  ],
+  "before": {
+    "M0": {
+      "runs": 5,
+      "clears": 5,
+      "meanSeconds": 278.2678854600061,
+      "meanStocksLost": 0.8,
+      "meanDamageTaken": 543,
+      "sourceCommit": "ca00266",
+      "file": "baseline-summary.json"
+    },
+    "M2": {
+      "runs": 5,
+      "clears": 5,
+      "meanSeconds": 398.56189759997653,
+      "meanStocksLost": 2.8,
+      "meanDamageTaken": 830.4,
+      "sourceCommit": "9f29012",
+      "file": "m2-final-summary.json"
+    }
+  }
+}
