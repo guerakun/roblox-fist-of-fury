@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-24",
+  "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+  "smoke": {
+    "seed": 1102,
+    "preflight": {
+      "difficulty": "Normal",
+      "heat": [],
+      "selectedBeforeRun": true,
+      "botPolicyRevision": "M0-actions-unchanged; current-observer-file-sha256:176df37700c74a7b6e0d2489402bc84c22c8e6032e4cf43880c870c30a38c19a",
+      "initialSettings": {
+        "hero": "Gale",
+        "heat": [],
+        "profileMode": "Practice",
+        "boon": "Guardian",
+        "players": 1,
+        "difficulty": "Normal",
+        "xp": 0,
+        "coins": 0
+      },
+      "configurationStable": true,
+      "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4"
+    },
+    "botEnabled": true,
+    "cameraSmoke": {
+      "heroSamples": 167,
+      "fixture": {
+        "passed": true,
+        "scope": "Histogram boundaries and angular arithmetic only"
+      },
+      "dtSamples": 1115,
+      "frames": 1114,
+      "viewport": {
+        "height": 361,
+        "width": 749
+      }
+    }
+  },
+  "readOnlyReview": {
+    "cameraSolveIdenticalTo": "9f29012",
+    "cameraSolveSHA256": "dedd48f622c3997f603d1b3ba1313544925da82b573112d6380242bbee04ae40",
+    "movementSHA256": "927c8a25ee166ee09bb11f01d4aa3ee550b48a2cabf50a33b15e907e8371e77d",
+    "singleProductionCameraWriter": true
+  },
+  "scope": "Observer compiled and collected actual client samples. Only arithmetic self-checks pass; full campaign diagnostics pending. First Normal1101 omitted this observer; later trials include passive unmeasured overhead. No subjective nausea/device certification.",
+  "review": "Presentation camera source audit; world independently reviewed final observer corrections and bounded passive scope."
+}
