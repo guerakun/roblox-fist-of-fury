@@ -1,5 +1,5 @@
 {
-  "summary": "M0 closed: 5/5 baseline clears, mean278.27s,0.80stocks,543damage (be91f0f). M1 original IDs/art/specials/story and IP scan implemented; rig/FX specs pass and committed campaign rebuilt. Names/art approval and three visible gameplay screenshots remain open: capture renders UI but no3D despite loaded world. WO-2.1 extraction passed deterministic equivalence; WO-2.2 director/body tells passed scheduler regressions, aggregate M2 telemetry pending; WO-2.3 six archetypes/fourteenmoves implemented; move/rig/pose specs and actual two-client grab/rescue passed. Director seed1101:292.37s,0stocks,430damage,idle10.58%,flank90.91%,cap0; aggregate suite pending. M5 hub source built and matchmaking core passed37fake-adapter assertions. Actual fixed2/3/4 and late2-to-4 campaigns passed;150/250ms passed;14lifecycle checks passed, same-identity reconnect blocked by Studio freshIDs and other scenarios itemized in MULTIPLAYER_EVIDENCE.md. No publication/liveDataStore/settings/sales changes. Lag restored0. Next: combat WO-2.4, presentation enemyFX thenWO-5.3 hubUI, rootWO-5.4 controller/join/return andM2telemetry. M3/M4 notstarted; ownerhumanplay/liveuniverse gates remain. Hub WO-5.3 now implemented: actual two-client party flow passed eight assertions; UI and safe departure helper specs passed. Exact next root work: WO-5.4 campaign admission/return, with WO-2.4 runtime verification in parallel. Hard/Nightmare and Heat remain locked until their launch work orders supply earned unlocks/contracts.",
+  "summary": "M0 closed: 5/5 baseline clears, mean278.27s,0.80stocks,543damage (be91f0f). M1 original IDs/art/specials/story and IP scan implemented; rig/FX specs pass and committed campaign rebuilt. Names/art approval and three visible gameplay screenshots remain open: capture renders UI but no3D despite loaded world. WO-2.1 extraction passed deterministic equivalence; WO-2.2 director/body tells passed scheduler regressions, aggregate M2 telemetry pending; WO-2.3 six archetypes/fourteenmoves implemented; move/rig/pose specs and actual two-client grab/rescue passed. Director seed1101:292.37s,0stocks,430damage,idle10.58%,flank90.91%,cap0; aggregate suite pending. M5 hub source built and matchmaking core passed37fake-adapter assertions. Actual fixed2/3/4 and late2-to-4 campaigns passed;150/250ms passed;14lifecycle checks passed, same-identity reconnect blocked by Studio freshIDs and other scenarios itemized in MULTIPLAYER_EVIDENCE.md. No publication/liveDataStore/settings/sales changes. Lag restored0. Next: combat WO-2.4, presentation enemyFX thenWO-5.3 hubUI, rootWO-5.4 controller/join/return andM2telemetry. M3/M4 notstarted; ownerhumanplay/liveuniverse gates remain. Hub WO-5.3 now implemented: actual two-client party flow passed eight assertions; UI and safe departure helper specs passed. Exact next root work: WO-5.4 campaign admission/return, with WO-2.4 runtime verification in parallel. Hard/Nightmare and Heat remain locked until their launch work orders supply earned unlocks/contracts. WO-2.4 now passed actual phase-two summons, harmless feint and desperation fixtures plus six-elite policy checks. Next combat work is WO-2.5 entries then WO-2.6 difficulty profiles; root continues WO-5.4.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -69,9 +69,9 @@
     },
     "WO-2.4": {
       "owner": "combat",
-      "status": "implemented; runtime verification next",
-      "evidence": "2026-09-24: worldsourcePASS;selection/runtimefixtures queued; no tuningclaim",
-      "next": "root Studio elite tests; then commit and2.5/2.6"
+      "status": "implemented; deterministic/runtime fixtures pass",
+      "evidence": "2026-09-24:6elite weightedselection/cooldown/desperation PASS;freshPlay2summons/one-shot/entrygrace/feintnodamage/desperationPASS;worldindependentreviewPASS;elites-runtime.json",
+      "next": "WO-2.5 entries,2.6 difficulty;aggregatefive-runacceptance remains open"
     },
     "WO-2.5": {
       "owner": "combat",
@@ -178,7 +178,7 @@
     "WO-5.3": {
       "owner": "root + presentation",
       "status": "implemented; Studio party/UI verified",
-      "evidence": "2026-09-24: actual2clients8assertionsPASS8.152s;UI19buttons/min44px/scrollPASS;transport3attempt/backoff andpartialsave-resume specsPASS;worldfinalsourcePASS;HUB_EVIDENCE.md",
+      "evidence": "2026-09-24: actual2clients8assertionsPASS8.152s;UI19buttons/min44px/scrollPASS;transport3attempt/backoff andpartialsave-resume specsPASS;worldfinalsourcePASS;HUB_EVIDENCE.md;commit70020b3;postreviewretest8.158sPASS",
       "next": "WO-5.4 campaign admission/return; physicaldevices/publishedteleports unverified"
     },
     "WO-5.4": {

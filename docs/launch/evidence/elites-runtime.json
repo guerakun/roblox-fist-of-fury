@@ -1,0 +1,8 @@
+{
+  "recorded": "2026-09-24",
+  "environment": "fresh Studio Play, real server Script and initialized CombatService",
+  "ok": true,
+  "runtime": {"feintNoDamage":true,"entryGrace":true,"oneShot":true,"summons":2,"desperationStarted":true},
+  "selection": {"weightedDistance":true,"repeatSuppression":true,"signatureCooldown":true,"airborneObservation":true,"oneDesperation":true,"partyLayout":true,"elites":6},
+  "limits": "Deterministic fixtures manipulate boss phase and force feint probability. Five full HumanBot runs, human feel, and aggregate challenge gates remain pending."
+}

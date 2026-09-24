@@ -59,6 +59,27 @@ function Moves.Build(name, context)
     elseif name == "BruteSwing" then
         result.Windup,result.Recovery,result.Armored,result.Pose=.9,.95,true,"Heavy"
         result.TellStyle="Floor";box(forward(5),10,11,true,1)
+    elseif name == "CrossroadRuin" then
+        result.Name,result.Windup,result.Recovery="CROSSROAD RUIN",1.15,1.45
+        box(origin,26,8,true,1.1);box(forward(9),10,25,false,1.1)
+    elseif name == "AlarmCollapse" then
+        result.Name,result.Windup,result.Recovery="ALARM COLLAPSE",1.2,1.5
+        circle(origin,6,true,1.1)
+        circle(safePoint(forward(14)+Vector3.new(0,0,-8)),5,false,1)
+        circle(safePoint(forward(14)+Vector3.new(0,0,8)),5,false,1)
+    elseif name == "WidowSpiral" then
+        result.Name,result.Windup,result.Recovery="WIDOW SPIRAL",1.2,1.4
+        circle(safePoint(target),7,false,1.1);box(origin,12,28,true,.8)
+    elseif name == "FinalDeparture" then
+        result.Name,result.Windup,result.Recovery="FINAL DEPARTURE",1.4,1.6
+        for _,z in ipairs({-10,0,10})do box(Vector3.new(arena.CenterX,0,z),arena.MaxX-arena.MinX-16,5,true,1.1)end
+    elseif name == "CinderHowl" then
+        result.Name,result.Windup,result.Recovery="CINDER HOWL",1.1,1.4
+        circle(origin,14,true,1.2);circle(safePoint(forward(18)),5,false,.85)
+    elseif name == "CoreMeltdown" then
+        result.Name,result.Windup,result.Recovery="CORE MELTDOWN",1.4,1.65
+        for _,z in ipairs({-10,10})do box(Vector3.new(arena.CenterX,0,z),arena.MaxX-arena.MinX-16,7,false,1.1)end
+        box(origin,28,10,true,1.1)
     elseif name == "Cleaver" then
         result.Name, result.Windup, result.Recovery = "CROSSWALK CLEAVE", .9, 1.0
         box(forward(6), 12, 9, false)

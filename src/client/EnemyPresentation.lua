@@ -50,7 +50,19 @@ function Presentation.new(folder: Instance, preferences: any): any
         grabOwners[userId] = nil
     end
     function api.Emit(event: any)
-        if event.kind == "EnemyCancel" then
+        if event.kind == "EnemyEntry" then
+            local model = event.targetModel
+            if typeof(model) ~= "Instance" or not model:IsA("Model") or not model.Parent then return end
+            local prior = model:FindFirstChild("EnemyEntryCue")
+            if prior then prior:Destroy() end
+            local cue = Instance.new("Highlight")
+            cue.Name = "EnemyEntryCue"; cue.Adornee = model; cue.DepthMode = Enum.HighlightDepthMode.Occluded
+            cue.FillColor = Color3.fromRGB(115, 208, 230); cue.FillTransparency = .7
+            cue.OutlineColor = Color3.fromRGB(213, 241, 247); cue.OutlineTransparency = .1; cue.Parent = model
+            local duration = math.clamp(tonumber(event.duration) or .6, .3, 2)
+            TweenService:Create(cue, TweenInfo.new(duration), {FillTransparency=1,OutlineTransparency=1}):Play()
+            Debris:AddItem(cue,duration+.02)
+        elseif event.kind == "EnemyCancel" then
             for p, owner in pairs(projectileOwners) do if owner == event.targetModel then p:Destroy() end end
             for userId, owner in pairs(grabOwners) do if owner == event.targetModel then release(userId) end end
         elseif event.kind == "EnemyGrabRelease" and type(event.targetUserId) == "number" then

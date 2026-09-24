@@ -17,6 +17,7 @@ local AttackDirector = require(script.Parent.AttackDirector)
 local Combat = {}
 local records, enemies = {}, {}
 local aiDirector = AttackDirector.New()
+local enemySequence = 0
 local cameraEstimate, cameraSpan, cameraGoal, cameraGoalSpan
 local lastCameraSample
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
@@ -66,6 +67,7 @@ local function releaseGrab(enemy, rescued)
 end
 local function freshStats() return {kills = 0, damageDealt = 0, damageTaken = 0, coinsEarned = 0, duration = 0} end
 function Combat.BeginRun()
+    enemySequence=0
     Telemetry.Reset()
     table.clear(disconnectedSurvival)
     for _, data in pairs(records) do data.runStats = freshStats() data.runStart = now() data.runFinished = nil end
@@ -501,6 +503,8 @@ function Combat.SpawnEnemy(kind, position, healthScale)
         blocking = false, guard = 0, facing = -1, stunnedUntil = 0, launchedUntil = 0, invulnerableUntil = 0,
         attackAt = now() + 1.6, spec = spec, phase = 1, poise = 0, armoredUntil = 0, recoveryUntil = 0,
         moveIndex = 0, attackSerial = 0, contributors = {}, targetHistory = {}}
+    enemySequence+=1
+    data.aiRng=Random.new(enemySequence*97+stageIndex*1009)
     enemies[model] = data
     model:SetAttribute("EnemyKind", kind)
     model:SetAttribute("Role", spec.Role)
@@ -526,6 +530,28 @@ function Combat.SpawnEnemy(kind, position, healthScale)
     fx("Spawn", position, {enemy = kind, enemyName = spec.Name, role = spec.Role})
     return model
 end
+function Combat.SpawnPhaseAdds(model,data)
+    if data.summonsIssued then return end
+    data.summonsIssued=true
+    local epoch=battleEpoch
+    task.defer(function()
+        if enemies[model]~=data or epoch~=battleEpoch or encounter.status~="Combat" then return end
+        local alive=Combat.GetAlivePlayers()
+        if #alive==0 then return end
+        local lo,hi=math.huge,-math.huge
+        for _,player in ipairs(alive)do local pr=root(player.Character);if pr then lo=math.min(lo,pr.Position.X);hi=math.max(hi,pr.Position.X)end end
+        if lo==math.huge then return end
+        for i=1,math.clamp(data.spec.PhaseSummons or 2,0,2)do
+            local left=i%2==1
+            local x=math.clamp(left and lo-20 or hi+20,arena.MinX+6,math.min(arena.MaxX-6,walkingMaxX-2))
+            local add=Combat.SpawnEnemy("Husk",Vector3.new(x,0,left and -9 or 9),1+(Combat.GetPlayerCount()-1)*.18)
+            local entry=enemies[add]
+            entry.entryUntil=now()+.6;entry.entryKind=left and "Left" or "Right";entry.entryDirection=left and 1 or -1
+            add:SetAttribute("EntryKind",entry.entryKind)
+            fx("EnemyEntry",root(add).Position,{targetModel=add,entry=entry.entryKind,duration=.6})
+        end
+    end)
+end
 function Combat.ClearEnemies()
     AttackDirector.Reset(aiDirector)
     battleEpoch += 1
@@ -544,6 +570,29 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     local attackOrigin=r.Position
     local move=EnemyMoves.Build(moveName,{origin=attackOrigin,target=targetRoot.Position,direction=direction,arena=arena,partyPositions=positions,spec=data.spec,phase=data.phase})
     move.Windup=math.max(.30,move.Windup)
+    local desperate=moveName==data.spec.DesperationMove
+    if data.spec.Role~="Grunt" and data.phase==2 and not desperate and t-(data.lastFeintAt or -100)>=6
+        and data.aiRng:NextNumber()<(data.spec.FeintChance or .2) then
+        data.lastFeintAt=t;data.plannedMove=nil
+        data.attacking=true;data.attackSerial+=1
+        local serial,epoch=data.attackSerial,battleEpoch
+        data.resolveAt=t+.4;data.recoveryUntil=t+.6;data.attackAt=t+.8
+        AttackDirector.BeginAttack(aiDirector,model,t,data.recoveryUntil)
+        Telemetry.Windup(data.kind,"Feint",.4,attackCount(),AttackDirector.Cap(#alive))
+        humanoid(model):Move(Vector3.zero)
+        fx("EnemyFeint",r.Position,{targetModel=model,enemy=data.kind,duration=.4,direction=direction,moveId=moveName})
+        task.delay(.4,function()
+            if enemies[model]~=data or data.attackSerial~=serial or battleEpoch~=epoch or not root(model) then return end
+            fx("EnemyCancel",root(model).Position,{targetModel=model,enemy=data.kind})
+            task.delay(.2,function()
+                if enemies[model]==data and data.attackSerial==serial and battleEpoch==epoch then data.attacking=false;AttackDirector.Release(aiDirector,model)end
+            end)
+        end)
+        return
+    end
+    data.plannedMove=nil;data.lastMove=moveName
+    if moveName==(data.spec.PhaseMoves or {})[1] then data.lastSignatureAt=t end
+    if desperate then data.desperationUsed=true end
     local tellStyle=move.TellStyle or (data.spec.Role=="Grunt" and "Body" or "Floor")
     data.attacking,data.attackSerial,data.moveIndex=true,data.attackSerial+1,data.moveIndex+1
     local serial,epoch=data.attackSerial,battleEpoch
@@ -664,7 +713,7 @@ local function aiStep(t)
         cameraSpan=cameraSpan and cameraSpan+(cameraGoalSpan-cameraSpan)*alpha or cameraGoalSpan
     else cameraEstimate,cameraSpan=nil,nil end
     lastCameraSample=t
-    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, CanAttack = enemyVisible,
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, CanAttack = enemyVisible, SummonPhase = Combat.SpawnPhaseAdds,
         root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
         Config = Config, arena = arena, encounter = encounter, attributes = attributes,
         fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})

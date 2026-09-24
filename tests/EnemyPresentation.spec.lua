@@ -21,6 +21,10 @@ return function(Presentation)
     api.Emit({kind="EnemyCancel",targetModel=owner})
     assert(#folder:GetChildren()==0, "Cancelled projectile remains")
     api.Emit({kind="EnemyProjectile",origin=Vector3.new(1,4,0),endpoint=Vector3.new(11,4,0),duration=1,targetModel=owner})
+    api.Emit({kind="EnemyEntry",targetModel=owner,duration=.3})
+    assert(owner:FindFirstChild("EnemyEntryCue"), "Entry cue missing")
+    task.wait(.4)
+    assert(not owner:FindFirstChild("EnemyEntryCue"), "Entry cue cleanup")
     owner:Destroy(); task.wait()
     assert(#folder:GetChildren()==0, "Removed enemy projectile remains")
     local player = game.Players.LocalPlayer
@@ -32,5 +36,5 @@ return function(Presentation)
     api.Emit({kind="EnemyGrabRelease",targetUserId=player.UserId})
     assert(not root:FindFirstChild("CoopGrabRescue"), "Rescue cue remains")
     folder:Destroy()
-    return {poses=30,criticalProjectileAtEffectsZero=true,cleanup=true,cancel=true,ownerRemoval=true,grabRelease=true}
+    return {poses=30,criticalProjectileAtEffectsZero=true,cleanup=true,cancel=true,ownerRemoval=true,grabRelease=true,entryCue=true}
 end

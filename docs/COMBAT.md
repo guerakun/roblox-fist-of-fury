@@ -27,11 +27,11 @@ All elite phase changes occur at 52% of their defeat threshold and change the mo
 
 ## Telegraph fairness and hitstun
 
-EnemyMoves.Build returns immutable attack footprints captured before the warning begins. The same exact center, box dimensions or circle radius drive the client warning and server hit test. The impact never follows a target after they have dodged. Ground-warning height is 3 studs for jumpable attacks and 16 for other attacks. Contains tests the player's root minus 2.5 studs against that height; a low warning is cleared once rootY exceeds 5.5. Non-jumpable warnings must be sidestepped or dashed. Multiple volumes in one move hit each player at most once.
+EnemyMoves.Build returns locked attack footprints captured before the warning begins. Floor markers describe the server damage area using its center, box dimensions or circle radius; ordinary body tells instead show the attacker's anticipation pose and flash. A traveling projectile uses swept hit boxes contained within its marked corridor. The impact never follows a target after they have dodged. Ground-warning height is 3 studs for jumpable attacks and 16 for other attacks. Contains tests the player's root minus 2.5 studs against that height; a low warning is cleared once rootY exceeds 5.5. Non-jumpable warnings must be sidestepped or dashed. Multiple volumes in one move hit each player at most once.
 
 Elite windups have visible armor. Armor reduces damage by only 10%, limits displacement and prevents light-hit stun chains. Heavy and special attacks build the poise-break meter at full base damage; light hits build it at half damage. Breaking poise cancels that windup and creates a two-second punish window. Normal recovery windows are 0.9-1.45 seconds. Bosses remain damageable throughout. Outside armor, elite hitstun is capped at 0.16 seconds, so one player cannot indefinitely lock a boss by repeating light attacks.
 
-A player gets 0.38 seconds of damage invulnerability after a received hit to prevent several simultaneous enemies from trapping them. A dash can escape hitstun after 0.16 seconds if its cooldown is ready. Up to two enemy warnings may overlap against one or two players, and at most three against larger groups. Enemies prefer recently untargeted nearby players. Normal melee enemies align their lane before committing to an attack.
+A player gets 0.38 seconds of damage invulnerability after a received hit to prevent several simultaneous enemies from trapping them. A dash can escape hitstun after 0.16 seconds if its cooldown is ready. The launch director reserves at most living players +1 concurrent attacks, from two solo to five with four living players; a reservation includes its attack and recovery. Enemies prefer recently untargeted nearby players. Normal melee enemies align their lane and assigned side before committing to an attack. The earlier two/three-warning cap is retained as a superseded tuning idea, not the current rule.
 
 ## Checkpoints, stocks and rewards
 
@@ -67,3 +67,43 @@ References: [Roblox spatial queries](https://create.roblox.com/docs/reference/en
 Normal simultaneous attack reservations are living players +1 (2 solo to5 with four). Slots favor opposite X occupancy within35studs. Approach reservations last3s; a started windup extends its lease through recovery. Stagger, target departure, and cap shrink cancel captured attacks before releasing capacity. Grunts reach the assigned side before attacking. Hold shuffles by2.5studs inX and3 inZ rather than standing still. Every real windup is clamped to at least0.30s. Grunts use an anticipation pose and body flash; elite/area floor warnings remain. Cosmetic feints do not apply damage.
 
 Scheduler and mocked movement regressions passed in Studio; five-run campaign telemetry and actual camera-frustum/human verification remain pending. The previous pure extraction comparison is preserved in tests/fixtures/wo-2.1 and is intentionally not a current behavior-equivalence gate after this change.
+
+
+## Launch archetypes and final starting values (WO-2.3)
+
+These are the implemented values at `f4c32be` on 2026-09-24. They are starting tuning values, not a measured difficulty certification. Six original ordinary-enemy silhouettes replace interchangeable melee behavior; Brute retains a seventh behavior policy. Older `Grunt` and `Runner` keys map to Husk and Strider for compatibility. Wave enemy counts remain unchanged. Husk weapon pickup is explicitly deferred to WO-4.3 rather than claimed here.
+
+| Stable kind | Speed | Defeat percent | Base damage | Base cooldown | Readable behavior |
+|---|---:|---:|---:|---:|---|
+| Husk | 12 | 56 | 9 | 1.85 s | Close two-part jab; jump kick beyond 9 studs; worn wraps and asymmetric jerkin |
+| Strider | 18 | 48 | 8 | 1.60 s | Slide from 9 studs or more; close jab; shin plates and heel boosters |
+| Grappler | 10 | 82 | 12 | 2.10 s | Guard-punishing capture and alternating back throw; broad grip gauntlets |
+| Pitcher | 13 | 50 | 10 | 1.90 s | Retreat inside 12 studs, seek 17-stud spacing, throw at range and shove when cornered; rod bandolier |
+| Warden | 10 | 72 | 11 | 1.95 s | Front light guard and delayed third-chain counter; shield forearms |
+| Leaper | 16 | 54 | 9 | 1.80 s | Vault behind the target, alternate close jab, react to observed heavies; arched crest and heels |
+
+Base damage is multiplied by each move's volume multiplier and existing defense rules; the cooldown alone is not the full attack cycle. The next attack also waits for resolution, recovery and the director reservation. Speeds are studs per second. Defeat thresholds receive the existing spawn-time party scaling.
+
+| Move IDs | Warning before launch/hit | Travel or second warning | Recovery |
+|---|---:|---:|---:|
+| HuskJab | 0.48 s | Second jab warned for 0.46 s | 0.55 s |
+| StriderJab / LeaperJab | 0.48 s | None | 0.55 s |
+| HuskJumpKick / LeaperVaultKick | 0.60 s | 0.38 s flight; landing marker lasts 0.98 s total | 0.85 s |
+| StriderSlide | 0.55 s | 0.32 s travel; jumpable path marker lasts 0.87 s total | 0.75 s |
+| GrapplerGrab / GrapplerThrow | 0.65 s | Capture lasts 1.00 s before its throw | 1.25 s |
+| PitcherThrow | 0.45 s | Projectile travels for 0.50 s after warning completes | 0.80 s |
+| PitcherShove | 0.40 s | None | 0.65 s |
+| WardenCounter | 0.40 s | None | 0.70 s |
+| WardenKick | 0.60 s | None | 0.70 s |
+| BruteFlop | 0.90 s | 0.42 s flight; landing marker lasts 1.32 s total | 1.15 s |
+| BruteSwing | 0.90 s | None | 0.95 s |
+
+All real attacks retain the global 0.30-second minimum. Ordinary close attacks use an anticipation pose plus body flash; travel and area attacks use floor markers. Projectile origin and endpoint are captured before the warning, and server Heartbeat damage sweeps the traveled segment. The fixed warning includes the four-stud projectile body in both X and Z, including the diagonal created by clamping a lane-edge endpoint. Damage starts after the 0.45-second warning rather than waiting for the whole projectile flight. Review corrected both early-warning countdown ambiguity and unwarned endpoint/lane padding; the regression covers Z=-12 and Z=12.
+
+The AI samples accepted player actions and block state with a 0.35-second observation delay. Warden blocks front-facing lights for 20% damage; a heavy suppresses its guard for 1.10 seconds. Grappler takes 90% light damage without light-hit stun/launch, preserving heavy/special counterplay. Leaper evades every third observed heavy, with a 0.50-second evade and 0.35-second invulnerability; this delayed response cannot retroactively dodge the already-resolved 0.30-second heavy. Brute armor applies during its committed attack. Strider's post-slide retreat is 1.20 seconds and Pitcher's post-shove retreat is 1.30 seconds after recovery.
+
+Grappler capture is unblockable: the initial grab deals 20% of base damage and a still-valid throw adds 80% after one second. An accepted ally hit on the captor releases the victim immediately. Attack serial, battle epoch and victim life checks prevent a canceled capture from applying its old delayed throw. Enemy removal, campaign clearing and invalidation release held victims; clients cannot declare their own capture or damage.
+
+The server rejects attacks outside a conservative estimate of the campaign camera: 44-degree field of view, supported aspect ratio at least 9:16, four-stud inset, party goal and smoothed center checks, and distance clamped to 52-140 studs. This is an estimated attack-permission envelope, not proof of every client's actual view. `EnemyFrustumAudit.client.lua` separately projects the attacker through the victim's real camera at Hit receipt; no actual zero-offscreen-hit result is claimed by the projection math alone.
+
+Root recorded the following actual Studio evidence for this work order: fourteen moves/seven policies and boundary geometry passed; six enemy rigs contained 19-22 parts with seven queryable core parts and six motors; thirty client pose/cancel/cleanup checks passed; the actual two-client scripted capture fixture passed ally rescue, canceled throw and unrescued timed-throw cases. The rescue fixture applies a server-side ally hit directly, so it is not human input/range validation. Source was independently reviewed. Five-run campaign comparison, actual frustum results, a four-player/twelve-enemy MicroProfiler capture, human readability and device play remain open. See the dated work-order ledger in [PROGRESS.md](PROGRESS.md) for the current acceptance state.

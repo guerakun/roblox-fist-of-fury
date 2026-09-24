@@ -4,17 +4,41 @@ local Archetypes=require(game.ReplicatedStorage.Nightfall.Shared.EnemyArchetypes
 local EnemyAI={}
 local ranges={HuskJab=6,HuskJumpKick=16,StriderSlide=17,StriderJab=6,GrapplerGrab=6,GrapplerThrow=6,
     PitcherThrow=21,PitcherShove=7,WardenCounter=7,WardenKick=7,LeaperVaultKick=18,LeaperJab=6,BruteFlop=13,BruteSwing=8}
-local function observe(data,target,record,t,delay)
-    local signature=tostring(record.lastAction)..":"..tostring(record.attackStartedAt)..":"..tostring(record.blocking)
+local function observe(data,target,record,t,delay,airborne)
+    local signature=tostring(record.lastAction)..":"..tostring(record.attackStartedAt)..":"..tostring(record.blocking)..":"..tostring(airborne)
     if data.observedTarget~=target then data.observedTarget=target;data.observed={};data.pendingObservation=nil;data.observationSignature=nil end
     if not data.pendingObservation and signature~=data.observationSignature then
         data.observationSignature=signature
-        data.pendingObservation={at=t+delay,value={action=record.lastAction,attackAt=record.attackStartedAt,combo=record.combo,blocking=record.blocking}}
+        data.pendingObservation={at=t+delay,value={action=record.lastAction,attackAt=record.attackStartedAt,combo=record.combo,blocking=record.blocking,airborne=airborne}}
     end
     if data.pendingObservation and t>=data.pendingObservation.at then data.observed=data.pendingObservation.value;data.pendingObservation=nil end
     return data.observed or {}
 end
 local closeMoves={Cleaver=true,CrossingSweep=true,AlarmRing=true,TicketCut=true,BellStrike=true,Bite=true,SlagPunch=true}
+-- Pure weighted choice: callers supply the random roll so policy has deterministic tests.
+function EnemyAI.ChooseEliteMove(spec,data,context,roll)
+    if spec.DesperationMove and data.percent>=data.threshold*(spec.DesperationAt or .8) and not data.desperationUsed then return spec.DesperationMove end
+    local pool,seen,total={},{},0
+    local signature=(spec.PhaseMoves or {})[1]
+    local function add(name)
+        if seen[name] then return end;seen[name]=true
+        local close=closeMoves[name]
+        local weight=close and (context.distance<=spec.Reach and 5 or .25) or (context.distance>spec.Reach and 4 or 1.5)
+        if name==signature then
+            if context.time-(data.lastSignatureAt or -100)<(spec.SignatureCooldown or 8) then weight=0 else weight*=2 end
+        end
+        if context.lanePlayers>=2 and not close then weight*=1.6 end
+        if context.airborne and (name=="CrossingSweep" or name=="AlarmRing" or name=="BellStrike" or name=="SlagPunch")then weight*=.35 end
+        if name==data.lastMove then weight*=.25 end
+        if weight>0 then total+=weight;table.insert(pool,{name=name,ceiling=total})end
+    end
+    for _,name in ipairs(spec.Moves or {"Melee"})do add(name)end
+    if data.phase==2 then for _,name in ipairs(spec.PhaseMoves or {})do add(name)end end
+    if total<=0 then return (spec.Moves or {"Melee"})[1] end
+    local point=math.clamp(roll or .5,0,.999999)*total
+    for _,entry in ipairs(pool)do if point<entry.ceiling then return entry.name end end
+    return pool[#pool].name
+end
 local function state(model,data,value)
     if data.aiState~=value then data.aiState=value;model:SetAttribute("AIState",value) end
 end
@@ -53,8 +77,14 @@ function EnemyAI.Step(t,c)
         if c.encounter.status~="Combat" then h:Move(Vector3.zero);Director.Release(director,model);continue end
         local elite=data.spec.Role~="Grunt"
         if elite and data.phase==1 and data.percent>=data.threshold*.52 then
-            data.phase=2;data.moveIndex=0;c.attributes(model,data)
+            data.phase=2;data.moveIndex=0;data.plannedMove=nil;c.attributes(model,data)
+            if c.SummonPhase then c.SummonPhase(model,data)end
             c.fx("BossPhase",r.Position,{phase=2,enemy=data.kind,enemyName=data.spec.Name,targetModel=model})
+        end
+        if t<(data.entryUntil or 0) or (data.entryKind=="Drop" and h.FloorMaterial==Enum.Material.Air) then
+            state(model,data,"Enter");h.WalkSpeed=data.spec.Speed
+            h:MoveTo(Vector3.new(math.clamp(r.Position.X+(data.entryDirection or 1)*4,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(r.Position.Z,-11,11)))
+            continue
         end
         if t<data.stunnedUntil or t<data.launchedUntil then state(model,data,"Stagger");h:Move(Vector3.zero);continue end
         if data.attacking then state(model,data,t<(data.resolveAt or 0) and "Attack" or "Recover");h:Move(Vector3.zero);continue end
@@ -78,7 +108,8 @@ function EnemyAI.Step(t,c)
         data.facing=pr.Position.X>=r.Position.X and 1 or -1
         local slot=Director.Assign(director,model,target,r.Position,pr.Position)
         local archetype=Archetypes.Id(data.kind,data.spec)
-        local observed=observe(data,target,c.records[target],t,.35)
+        local targetHumanoid=c.humanoid(target.Character)
+        local observed=observe(data,target,c.records[target],t,.35,targetHumanoid and targetHumanoid.FloorMaterial==Enum.Material.Air)
         if archetype=="Warden" then
             local wasBlocking=data.blocking
             data.blocking=t>=(data.guardBrokenUntil or 0)
@@ -105,7 +136,16 @@ function EnemyAI.Step(t,c)
         end
         local pattern=data.phase==2 and data.spec.PhaseMoves or data.spec.Moves
         local moveName=pattern and pattern[data.moveIndex%#pattern+1] or "Melee"
-        if not elite then moveName=Archetypes.Select(archetype,distance,observed,data.moveIndex) end
+        if not elite then moveName=Archetypes.Select(archetype,distance,observed,data.moveIndex)
+        else
+            if not data.plannedMove or data.planTarget~=target or t>=(data.planUntil or 0) then
+                local lanePlayers=0
+                for _,p in ipairs(alive)do local other=c.root(p.Character);if other and math.abs(other.Position.Z-pr.Position.Z)<=5 then lanePlayers+=1 end end
+                data.plannedMove=EnemyAI.ChooseEliteMove(data.spec,data,{distance=distance,lanePlayers=lanePlayers,airborne=observed.airborne,time=t},data.aiRng and data.aiRng:NextNumber() or .5)
+                data.planTarget=target;data.planUntil=t+1
+            end
+            moveName=data.plannedMove
+        end
         local range=not elite and (ranges[moveName] or data.spec.Reach-1) or (closeMoves[moveName] and data.spec.Reach or 65)
         local token=director.tokens[model]
         if token and token.target~=target then Director.Release(director,model);token=nil;data.engaging=false end

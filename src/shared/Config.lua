@@ -57,6 +57,13 @@ Config.Enemies = {
     FurnaceHound = {Name = "Furnace Hound", Role = "Miniboss", Color = Color3.fromRGB(247, 137, 52), Speed = 16, Weight = 1.8, Threshold = 220, Damage = 18, Reach = 12, Windup = 1.0, Cooldown = 2.4, Scale = 1.4, Poise = 42, Moves = {"Pounce", "CinderTrail", "Bite"}, PhaseMoves = {"Pounce", "CinderTrail", "Pounce", "Bite"}},
     KilnSovereign = {Name = "Kiln Sovereign", Role = "Boss", Color = Color3.fromRGB(255, 103, 49), Speed = 9, Weight = 2.4, Threshold = 340, Damage = 22, Reach = 14, Windup = 1.25, Cooldown = 3.0, Scale = 1.8, Poise = 60, Moves = {"ForgeCrush", "FurnaceVent", "SlagPunch"}, PhaseMoves = {"TwinVent", "ForgeCrush", "SlagPunch", "ForgeCrush"}},
 }
+local eliteDesperation = {Executioner="CrossroadRuin", SirenMarshal="AlarmCollapse", PlatformWidow="WidowSpiral",
+    LastConductor="FinalDeparture", FurnaceHound="CinderHowl", KilnSovereign="CoreMeltdown"}
+for id, move in pairs(eliteDesperation) do
+    local spec = Config.Enemies[id]
+    spec.SignatureCooldown, spec.PhaseSummons, spec.FeintChance = 8, 2, .20
+    spec.DesperationAt, spec.DesperationMove = .80, move
+end
 -- Six original combat roles; old aliases remain for fixtures and encounter compatibility.
 local Archetypes = require(script.Parent.EnemyArchetypes)
 for id, spec in pairs(Archetypes.Specs) do Config.Enemies[id] = table.clone(spec) end
