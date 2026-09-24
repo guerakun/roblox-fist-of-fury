@@ -9,6 +9,10 @@ P.ChapterName = "AFTER THE LAST TRAIN"
 P.XPPerTier = 150
 P.Rewards = {Wave = {Coins = 25, XP = 35}, Miniboss = {Coins = 60, XP = 75}, Boss = {Coins = 120, XP = 120}}
 P.Boons = {
+    -- Disabled until authoritative restrictions and actual combat checks are integrated.
+    {Id="GlassCannon",Name="GLASS CANNON",XP=600,Enabled=false,Description="Deal 20% more damage and take 20% more damage.",DamageMultiplier=1.2,DamageTakenMultiplier=1.2},
+    {Id="Berserker",Name="BERSERKER",XP=800,Enabled=false,Description="Gain style twice as fast. Blocking is unavailable.",StyleGainMultiplier=2,CanBlock=false},
+    {Id="Anchor",Name="ANCHOR",XP=1000,Enabled=false,Description="30% heavier against knockback. Dash and Burst are unavailable.",WeightMultiplier=1.3,CanDash=false},
     {Id = "Guardian", Name = "GUARDIAN", XP = 0, Description = "Take 8% less damage. A forgiving first choice.", DamageReduction = 0.08},
     {Id = "Focus", Name = "FOCUS", XP = 200, Description = "Deal 8% more damage. Earned through chapter XP.", DamageMultiplier = 1.08},
     {Id = "Haste", Name = "HASTE", XP = 400, Description = "+2 movement speed. Reposition around telegraphs.", MoveSpeedBonus = 2},

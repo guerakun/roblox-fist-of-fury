@@ -6,6 +6,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local GuiService = game:GetService("GuiService")
 local ContextActionService = game:GetService("ContextActionService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.ProgressionConfig)
+local BoonDisplay=require(script.Parent.BoonDisplay)
 local UI = {}
 local initialized = false
 local C = {ink=Color3.fromRGB(11,17,28),panel=Color3.fromRGB(23,33,49),text=Color3.fromRGB(237,242,252),muted=Color3.fromRGB(155,172,195),cyan=Color3.fromRGB(102,235,218),gold=Color3.fromRGB(255,197,100),red=Color3.fromRGB(255,130,147)}
@@ -103,7 +104,7 @@ function UI.Init()
             pendingScrollPosition,pendingSelectionKey=nil,nil
             if selectionKey and overlay.Visible then
                 for _,child in ipairs(scroll:GetDescendants()) do
-                    if child:IsA("GuiButton") and child:GetAttribute("SelectionKey")==selectionKey then GuiService.SelectedObject=child;break end
+                    if child:IsA("GuiButton") and child.Selectable and child:GetAttribute("SelectionKey")==selectionKey then GuiService.SelectedObject=child;break end
                 end
             end
         end)
@@ -172,16 +173,19 @@ function UI.Init()
             end
         else
             copyLine("ONE BOON • EARNED THROUGH PLAY",C.cyan,compact and 55 or 44)
-            copyLine("Choose one small combat bonus. Unlocks use lifetime chapter XP, never money. Change between encounters; bonuses do not stack.",C.muted,compact and 90 or 58)
+            copyLine("Choose one combat modifier and read its trade-off. Unlocks use lifetime chapter XP, never money. Change between encounters; modifiers do not stack.",C.muted,compact and 90 or 58)
             if not snapshot.canEquipBoon then copyLine("Encounter in progress. Change your boon during the next break.",C.gold,compact and 68 or 50) end
-            for _,boon in ipairs(Config.Boons) do
-                local unlocked=(snapshot.xp or 0)>=boon.XP
-                local equipped=snapshot.boon==boon.Id
+            for _,boon in ipairs(BoonDisplay.Ordered(Config.Boons)) do
+                local display=BoonDisplay.State(boon,snapshot)
                 local item=row(compact and 163 or 106)
                 text(item,boon.Name,15,C.cyan,UDim2.fromOffset(13,9),UDim2.new(1,compact and -26 or -146,0,24))
                 text(item,boon.Description,12,C.text,UDim2.fromOffset(13,36),UDim2.new(1,compact and -26 or -146,0,compact and 51 or 39))
-                text(item,boon.XP==0 and "AVAILABLE TO EVERYONE" or tostring(boon.XP).." LIFETIME XP",10,C.muted,UDim2.fromOffset(13,compact and 90 or 79),UDim2.new(1,compact and -26 or -146,0,18))
-                local b=button(item,equipped and "EQUIPPED" or unlocked and "EQUIP" or "LOCKED",UDim2.new(1,-113,0,compact and 118 or 36),UDim2.fromOffset(100,32),function()if unlocked and not equipped then send("EquipBoon",boon.Id) end end)
+                text(item,display.requirement,10,C.muted,UDim2.fromOffset(13,compact and 90 or 79),UDim2.new(1,compact and -26 or -146,0,18))
+                local b=button(item,display.label,UDim2.new(1,-113,0,compact and 118 or 36),UDim2.fromOffset(100,44),function()
+                    if BoonDisplay.State(boon,snapshot).canEquip then send("EquipBoon",boon.Id)end
+                end)
+                BoonDisplay.ApplyButton(b,boon,snapshot)
+                b.TextColor3=display.enabled and C.text or C.muted
                 b:SetAttribute("SelectionKey","Boon"..boon.Id)
             end
         end

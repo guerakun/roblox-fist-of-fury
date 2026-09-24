@@ -5,6 +5,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.ProgressionConfig)
 local ProfileStore = require(script.Parent.ProfileStore)
+local BoonPolicy=require(script.Parent.BoonPolicy)
 local Analytics = require(script.Parent.LaunchAnalytics)
 local Heat = require(ReplicatedStorage.Nightfall.Shared.HeatConfig)
 local RewardPolicy = require(script.Parent.RewardPolicy)
@@ -91,16 +92,8 @@ local function changed(player)
     publish(player)
 end
 function Progression.GetCombatModifiers(player)
-    local defaults = {damageMultiplier = 1, knockbackMultiplier = 1, moveSpeedBonus = 0, damageReduction = 0}
-    local record = records[player]
-    local profile = record and record.profile
-    if not profile then return defaults end
-    local boon = Config.FindBoon(profile.data.boon)
-    if not boon or profile.data.xp < boon.XP then return defaults end
-    defaults.damageMultiplier = boon.DamageMultiplier or 1
-    defaults.moveSpeedBonus = boon.MoveSpeedBonus or 0
-    defaults.damageReduction = boon.DamageReduction or 0
-    return defaults
+    local record=records[player]
+    return BoonPolicy.Modifiers(Config,record and record.profile and record.profile.data)
 end
 function Progression.SetRunState(status, stage)
     if type(status) ~= "string" then return end
@@ -313,7 +306,7 @@ local function action(player, actionName, value)
         if type(value) ~= "string" then return end
         if not SAFE_STATES[runStatus] then notice(player, "Change your boon between encounters."); return end
         local boon = Config.FindBoon(value)
-        if not boon or data.xp < boon.XP then notice(player, "Earn chapter XP to unlock this boon."); return end
+        if not boon or not BoonPolicy.Unlocked(Config,data,value) then notice(player, "Earn chapter XP to unlock this boon."); return end
         data.boon = value; changed(player); notice(player, boon.Name .. " equipped. One boon at a time.")
     elseif actionName == "PurchasePass" then
         if not PURCHASE_STATES[runStatus] then notice(player, "Purchase from the lobby or results screen, where there is no encounter countdown."); return end
