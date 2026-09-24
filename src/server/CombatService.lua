@@ -10,6 +10,8 @@ local Config = require(ReplicatedStorage.Nightfall.Shared.Config)
 local CombatMath = require(ReplicatedStorage.Nightfall.Shared.CombatMath)
 local ToolboxHitbox = require(ReplicatedStorage.Nightfall.Shared.ToolboxHitbox)
 local Telemetry = require(script.Parent.CombatTelemetry)
+local EnemyAI = require(script.Parent.EnemyAI)
+local AttackDirector = require(script.Parent.AttackDirector)
 local Combat = {}
 local records, enemies = {}, {}
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
@@ -492,11 +494,8 @@ function Combat.ClearEnemies()
     for model in pairs(enemies) do model:Destroy() end
     table.clear(enemies)
 end
-local closeMoves = {Cleaver = true, CrossingSweep = true, AlarmRing = true, TicketCut = true, BellStrike = true, Bite = true, SlagPunch = true}
 local function attackCount()
-    local count = 0
-    for _, data in pairs(enemies) do if data.attacking and now() < data.resolveAt then count += 1 end end
-    return count
+    return AttackDirector.CountActive(enemies, now)
 end
 local function beginEnemyAttack(model, data, target, moveName, alive)
     local r, targetRoot = root(model), root(target.Character)
@@ -550,47 +549,10 @@ local function beginEnemyAttack(model, data, target, moveName, alive)
     end)
 end
 local function aiStep(t)
-    local alive = Combat.GetAlivePlayers()
-    for model, data in pairs(enemies) do
-        local r, h = root(model), humanoid(model)
-        if not r or not h or h.Health <= 0 then knockOut(model) continue end
-        if CombatMath.InBlastZone(r.Position, arena, Config.BlastMargin) then knockOut(model) continue end
-        if encounter.status ~= "Combat" then h:Move(Vector3.zero) continue end
-        local elite = data.spec.Role ~= "Grunt"
-        if elite and data.phase == 1 and data.percent >= data.threshold * .52 then
-            data.phase = 2
-            -- Reset only the next pattern choice; the captured windup and its warning resolve unchanged.
-            data.moveIndex = 0
-            attributes(model, data)
-            fx("BossPhase", r.Position, {phase = 2, enemy = data.kind, enemyName = data.spec.Name, targetModel = model})
-        end
-        if t < data.stunnedUntil or t < data.launchedUntil or t < data.recoveryUntil or data.attacking then h:Move(Vector3.zero) continue end
-        local pos = r.Position
-        local x, z = math.clamp(pos.X, arena.MinX + 6, arena.MaxX - 6), math.clamp(pos.Z, -12, 12)
-        if x ~= pos.X or z ~= pos.Z then r.CFrame += Vector3.new(x - pos.X, 0, z - pos.Z) end
-        local target, distance, bestScore
-        for _, player in ipairs(alive) do
-            local pr = root(player.Character)
-            if pr and not records[player].respawning then
-                local d = (Vector3.new(pr.Position.X, 0, pr.Position.Z) - Vector3.new(r.Position.X, 0, r.Position.Z)).Magnitude
-                local focusPenalty = math.max(0, 4 - (t - (data.targetHistory[player] or 0))) * 5
-                local score = d + focusPenalty
-                if not bestScore or score < bestScore then target, distance, bestScore = player, d, score end
-            end
-        end
-        if not target then h:Move(Vector3.zero) continue end
-        local pr = root(target.Character)
-        data.facing = pr.Position.X >= r.Position.X and 1 or -1
-        local pattern = data.phase == 2 and data.spec.PhaseMoves or data.spec.Moves
-        local moveName = pattern and pattern[data.moveIndex % #pattern + 1] or "Melee"
-        local range = not elite and data.spec.Reach - 1 or (closeMoves[moveName] and data.spec.Reach or 65)
-        if distance > range or (not elite and math.abs(pr.Position.Z - r.Position.Z) > 3) then
-            h.WalkSpeed = data.spec.Speed
-            h:MoveTo(Vector3.new(pr.Position.X - data.facing * 4, r.Position.Y, math.clamp(pr.Position.Z, -11, 11)))
-        elseif t >= data.attackAt and attackCount() < math.min(3, math.max(2, #alive)) then
-            beginEnemyAttack(model, data, target, moveName, alive)
-        else h:Move(Vector3.zero) end
-    end
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records,
+        root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
+        Config = Config, arena = arena, encounter = encounter, attributes = attributes,
+        fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})
 end
 local function setupCharacter(player, model)
     local data = records[player]

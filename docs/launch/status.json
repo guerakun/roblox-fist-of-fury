@@ -1,5 +1,5 @@
 {
-  "summary": "M0 complete: four existing specs plus telemetry counter/sampling spec passed. Five fresh HumanBot runs: 5/5 clears, mean 278.27s, 0.80 stocks lost, 543.00 snapshot damage. Gameplay baseline ca00266, telemetry c1a037d, bot b21b807; full evidence linked below. Published/live operations remain prohibited. Evidence export rejection was resolved by replacing account IDs with anonymous Player labels; originals stay ignored locally. Exact next orders: combat WO-2.1 pure extraction, presentation WO-1.1, world WO-1.4, root WO-5.5 multiplayer/lifecycle. Candidate names/art and human playtests still require owner review in morning.",
+  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. Original-hero migration and world/docs scrub implemented, integration pending. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: integrate WO-1.1, save WO-1.4, continue WO-5.5 and release WO-2.2.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -10,7 +10,7 @@
     "WO-0.2": {
       "owner": "root",
       "status": "closed",
-      "evidence": "2026-09-24: 5 fresh seeds1101\u00e2\u20ac\u201c1105; 5/5 clears; mean278.27s, 0.80 stocks lost, 543.00 damage; raw anonymous JSON in launch/evidence; bot b21b807; counters agree",
+      "evidence": "2026-09-24: five fresh seeds 1101-1105; 5/5 clears; mean278.27s, 0.80 stocks, 543 damage; anonymous reports; closing commit be91f0f",
       "next": "release Phase B; compare WO-2.1 extraction seed1101 before syncing M1 changes"
     },
     "WO-0.3": {
@@ -21,9 +21,9 @@
     },
     "WO-1.1": {
       "owner": "presentation",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "implemented, integration pending",
+      "evidence": "metadata/art keys/client paths plus profile migration in source; independent source review PASS; runtime spec pending",
+      "next": "atomic integration after extraction save"
     },
     "WO-1.2": {
       "owner": "presentation",
@@ -39,9 +39,9 @@
     },
     "WO-1.4": {
       "owner": "world",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "implemented, review pending",
+      "evidence": "world/docs scrub and two retired screenshots removed; scoped scan zero; stage signs Ashgate",
+      "next": "independent review and commit"
     },
     "WO-1.5": {
       "owner": "root",
@@ -51,9 +51,9 @@
     },
     "WO-2.1": {
       "owner": "combat",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "closed",
+      "evidence": "2026-09-24: 25 legacy/extracted traces, nine caps, clock boundary and EnemyMoves PASS; source structural equivalence reviewed by presentation/world; extraction-seed1101.json Victory265.15s/1stock/448damage (baseline273.32s/1/497)",
+      "next": "WO-1.1 Combat defaults, then WO-2.2 slots/tokens"
     },
     "WO-2.2": {
       "owner": "combat",
@@ -189,9 +189,9 @@
     },
     "WO-5.5": {
       "owner": "root",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "in progress",
+      "evidence": "actual Studio 2-to-4 client campaign PASS15 assertions/12encounters/Victory152.07s; report pending save; fixed-count/lifecycle/lag unrun",
+      "next": "run generalized harness at2/3/4, lifecycle and150/250ms"
     },
     "WO-5.6": {
       "owner": "root",
