@@ -30,9 +30,10 @@ return function()
         end
         assert(hud.model.reveals==1 and hud.labels.Payment.Text=="REWARDS PENDING")
         assert(string.find(hud.labels.Base.Text,"120 COINS + 80 XP",1,true))
-        state.districtReceipt={resultId="fixture:1",revision=2,status="paid",basePaidCoins=120,basePaidXP=80,coins=39,xp=26,
+        state.districtReceipt={resultId="fixture:1",revision=2,status="paid",basePaidCoins=120,basePaidXP=80,coins=39,xp=26,bountyCoins=25,bountyXP=0,
             rankMultiplier=1.3,heatMultiplier=1,difficultyMultiplier=1.15}
         hud.Update(state)assert(hud.model.reveals==1 and string.find(hud.labels.Bonus.Text,"39 COINS + 26 XP",1,true))
+        assert(hud.labels.Bounty.Text=="BOUNTY RECEIVED / 25 COINS + 0 XP")
         hud.SetOpen(false)hud.Render(1280,720,false,health)assert(hud.toggle.Visible and not hud.shade.Visible)
         hud.Update(state)hud.Render(1280,720,false,health)assert(not hud.shade.Visible,"Receipt refresh must not reopen dismissed panel")
         player:SetAttribute("SettingsOpen",true)hud.Render(1280,720,false,health)assert(not hud.toggle.Visible)

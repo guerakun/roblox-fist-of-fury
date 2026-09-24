@@ -40,12 +40,13 @@ local statusText={pending="REWARDS PENDING",paid="REWARDS RECEIVED",readOnly="SA
     capped="REWARD CAP REACHED",capacity="REWARD JOURNAL FULL / NOT SETTLED"}
 function Model:Lines()
     local receipt=self.receipt
-    if not receipt then return {status="REWARDS PENDING",base="BASE RECEIVED / --",bonus="BONUS RECEIVED / --",multipliers="Reward factors pending"}end
+    if not receipt then return {status="REWARDS PENDING",base="BASE RECEIVED / --",bonus="BONUS RECEIVED / --",bounty="BOUNTY RECEIVED / --",multipliers="Reward factors pending"}end
     local function amount(value)return number(value)and tostring(math.floor(value))or "--"end
     local function factor(value)return number(value)and string.format("x%.2f",value)or "pending"end
     return {status=statusText[receipt.status]or "REWARDS PENDING",
         base="BASE RECEIVED / "..amount(receipt.basePaidCoins).." COINS + "..amount(receipt.basePaidXP).." XP",
         bonus="BONUS RECEIVED / "..amount(receipt.coins).." COINS + "..amount(receipt.xp).." XP",
+        bounty="BOUNTY RECEIVED / "..amount(receipt.bountyCoins==nil and 0 or receipt.bountyCoins).." COINS + "..amount(receipt.bountyXP==nil and 0 or receipt.bountyXP).." XP",
         multipliers="RANK "..factor(receipt.rankMultiplier).."  /  HEAT "..factor(receipt.heatMultiplier).."  /  TIER "..factor(receipt.difficultyMultiplier)}
 end
 function Model.Style(style)

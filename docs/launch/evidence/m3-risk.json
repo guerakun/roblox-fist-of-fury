@@ -1,0 +1,110 @@
+{
+  "date": "2026-09-24",
+  "scope": "WO-3.5 final source actual Studio integration; scripted inputs/contact, not physical device or human enjoyment",
+  "pure": {
+    "riskChecks": 33,
+    "registry": {
+      "passed": true,
+      "liveCap": 64,
+      "identityCap": 1024,
+      "generationRunExpiryRadiusGuards": true
+    },
+    "visuals": {
+      "passed": true,
+      "orbParts": 9,
+      "bountyParts": 6,
+      "coreQueryable": 7,
+      "motors": 6,
+      "visualReadabilityVerified": false
+    }
+  },
+  "actualRisk": {
+    "ok": true,
+    "result": {
+      "physicalPickupVerified": false,
+      "readyBypassRejected": true,
+      "perfectBlock": true,
+      "desperationCostLock": true,
+      "passed": true,
+      "bountyPaidOnce": true,
+      "rapidToggleOrdinaryBlock": true,
+      "heldWindowNotRefreshed": true,
+      "realIntentRemotes": true,
+      "costKO": true,
+      "bountyEscapeNoReward": true
+    }
+  },
+  "actualContact": {
+    "ok": true,
+    "result": {
+      "humanInputVerified": false,
+      "physicalTouch": true,
+      "finalKOException": true,
+      "oneClaimAcrossLimbs": true,
+      "passed": true,
+      "expiry": true
+    }
+  },
+  "actualClient": {
+    "feedback": {
+      "orbNoticeRateLimit": true,
+      "acceptedEventNotices": true,
+      "flashCleanup": true,
+      "noPhysicalPartsAdded": true,
+      "passed": true,
+      "duplicateCuesBounded": true
+    },
+    "hud": {
+      "physicalInputVerified": false,
+      "minimumTouchTarget": 48,
+      "reusesSpecialBounds": true,
+      "explicitCost": true,
+      "scaleCases": 2,
+      "passed": true,
+      "oneHoldOneRequest": true
+    },
+    "model": {
+      "immutablePerformance": true,
+      "expiredClear": true,
+      "passed": true,
+      "checks": 29,
+      "revisionOrdering": true,
+      "noRewardAuthority": true,
+      "revealCount": 2,
+      "actualBaseAndBonusSeparate": true
+    },
+    "district": {
+      "receiptRefreshWithoutReveal": true,
+      "returnReserveCases": 2,
+      "actualPaymentLabels": true,
+      "rankHiddenDuringCombat": true,
+      "physicalInputVerified": false,
+      "viewports": 4,
+      "passed": true,
+      "minimumCloseTarget": 44
+    },
+    "control": {
+      "noRepeat": true,
+      "orderedChord": true,
+      "focusAndLifeCancel": true,
+      "checks": 29,
+      "normalActionsImmediate": true,
+      "shortTapFree": true,
+      "passed": true,
+      "requests": 2
+    }
+  },
+  "review": "Combat, presentation and world independently reviewed final counterparts; COMBAT tuning documentation reviewed by combat",
+  "decisions": [
+    "Perfect-block fresh presses rearm after .35 seconds; early fresh presses restart the interval and remain ordinary blocks",
+    "No final-enemy KO orb; only nonfinal KOs preserve collection risk without delaying clear",
+    "Bounty begins fleeing at eight seconds and expires after six seconds of flight; frozen boundary respects current walking limit"
+  ],
+  "remaining": [
+    "Full M3 HumanBot tier/rank curves",
+    "Physical touch/controller input",
+    "Representative visual polish review",
+    "Real same-account reconnect",
+    "Existing SEC03 movement-origin gap"
+  ]
+}

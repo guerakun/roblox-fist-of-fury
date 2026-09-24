@@ -44,8 +44,8 @@ function HUD.new(options)
         ScrollBarThickness=4,ScrollingDirection=Enum.ScrollingDirection.Y,ZIndex=27},card)
     make("UIListLayout",{SortOrder=Enum.SortOrder.LayoutOrder,Padding=UDim.new(0,4)},scroll)
     local labels={}
-    for index,key in ipairs({"Performance","Damage","Factors","Base","Bonus","Payment","Hint"})do
-        local label=text(scroll,key,index==1 and 14 or 11,index==6 and colors.cyan or colors.text,
+    for index,key in ipairs({"Performance","Damage","Factors","Base","Bonus","Bounty","Payment","Hint"})do
+        local label=text(scroll,key,index==1 and 14 or 11,index==7 and colors.cyan or colors.text,
             UDim2.fromOffset(0,(index-1)*27),UDim2.new(1,-8,0,25))
         label.ZIndex=28 label.LayoutOrder=index label.Position=UDim2.new()
         label.TextTruncate=Enum.TextTruncate.None label.TextWrapped=true label.AutomaticSize=Enum.AutomaticSize.Y
@@ -98,8 +98,8 @@ function HUD.new(options)
             labels.Performance.Text=tostring(math.floor(tonumber(result.score)or 0)).." SCORE / "..time(result.duration).." / PAR "..time(result.parTime)
             labels.Damage.Text=string.format("%.0f%% DAMAGE TAKEN / %s",tonumber(result.damageTaken)or 0,string.upper(result.difficulty or "Normal"))
             local lines=model:Lines()
-            labels.Factors.Text=lines.multipliers labels.Base.Text=lines.base labels.Bonus.Text=lines.bonus labels.Payment.Text=lines.status
-            labels.Hint.Text="Base and bonus are separate. Close to continue."
+            labels.Factors.Text=lines.multipliers labels.Base.Text=lines.base labels.Bonus.Text=lines.bonus labels.Bounty.Text=lines.bounty labels.Payment.Text=lines.status
+            labels.Hint.Text="Base, rank bonus and bounty are separate."
         end
         local current=Model.Style(state.style)
         multiplier.Text=string.format("x%.0f",current.multiplier)

@@ -37,10 +37,10 @@ local function observe(player,snapshot)
         if type(receipt)=="table"then
             if receipt.resultId~=result.id then fail(record.alias..": receipt/result mismatch")end
             if previous.revision and receipt.revision<previous.revision then fail(record.alias..": receipt revision moved backward")end
-            previous.latestReceipt={status=receipt.status,basePaidCoins=receipt.basePaidCoins,coins=receipt.coins}
+            previous.latestReceipt={status=receipt.status,basePaidCoins=receipt.basePaidCoins,coins=receipt.coins,bountyCoins=receipt.bountyCoins or 0}
             if previous.revision~=receipt.revision then
                 table.insert(previous.receiptRevisions,{revision=receipt.revision,status=receipt.status,
-                    baseCoins=receipt.baseCoins,basePaidCoins=receipt.basePaidCoins,bonusCoins=receipt.coins,
+                    baseCoins=receipt.baseCoins,basePaidCoins=receipt.basePaidCoins,bonusCoins=receipt.coins,bountyCoins=receipt.bountyCoins or 0,
                     baseXP=receipt.baseXP,basePaidXP=receipt.basePaidXP,bonusXP=receipt.xp})
                 previous.revision=receipt.revision
             end
@@ -80,7 +80,7 @@ for _,record in ipairs(output.players)do
     for _,district in ipairs(record.districts)do
         stages[district.stage]=true
         if not district.latestReceipt then coverage=false
-        else receiptCoins+=district.latestReceipt.basePaidCoins+district.latestReceipt.coins end
+        else receiptCoins+=district.latestReceipt.basePaidCoins+district.latestReceipt.coins+(district.latestReceipt.bountyCoins or 0)end
     end
     record.threeDistrictsObserved=stages[1]and stages[2]and stages[3]or false
     if not record.threeDistrictsObserved then coverage=false end

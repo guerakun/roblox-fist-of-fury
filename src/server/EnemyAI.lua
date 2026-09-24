@@ -1,3 +1,4 @@
+local Risk=require(script.Parent.RiskPolicy)
 -- Server-owned movement and engagement state; damage remains in CombatService.
 local Director=require(script.Parent.AttackDirector)
 local DifficultyPolicy=require(script.Parent.DifficultyPolicy)
@@ -79,6 +80,27 @@ function EnemyAI.Step(t,c)
         if not r or not h or h.Health<=0 then c.knockOut(model);continue end
         if c.CombatMath.InBlastZone(r.Position,c.arena,c.Config.BlastMargin)then c.knockOut(model);continue end
         if c.encounter.status~="Combat" then h:Move(Vector3.zero);Director.Release(director,model);continue end
+        if data.bounty then
+            local left,right=data.bounty.minX,data.bounty.maxX
+            local atEdge=r.Position.X<=left+1 or r.Position.X>=right-1
+            local phase=Risk.BountyPhase(t,data.bounty.spawnedAt,atEdge)
+            if phase~="Opportunity"then
+                Director.Release(director,model);data.engaging=false
+                if data.attacking then
+                    data.attackSerial+=1;data.attacking=false;data.resolveAt=t;data.armoredUntil=0
+                    c.fx("EnemyCancel",r.Position,{targetModel=model,enemy=data.kind})
+                end
+                if phase=="Escaped"then c.Combat.EscapeBounty(model);continue end
+                state(model,data,"Flee")
+                if t<data.stunnedUntil or t<data.launchedUntil then h:Move(Vector3.zero);continue end
+                if not data.bounty.fleeX then
+                    data.bounty.fleeX=r.Position.X<(left+right)/2 and left or right
+                end
+                h.WalkSpeed=data.spec.Speed*1.2
+                h:MoveTo(Vector3.new(data.bounty.fleeX,r.Position.Y,math.clamp(r.Position.Z,-11,11)))
+                continue
+            end
+        end
         local elite=data.spec.Role~="Grunt"
         if elite and data.phase==1 and data.percent>=data.threshold*.52 then
             data.phase=2;data.moveIndex=0;data.plannedMove=nil;c.attributes(model,data)

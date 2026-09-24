@@ -21,6 +21,10 @@ local function runRules()return HeatConfig.Rules(runHeat)end
 local PressurePolicy = require(script.Parent.PressurePolicy)
 local SurvivalPolicy = require(script.Parent.SurvivalPolicy)
 local StylePolicy=require(script.Parent.StylePolicy)
+local Risk=require(script.Parent.RiskPolicy)
+local ScorePickups=require(script.Parent.ScorePickupService)
+local pickups
+local bountyWaves={}
 local styleEventSequence=0
 local completedDistricts={}
 local activeCampaign=nil
@@ -103,8 +107,32 @@ local function beginStyleWave(data)
     return state
 end
 local function freshStats() return {kills = 0, damageDealt = 0, damageTaken = 0, coinsEarned = 0, duration = 0} end
+local function desperationAllowed(player,data,t)
+    local h=humanoid(player.Character)
+    return Risk.Desperation(t,{alive=h~=nil and h.Health>0,downed=data.downed,respawning=data.respawning,
+        grabbed=data.grabbedBy~=nil,travelLocked=travelLocked,status=encounter.status,stunnedUntil=data.stunnedUntil,
+        busyUntil=data.busyUntil,desperationReadyAt=data.cooldowns.Desperation,specialReadyAt=data.cooldowns.Special})
+end
 function Combat.BeginRun(campaignId)
     activeCampaign=type(campaignId)=="string"and campaignId~=""and campaignId or nil
+    if pickups then pickups:Clear()end
+    table.clear(bountyWaves)
+    pickups=activeCampaign and ScorePickups.new(activeCampaign,{
+        Eligible=function(player,context)
+            local data=records[player];local h=humanoid(player.Character)
+            return data~=nil and player.Parent==Players and h~=nil and h.Health>0 and not data.downed
+                and not data.respawning and not data.grabbedBy and not travelLocked and encounter.status=="Combat"
+                and context.campaignId==activeCampaign and context.stage==stageIndex and context.wave==encounter.wave
+        end,
+        Claimed=function(player,record)
+            local state=styleState(records[player],false)
+            local before=StylePolicy.Snapshot(state).score
+            if Combat.AwardStyle(player,"Orb","orb:"..record.id)then
+                local delta=StylePolicy.Snapshot(state).score-before
+                fx("ScoreOrbClaim",record.position,{playerUserId=player.UserId,score=delta})
+            end
+        end,
+    })or nil
     table.clear(completedDistricts)
     enemySequence=0
     styleEventSequence=0
@@ -154,6 +182,8 @@ function Combat.GetSnapshot(player)
     stats.damageDealt, stats.damageTaken = math.floor(stats.damageDealt), math.floor(stats.damageTaken)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
         style=StylePolicy.Snapshot(style),districtResult=districtResult,districtReceipt=districtReceipt,
+        canDesperation=desperationAllowed(player,data,now()),desperationCost=Risk.DesperationCost,
+        desperationCooldown=math.max(0,(data.cooldowns.Desperation or 0)-now()),
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = {},
         enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
         downed = data.downed, downedRemaining = math.max(0,(data.downedUntil or 0)-now()), revive=reviveSnapshot(player), grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
@@ -168,6 +198,7 @@ function Combat.BroadcastState()
     for player in pairs(records) do if player.Parent then remotes.State:FireClient(player, Combat.GetSnapshot(player)) end end
 end
 function Combat.SetEncounterState(state)
+    if state.status and state.status~="Combat"and pickups then pickups:Clear()end
     for key, value in pairs(state) do encounter[key] = value end
     Progression.SetRunState(encounter.status, stageIndex)
     if state.status == "Victory" or state.status == "Defeat" then
@@ -262,6 +293,7 @@ function Combat.AddCoinsEarned(player, amount)
     if data then data.runStats.coinsEarned += math.max(0, amount) end
 end
 function Combat.BeginEncounter()
+    if pickups then pickups:Clear()end
     battleEpoch += 1
     for _, data in pairs(records) do data.contribution = 0 end
 end
@@ -346,6 +378,7 @@ local function resetPosition(player, position, percent)
     data.revive,data.downedUntil,data.downedPosition=nil,nil,nil
     data.stunnedUntil, data.launchedUntil, data.recovered = 0, 0, false
     data.recentHits = {}
+    data.blockStartedAt,data.perfectBlockConsumed,data.lastBlockPressedAt=nil,false,nil
     data.invulnerableUntil = now() + 2
     r.Anchored = false
     r.AssemblyLinearVelocity = Vector3.zero
@@ -538,6 +571,20 @@ local function knockOut(model)
     fx("KO", r and r.Position or Vector3.zero, {hero = data.hero, playerUserId = player and player.UserId, enemy = data.kind})
     if not player then
         enemies[model] = nil
+        AttackDirector.Release(aiDirector,model)
+        if data.bounty and data.bounty.campaignId==activeCampaign and data.bounty.stage==stageIndex and data.bounty.wave==encounter.wave then
+            local participants={}
+            for contributor in pairs(data.contributors)do
+                if records[contributor]and contributor.Parent==Players then table.insert(participants,contributor)end
+            end
+            Progression.AwardBounty(participants,data.bounty.campaignId,data.bounty.stage,data.bounty.wave)
+        end
+        -- Last-KO exception: orbs require another live enemy so collection remains a combat risk.
+        if pickups and next(enemies)and r and encounter.status=="Combat"then
+            local position=Vector3.new(math.clamp(r.Position.X,arena.MinX+6,walkingMaxX-2),2,math.clamp(r.Position.Z,-11,11))
+            pickups:Spawn("ko:"..tostring(data.styleId),position,now()+Risk.ScoreOrbLifetime,
+                {campaignId=activeCampaign,stage=stageIndex,wave=encounter.wave})
+        end
         for contributor in pairs(data.contributors) do
             if records[contributor] then records[contributor].runStats.kills += 1 end
         end
@@ -585,6 +632,23 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     local light=sourcePlayer and sourceData.lastAction=="Light"
     local blocked = not attack.Unblockable and data.blocking and data.facing == -direction
         and (victimPlayer~=nil or (enemyId=="Warden" and light))
+    if victimPlayer and Risk.PerfectBlock(t,data.blockStartedAt,blocked,attack.Unblockable,data.perfectBlockConsumed)then
+        data.perfectBlockConsumed=true
+        sourceData.attackSerial+=1;sourceData.attacking=false;sourceData.engaging=false
+        sourceData.resolveAt=t;sourceData.armoredUntil=0
+        sourceData.stunnedUntil=math.max(sourceData.stunnedUntil,t+Risk.PerfectStagger)
+        sourceData.recoveryUntil=math.max(sourceData.recoveryUntil,t+Risk.PerfectStagger)
+        sourceData.attackAt=math.max(sourceData.attackAt,t+Risk.PerfectStagger)
+        AttackDirector.Release(aiDirector,sourceModel);releaseGrab(sourceModel,true)
+        local attackerRoot=root(sourceModel)
+        if attackerRoot then attackerRoot.AssemblyLinearVelocity=Vector3.zero end
+        styleEventSequence+=1
+        Combat.AwardStyle(victimPlayer,"PerfectBlock","parry:"..styleEventSequence)
+        data.contribution+=3
+        fx("EnemyCancel",attackerRoot and attackerRoot.Position or r.Position,{targetModel=sourceModel,enemy=sourceData.kind})
+        fx("PerfectBlock",r.Position,{targetModel=targetModel,attackerModel=sourceModel,duration=Risk.PerfectStagger})
+        return false -- No damage, chip, grab, knockback or hit telemetry was accepted.
+    end
     if enemyId=="Warden" and sourcePlayer and sourceData.lastAction=="Heavy" then data.guardBrokenUntil=t+1.1;data.blocking=false end
     local styleBackHit=sourcePlayer and data.facing==direction
     local targetHumanoid=humanoid(targetModel)
@@ -695,11 +759,16 @@ local function performAttack(player, action, data)
         if action == "Heavy" or action == "Special" then Destruction.BreakNearby(r.Position + Vector3.new(direction * attack.Range / 2, 0, 0), math.clamp(attack.Width, 8, 14), direction) end
     end)
 end
-local allowedActions = {Light = true, Heavy = true, Special = true, Dash = true, Block = true, Recovery = true, Jump = true, SelectCharacter = true, Restart = true, Ready = true, ShareStock = true, Revive = true}
+local allowedActions = {Light = true, Heavy = true, Special = true, Dash = true, Block = true, Recovery = true, Jump = true, SelectCharacter = true, Restart = true, Ready = true, ShareStock = true, Revive = true, Desperation = true}
 local function actionReceived(player, action, payload)
     -- Cancellation is cheap and cannot grant an action; never lose release to the request throttle.
     if action=="Revive"and type(payload)=="table"and payload.held==false then
         local releasing=records[player];if releasing then releasing.revive=nil end;return
+    end
+    if action=="Block"and type(payload)=="table"and payload.held==false then
+        local releasing=records[player]
+        if releasing then releasing.blocking=false;releasing.blockStartedAt=nil;attributes(player.Character,releasing)end
+        return
     end
     if travelLocked then return end
     local data = records[player]
@@ -749,7 +818,21 @@ local function actionReceived(player, action, payload)
     data.facing = CombatMath.Direction(payload.direction, data.facing)
     if t < data.busyUntil then return end
     if action == "Block" then
-        if payload.held == true then data.blocking = true attributes(player.Character, data) end
+        if payload.held == true then
+            if not data.blocking then
+                data.blockStartedAt=Risk.ArmPerfect(t,data.lastBlockPressedAt)and t or nil
+                data.lastBlockPressedAt=t;data.perfectBlockConsumed=false
+            end
+            data.blocking=true;attributes(player.Character,data)
+        end
+    elseif action=="Desperation"then
+        if not desperationAllowed(player,data,t)then return end
+        data.cooldowns.Desperation=t+Risk.DesperationCooldown
+        local paid,ko=Risk.PayPercent(data.percent,Risk.DesperationCost,Config.PlayerPercentLimit)
+        data.percent=paid;attributes(player.Character,data)
+        fx("Desperation",r.Position,{targetModel=player.Character,playerUserId=player.UserId,cost=Risk.DesperationCost})
+        if ko then knockOut(player.Character);return end
+        performAttack(player,"Special",data)
     elseif action == "Dash" and t >= (data.cooldowns.Dash or 0) then
         if not dashAllowed then return end
         if burstCost>0 then
@@ -810,6 +893,30 @@ function Combat.SpawnEnemy(kind, position, healthScale)
     fx("Spawn", position, {enemy = kind, enemyName = spec.Name, role = spec.Role})
     return model
 end
+function Combat.TryMarkBounty(model,campaignId,stage,wave)
+    local data=enemies[model]
+    if campaignId~=activeCampaign or stage~=stageIndex or not data or data.kind~="Husk"
+        or type(wave)~="number"or wave%1~=0 or wave<1 or wave>4 then return false end
+    local key=stage..":"..wave
+    if bountyWaves[key]or not Risk.BountySelected(campaignId,stage,wave)then return false end
+    bountyWaves[key]=true
+    data.bounty={campaignId=campaignId,stage=stage,wave=wave,spawnedAt=now(),minX=arena.MinX+6,maxX=math.min(arena.MaxX-6,walkingMaxX-2)}
+    EnemyFactory.MarkBounty(model)
+    local title=model.Head:FindFirstChild("EnemyPlate")
+    if title then title.Title.Text="GILDED HUSK"end
+    fx("BountySpawn",root(model).Position,{targetModel=model})
+    return true
+end
+function Combat.EscapeBounty(model)
+    local data=enemies[model]
+    if not data or not data.bounty then return false end
+    releaseGrab(model,true);AttackDirector.Release(aiDirector,model)
+    data.attackSerial+=1;data.attacking=false
+    fx("EnemyCancel",root(model)and root(model).Position or Vector3.zero,{targetModel=model,enemy=data.kind})
+    fx("BountyEscape",root(model)and root(model).Position or Vector3.zero,{targetModel=model})
+    enemies[model]=nil;model:Destroy()
+    return true
+end
 function Combat.SpawnEnemyEntry(kind,entryKind,stageNumber,waveNumber,healthScale,index,rear)
     local stage=Config.Stages[stageNumber]
     local wave=stage.Waves[waveNumber]
@@ -848,6 +955,7 @@ function Combat.SpawnPhaseAdds(model,data)
     end)
 end
 function Combat.ClearEnemies()
+    if pickups then pickups:Clear()end
     AttackDirector.Reset(aiDirector)
     battleEpoch += 1
     for model in pairs(enemies) do releaseGrab(model,true); model:Destroy() end
@@ -921,6 +1029,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
         local hit=alreadyHit or {}
         for _,volume in ipairs(volumes)do
             for _,player in ipairs(Combat.GetAlivePlayers())do
+                if not valid()then return hit end
                 local pr=root(player.Character)
                 if pr and not hit[player] and EnemyMoves.Contains(volume,pr.Position)then
                     hit[player]=true
@@ -988,14 +1097,18 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
             if slot then slot.offset=Vector3.new(-slot.offset.X,0,slot.offset.Z)end
         end
         if not move.Projectile then impact(move.Volumes)end
+        if not valid()then return end -- A perfect block invalidates the whole captured resolver.
         impactVisual()
         if move.FollowUp then
             warn(move.FollowUp,move.Volumes)
             task.wait(move.FollowUp)
             if not valid() then return end
             fx("Attack",root(model).Position,{direction=direction,enemy=data.kind,action="Light",targetModel=model,moveId=moveName})
-            impact(move.Volumes);impactVisual()
+            impact(move.Volumes)
+            if not valid()then return end
+            impactVisual()
         end
+        if not valid()then return end
         data.armoredUntil=0
         local followup=Archetypes.AfterMove(Archetypes.Id(data.kind,data.spec),moveName)
         local retreat=followup.retreat or move.Retreat
@@ -1120,6 +1233,8 @@ local function removePlayer(player)
     records[player] = nil
 end
 function Combat.ResetLobby()
+    if pickups then pickups:Clear();pickups=nil end
+    table.clear(bountyWaves)
     activeCampaign=nil
     difficulty="Normal"
     table.clear(disconnectedSurvival)
@@ -1143,6 +1258,7 @@ function Combat.Init()
     RunService.Heartbeat:Connect(function(dt)
         local t = now()
         stepRevives(t)
+        if pickups then pickups:Step(t)end
         for player, data in pairs(records) do
             local model = player.Character
             local r, h = root(model), humanoid(model)

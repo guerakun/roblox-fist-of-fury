@@ -1,0 +1,42 @@
+return function()
+    local Registry=require(game.ServerScriptService.NightfallServer.PickupRegistry)
+    local r=Registry.new("run")
+    local orb=r:Spawn("enemy1","ScoreOrb",Vector3.zero,5,{score=20});assert(orb)
+    assert(not r:Spawn("enemy1","ScoreOrb",Vector3.zero,5,{}))
+    assert(not r:Claim("enemy1",orb.generation,1,1,5.01,true,5,"run"))
+    assert(not r:Claim("enemy1",orb.generation,1,1,1,false,5,"run"))
+    assert(not r:Claim("enemy1",orb.generation+1,1,1,1,true,5,"run"))
+    assert(not r:Claim("enemy1",orb.generation,1,1,0,true,5,"old-run"),"Old run callback claimed replacement")
+    local winner=r:Claim("enemy1",orb.generation,1,1,5,true,5,"run")
+    assert(winner and winner.claimant==1 and r.count==0)
+    assert(not r:Claim("enemy1",orb.generation,1,2,0,true,5,"run"),"Second player won claimed orb")
+    assert(not r:Spawn("enemy1","ScoreOrb",Vector3.zero,9,{}),"Claim reset identity")
+    local exp=r:Spawn("enemy2","ScoreOrb",Vector3.zero,5,{});assert(exp)
+    assert(not r:Claim("enemy2",exp.generation,5,1,0,true,5,"run"),"Expiry exact boundary")
+    assert(#r:Sweep(5)==1 and r.count==0)
+    assert(not r:Spawn("enemy2","ScoreOrb",Vector3.zero,9,{}),"Expiry reset identity")
+    assert(r:Spawn("enemy3","ScoreOrb",Vector3.zero,10,{}));assert(#r:Clear()==1 and r.count==0)
+    assert(not r:Spawn("enemy3","ScoreOrb",Vector3.zero,20,{}),"Retry reset drop budget")
+    assert(Registry.new("next-run"):Spawn("enemy3","ScoreOrb",Vector3.zero,5,{}))
+    local capacity=Registry.new("capacity")
+    for i=1,64 do assert(capacity:Spawn(tostring(i),"ScoreOrb",Vector3.zero,5,{}))end
+    assert(not capacity:Spawn("overflow","ScoreOrb",Vector3.zero,5,{}))
+    assert(#capacity:Sweep(5)==64 and capacity.count==0)
+    local replacement=Registry.new("new-run")
+    local replacementRecord=replacement:Spawn("same-id","ScoreOrb",Vector3.zero,5,{})
+    assert(not replacement:Remove("same-id",replacementRecord.generation,"old-run"),"Old expiry removed new run")
+    assert(not replacement:Remove("same-id",nil,"new-run"),"Missing generation removed item")
+    for _,radius in ipairs({false,-1,math.huge,0/0})do
+        assert(not replacement:Claim("same-id",replacementRecord.generation,1,1,0,true,radius,"new-run"),"Invalid radius accepted")
+    end
+    assert(replacement:Remove("same-id",replacementRecord.generation,"new-run"))
+    assert(not replacement:Spawn("bad-position","ScoreOrb",Vector3.new(0/0,0,0),5,{}))
+    assert(not replacement:Spawn("bad-expiry","ScoreOrb",Vector3.zero,math.huge,{}))
+    local lifetime=Registry.new("lifetime")
+    for i=1,1024 do
+        local item=lifetime:Spawn(tostring(i),"ScoreOrb",Vector3.zero,5,{})
+        assert(item and lifetime:Remove(item.id,item.generation,"lifetime"))
+    end
+    assert(lifetime.usedCount==1024 and lifetime.count==0 and not lifetime:Spawn("1025","ScoreOrb",Vector3.zero,5,{}),"Lifetime budget exceeded")
+    return {passed=true,lifetimeBudget=1024,crossRunExpiry=true,invalidRadius=true,atomicWinner=true,expiry=true,staleGeneration=true,retryBudget=true,boundedLive=64,physicalTouchVerified=false}
+end

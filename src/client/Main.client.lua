@@ -26,6 +26,9 @@ local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
 local HeroSpecials = require(script.Parent:WaitForChild("HeroSpecials"))
 local EnemyPresentation = require(script.Parent:WaitForChild("EnemyPresentation"))
 local FocusGuard = require(script.Parent:WaitForChild("FocusGuard"))
+local DesperationControl = require(script.Parent:WaitForChild("DesperationControl"))
+local DesperationHUD = require(script.Parent:WaitForChild("DesperationHUD"))
+local riskFeedback = require(script.Parent:WaitForChild("RiskFeedback")).new({player=player,colors=COLORS})
 local HEROES = Config.CharacterOrder
 local HERO_COLORS, HERO_MOVES = {}, {}
 for _, id in ipairs(HEROES) do
@@ -49,6 +52,9 @@ local rigJoints: {[Motor6D]: CFrame} = {}
 local toolboxData: any = nil
 local poseAction: string? = nil
 local poseStart = 0
+local desperationControl: any = nil
+local desperationHUD: any = nil
+local desperationHintActive = false
 local localBlocking = false
 local touchInput: InputObject? = nil
 local blockInput: InputObject? = nil
@@ -74,6 +80,7 @@ end
 local focusGuard = FocusGuard.new({input = UserInputService, player = player, releaseBlock = releaseBlock,
     clearHeld = function()
         heldKeys = {}; gamepadMove = Vector2.zero; touchMove = Vector2.zero; touchInput = nil
+        if desperationControl then desperationControl:Reset() end
         if touchKnob then touchKnob.Position = UDim2.fromScale(.5, .5) end
     end})
 local function combatSound(kind: string, position: Vector3)
@@ -419,6 +426,15 @@ local function send(action: string, held: boolean?)
         if now - lastLocalAction > 0.15 then animate(action); lastLocalAction = now end
     end
 end
+local function desperationTouchMode()
+    local last = UserInputService:GetLastInputType()
+    return UserInputService.TouchEnabled and string.find(last.Name, "Gamepad") == nil
+end
+desperationControl = DesperationControl.new({blocked=function()return focusGuard:Blocked()end,send=function()
+    actionRemote:FireServer("Desperation", {direction=facing})
+    animate("Special")
+end})
+desperationHUD = DesperationHUD.new({control=desperationControl,special=abilityButtons.Special,colors=COLORS})
 local bindings: any = {
     Light = {Enum.KeyCode.J, Enum.KeyCode.ButtonX}, Heavy = {Enum.KeyCode.K, Enum.KeyCode.ButtonY},
     Special = {Enum.KeyCode.L, Enum.KeyCode.ButtonB}, Dash = {Enum.KeyCode.Q, Enum.KeyCode.ButtonL2},
@@ -428,6 +444,7 @@ local bindings: any = {
 for action, keys in pairs(bindings) do
     ContextActionService:BindAction("Nightfall_" .. action, function(_, inputState)
         if focusGuard:ReleaseInput(action, inputState) then return Enum.ContextActionResult.Sink end
+        if desperationControl:Handle(action, inputState) then return Enum.ContextActionResult.Sink end
         if focusGuard:Blocked() then return Enum.ContextActionResult.Pass end
         if inputState == Enum.UserInputState.Begin then send(action, action == "Block" and true or nil) end
         return Enum.ContextActionResult.Sink
@@ -662,6 +679,8 @@ end
 fxRemote.OnClientEvent:Connect(function(event: any)
     if type(event) ~= "table" then return end
     local kind = event.kind
+    local riskMessage, riskColor = riskFeedback.Emit(event)
+    if riskMessage then toast(riskMessage, riskColor) end
     enemyPresentation.Emit(event)
     if kind == "EnemyEvade" and typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
         local actor = registerActor(event.targetModel)
@@ -771,6 +790,7 @@ stateRemote.OnClientEvent:Connect(function(state: any)
     if state.kind == "Toast" or state.kind == "Message" then toast(state.text or state.message or ""); return end
     local wasDowned = snapshot.downed
     for key, value in pairs(state) do snapshot[key] = value end
+    desperationControl:Update(snapshot)
     if snapshot.downed and not wasDowned then focusGuard:Reset("downed") end
     local hero = snapshot.hero
     local color = HERO_COLORS[hero] or COLORS.cyan
@@ -979,6 +999,7 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
     -- Eye and focus share the same smoothed center: movement cannot introduce yaw snaps.
     camera.CFrame = CFrame.lookAt(eye, focus)
     camera.Focus = CFrame.new(focus)
+    desperationHUD.Render(desperationTouchMode())
     renderAccum += dt
     if renderAccum > 0.1 then
         renderAccum = 0
@@ -993,6 +1014,13 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
             text.Text = remaining > 0 and string.format("%.1fs", remaining) or string.upper(name)
             text.TextColor3 = remaining > 0 and COLORS.muted or COLORS.text
         end
+        if desperationControl:Available() and not desperationTouchMode() then
+            desperationHintActive = true
+            local controller = string.find(UserInputService:GetLastInputType().Name, "Gamepad") ~= nil
+            abilityKeyLabels.Special.Text = controller and "HOLD B + Y" or "HOLD L + K"
+            abilityLabels.Special.Text = "+"..tostring(snapshot.desperationCost).."% SELF"
+            abilityLabels.Special.TextColor3 = COLORS.orange
+        elseif desperationHintActive then desperationHintActive = false; inputLabels() end
     end
 end)
 if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize) end

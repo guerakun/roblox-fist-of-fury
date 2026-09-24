@@ -341,4 +341,38 @@ function Factory.Create(kind, spec)
     model.PrimaryPart = root
     return model
 end
+-- Marking changes silhouette only; core hit geometry, physics and AI remain untouched.
+function Factory.MarkBounty(model)
+    if typeof(model)~="Instance"or not model:IsA("Model")or model:GetAttribute("ArchetypeVisual")~="Husk"then return nil end
+    local existing=model:FindFirstChild("BountyVisuals")
+    if existing then return existing end
+    local torso=model:FindFirstChild("Torso")
+    local arm=model:FindFirstChild("Left Arm")
+    if not torso or not torso:IsA("BasePart")or not arm or not arm:IsA("BasePart")then return nil end
+    local scale=torso.Size.X/2
+    local folder=Instance.new("Folder");folder.Name="BountyVisuals";folder.Parent=model
+    local gold=Color3.fromRGB(221,170,68)
+    local count=0
+    local function detail(name,host,size,offset,color,material,rotation)
+        local p=Instance.new("Part")
+        p.Name=name;p.Size=size*scale;p.CFrame=host.CFrame*CFrame.new(offset*scale)*(rotation or CFrame.identity)
+        p.Color=color;p.Material=material or Enum.Material.Metal
+        p.CanCollide=false;p.CanTouch=false;p.CanQuery=false;p.Massless=true;p.CastShadow=false
+        p.TopSurface=Enum.SurfaceType.Smooth;p.BottomSurface=Enum.SurfaceType.Smooth;p.Parent=folder
+        local weld=Instance.new("WeldConstraint");weld.Part0=host;weld.Part1=p;weld.Parent=p
+        count+=1
+        return p
+    end
+    local pouch=detail("CoinPouch",torso,Vector3.new(1.0,1.12,.65),Vector3.new(.72,-.58,-.88),gold)
+    pouch.Shape=Enum.PartType.Ball
+    detail("PouchClasp",torso,Vector3.new(.55,.19,.70),Vector3.new(.72,.0,-.88),Color3.fromRGB(244,217,142))
+    detail("PouchStrap",torso,Vector3.new(.18,2.1,.13),Vector3.new(.18,.06,-.72),Color3.fromRGB(120,86,47),Enum.Material.Fabric,CFrame.Angles(0,0,.48))
+    detail("CoinStamp",torso,Vector3.new(.34,.34,.07),Vector3.new(.72,-.52,-1.23),Color3.fromRGB(255,230,172),Enum.Material.Neon)
+    detail("GildedShoulder",arm,Vector3.new(1.10,.40,1.13),Vector3.new(0,.72,0),gold)
+    detail("GildedStripe",arm,Vector3.new(.70,.13,.10),Vector3.new(0,.72,-.62),Color3.fromRGB(255,230,172),Enum.Material.Neon)
+    model:SetAttribute("BountyVisual",true)
+    model:SetAttribute("BountyVisualRevision","RiskLoot-1")
+    model:SetAttribute("CosmeticPartCount",(model:GetAttribute("CosmeticPartCount")or 0)+count)
+    return folder
+end
 return Factory

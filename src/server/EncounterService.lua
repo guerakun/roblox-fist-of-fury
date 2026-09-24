@@ -146,7 +146,8 @@ local function run(startStage, startWave, token,startingMode)
             local function spawnPulse(index)
                 if token~=generation then return end
                 for _,entry in ipairs(pulses[index])do
-                    combat.SpawnEnemyEntry(entry.kind,entry.entry,stageNumber,waveNumber,healthScale,entry.index,entry.rear)
+                    local enemy=combat.SpawnEnemyEntry(entry.kind,entry.entry,stageNumber,waveNumber,healthScale,entry.index,entry.rear)
+                    if wave.Kind=="Wave"then combat.TryMarkBounty(enemy,campaignId,stageNumber,waveNumber)end
                 end
                 setState({pulse=index,pulses=#pulses,spawnBudget=totalBudget})
                 if index>1 then fx("Reinforcements",stage,{title="REINFORCEMENTS",pulse=index,pulses=#pulses,count=#pulses[index]})end

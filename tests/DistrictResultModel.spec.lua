@@ -36,7 +36,13 @@ return function()
     model:Apply({districtResult=result(1),districtReceipt=false})check(model.result.stage==2 and model.receipt~=nil,"Old district cannot clear current receipt")
     model:Apply({districtResult=false,districtReceipt=false})check(model.result==nil and model.receipt==nil)
     check(not model:Apply({districtResult=result(2),districtReceipt=receipt(2,2,"paid")})and model.reveals==2,"Retry must not replay rank entrance")
-    local invalid=receipt(2,-1,"paid")model:Apply({districtReceipt=invalid})check(model.receipt.revision==2)
+    check(model:Lines().bounty=="BOUNTY RECEIVED / 0 COINS + 0 XP","Old receipt must default missing bounty to zero")
+    local bounty=receipt(2,3,"paid")bounty.bountyCoins=25 bounty.bountyXP=0
+    model:Apply({districtReceipt=bounty})check(model:Lines().bounty=="BOUNTY RECEIVED / 25 COINS + 0 XP")
+    check(model.receipt.coins==60 and model.receipt.basePaidCoins==150,"Bounty cannot merge into base or rank bonus")
+    local malformed=receipt(2,4,"paid")malformed.bountyCoins=-1 malformed.bountyXP=0/0
+    model:Apply({districtReceipt=malformed})check(model:Lines().bounty=="BOUNTY RECEIVED / -- COINS + -- XP")
+    local invalid=receipt(2,-1,"paid")model:Apply({districtReceipt=invalid})check(model.receipt.revision==4)
     for _,style in ipairs({false,{}, {score=0/0,multiplier=math.huge,progress=-3}})do
         local display=Model.Style(style)check(display.score==0 and display.multiplier==1 and display.progress==0)
     end
