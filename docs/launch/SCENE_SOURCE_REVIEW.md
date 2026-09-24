@@ -76,3 +76,10 @@ The unparented breakdown attributes 39 Models to the test-only HumanBot script, 
 The snapshot also reports two Atmospheres, two BloomEffects, one DepthOfFieldEffect, one SunRaysEffect, one ColorCorrectionEffect and one Sky. The source builder owns only its named effects; this broader inventory includes other scene/core context. Exact ancestry and lifetime of the additional effects were not inspected here. Likewise, client-wide 24 SurfaceGuis and 21 PointLights are not a contradiction of the narrower WorldBuilder-only counts above.
 
 Retain the scene artifact beside the source-derived inventory. Future memory assessment needs comparable before/peak/after snapshots and post-cleanup intervals, ideally without test-driver retention. The one-cube rendering result cannot establish draw-call budget, geometry cost, scene visibility or minimum-phone FPS. The original device, render and growth gates remain open.
+
+
+### Queued test-only lifetime fixture
+
+`tests/WorldLifetime.spec.lua` is prepared for root to run in an isolated Studio server Play session **after the frozen five-bot comparison**, with encounter status Waiting and no enemies. It rebuilds the authored city, stresses all 34 current props without yielding between break calls, checks the immediate 30-fragment cap and nonphysical/server-owned fragments, waits for cleanup and validates every saved part/light/emitter property after restoration. It also checks that repeated breaks do not reschedule already broken props.
+
+The second phase breaks an old-world prop, rebuilds the city, gives its replacement sentinel properties and waits past the old 20-second restore deadline. The replacement must retain its sentinels. Repeated full Build + DressWorld calls must keep class/descendant/prop counts and exactly one of each named Lighting effect. The test leaves an undamaged rebuilt world, including on assertion failure. Expected duration is about 45 seconds. It does not count unparented objects, measure memory growth or exercise rendering. **Prepared, not run** at this recording; root must save actual output and any failure before claiming new 34-prop lifetime evidence.
