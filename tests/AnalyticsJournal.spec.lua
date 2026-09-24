@@ -1,0 +1,21 @@
+return function()
+    local J=require(game.ServerScriptService.NightfallServer.AnalyticsJournal)
+    local rows={}local j=J.new(function(player,event)table.insert(rows,{player=player,event=event})end)
+    assert(j:Funnel('A','run',1,'Start'))assert(not j:Funnel('A','run',1,'Duplicate'))
+    assert(j:Funnel('B','run',1,'Start'))assert(j:Funnel('A','run2',1,'Start'))
+    assert(j:Economy('A','reward1','Source',25,125,'Encounter'))
+    assert(not j:Economy('A','reward1','Source',25,150,'Duplicate'))
+    assert(j:Economy('A','purchase1','Sink',10,115,'TealTrail'))
+    assert(not j:Economy('A','bad','Source',0/0,1,'Bad'))assert(not j:Economy('A','bad','Source',0,1,'Bad'))
+    assert(#rows==5 and rows[4].event.amount==25 and rows[4].event.balance==125,'actual delta and ending balance')
+    local failing=J.new(function()error('service unavailable')end)
+    assert(not failing:Funnel('A','run',1,'Start'),'telemetry failure contained')
+    j:Forget('A')assert(j:Funnel('A','run',1,'Rejoin'),'player lifecycle cleanup')
+    assert(not j:Economy('A',nil,'Source',1,1,'Bad'),'invalid key contained')
+    assert(not j:Economy('A',{},'Source',1,1,'Bad'),'table key contained')
+    local bounded=J.new(function()end)
+    for i=1,513 do assert(bounded:Emit('A',tostring(i),{}))end
+    assert(#bounded.players.A.order==512 and bounded.players.A.keys['1']==nil,'history capped explicitly')
+    assert(bounded:Emit('A','1',{}),'evicted key can be observed again; bounded horizon')
+    return {assertions=16,events=#rows,observerOnly=true}
+end

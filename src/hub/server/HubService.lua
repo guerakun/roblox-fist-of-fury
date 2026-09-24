@@ -10,6 +10,7 @@ local Adapter=require(script.Parent.MatchmakingAdapter)
 local Transport=require(script.Parent.TeleportCoordinator)
 local Preparation=require(script.Parent.DeparturePreparation)
 local ReturnParty=require(script.Parent.ReturnPartyService)
+local Analytics=require(script.Parent.LaunchAnalytics)
 local studio=game:GetService('RunService'):IsStudio()
 local profiles,messages,invitations,rates,busy,dispatching={},{},{},{},{},{}
 local service,adapter,store,transport,remotes,preparation,returnParty
@@ -163,6 +164,7 @@ function H.Init()
     game:GetService('TeleportService').TeleportInitFailed:Connect(function(p,_,message,place)transport:Failed(p,place,message)end)
     remotes.Request.OnServerEvent:Connect(request)
     local function joined(p)
+        Analytics.HubJoin(p)
         local loaded=store:Load(p.UserId)
         if p.Parent~=Players then store:Release(loaded)return end
         profiles[p]=loaded

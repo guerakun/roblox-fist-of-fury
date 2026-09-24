@@ -5,6 +5,9 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.ProgressionConfig)
 local ProfileStore = require(script.Parent.ProfileStore)
+local Analytics = require(script.Parent.LaunchAnalytics)
+local campaignSessions = {}
+local currentCampaign
 local Progression = {}
 local records = {}
 local rewardHistories = {}
@@ -102,6 +105,7 @@ function Progression.SetRunState(status, stage)
     local wasSafe = SAFE_STATES[runStatus] == true
     local wasPurchasable, previousStage = PURCHASE_STATES[runStatus] == true, stageIndex
     runStatus, stageIndex = status, stage or stageIndex
+    if status=="Waiting"then currentCampaign=nil end
     if wasSafe ~= (SAFE_STATES[status] == true) or wasPurchasable ~= (PURCHASE_STATES[status] == true) or previousStage ~= stageIndex then
         for player in pairs(records) do publish(player) end
     end
@@ -119,15 +123,21 @@ local function grantReward(player, kind, rewardKey)
     table.insert(record.rewardOrder, rewardKey)
     if #record.rewardOrder > 128 then record.rewardKeys[table.remove(record.rewardOrder, 1)] = nil end
     local data = record.profile.data
+    local beforeCoins=data.coins
     data.coins = math.min(100000000, data.coins + reward.Coins)
     data.xp = math.min(100000000, data.xp + reward.XP)
     if kind == "Boss" then data.clears += 1 end
     changed(player)
+    Analytics.Economy(player,rewardKey,"Source",data.coins-beforeCoins,data.coins,"Encounter_"..kind)
     notice(player, "+" .. reward.Coins .. " coins  /  +" .. reward.XP .. " chapter XP")
+end
+function Progression.BeginCampaign(players,campaignId)
+    currentCampaign=campaignId
+    for _,player in ipairs(players)do campaignSessions[player]=campaignId Analytics.CampaignStart(player,campaignId)end
 end
 function Progression.AwardEncounterClear(participants, _stage, kind, rewardKey)
     if type(participants) ~= "table" then return end
-    for _, player in ipairs(participants) do if typeof(player) == "Instance" and player:IsA("Player") then grantReward(player, kind, rewardKey) end end
+    for _, player in ipairs(participants) do if typeof(player) == "Instance" and player:IsA("Player") then grantReward(player, kind, rewardKey)if kind=="Boss" and campaignSessions[player]then Analytics.District(player,campaignSessions[player],_stage)end end end
 end
 function Progression.AwardEnemyDefeat() end -- Encounter participation rewards support play equally.
 local function checkPass(player)
@@ -151,6 +161,7 @@ local function action(player, actionName, value)
         if type(value) ~= "number" or value ~= value or value % 1 ~= 0 or value < 1 or value > #Config.Tiers then return end
         if data.xp < value * Config.XPPerTier then notice(player, "Keep clearing encounters to unlock this tier."); return end
         local key, tier = tostring(value), Config.Tiers[value]
+        local beforeCoins=data.coins
         local granted = false
         if not data.claimed[key] then
             data.claimed[key] = true
@@ -167,14 +178,14 @@ local function action(player, actionName, value)
         if tier.Premium and record.premium and not data.premiumClaimed[key] then
             data.premiumClaimed[key] = true; data.owned[tier.Premium] = true; granted = true
         end
-        if granted then changed(player); notice(player, "Tier " .. value .. " rewards claimed.") end
+        if granted then changed(player); Analytics.Economy(player,"Tier:"..key,"Source",data.coins-beforeCoins,data.coins,"ChapterTier"); notice(player, "Tier " .. value .. " rewards claimed.") end
     elseif actionName == "BuyCosmetic" then
         if type(value) ~= "string" then return end
         local cosmetic = Config.FindCosmetic(value)
         if not cosmetic or cosmetic.Premium or cosmetic.TrackOnly or cosmetic.Price <= 0 or data.owned[value] then return end
         if data.coins < cosmetic.Price then notice(player, "Earn " .. (cosmetic.Price-data.coins) .. " more coins from encounters."); return end
         data.coins -= cosmetic.Price; data.owned[value] = true
-        changed(player); notice(player, cosmetic.Name .. " unlocked. Equip it in your collection.")
+        changed(player); Analytics.Economy(player,"Cosmetic:"..value,"Sink",cosmetic.Price,data.coins,value); notice(player, cosmetic.Name .. " unlocked. Equip it in your collection.")
     elseif actionName == "EquipCosmetic" then
         if type(value) ~= "string" then return end
         if value == "ClearTitle" then data.title = "None"
@@ -205,6 +216,7 @@ local function addPlayer(player)
     local history = historyFor(player.UserId)
     local record = {profile = nil, premium = false, rewardKeys = history.keys, rewardOrder = history.order, pending = {}, rateStart = 0, rateCount = 0, promptAt = 0}
     records[player] = record
+    if currentCampaign and runStatus~="Waiting"then campaignSessions[player]=currentCampaign Analytics.CampaignStart(player,currentCampaign)end
     player.CharacterAdded:Connect(function(model)
         task.spawn(function()
             model:WaitForChild("HumanoidRootPart", 10)
@@ -271,6 +283,7 @@ function Progression.Init()
     Players.PlayerRemoving:Connect(function(player)
         local record = records[player]
         records[player] = nil
+        campaignSessions[player]=nil
         if record and record.profile then
             inFlightLifecycle += 1
             store:Release(record.profile)

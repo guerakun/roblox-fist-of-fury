@@ -39,6 +39,12 @@
         },
         "ReturnPartyService": {
           "$path": "src/server/ReturnPartyService.lua"
+        },
+        "LaunchAnalytics": {
+          "$path": "src/server/LaunchAnalytics.lua"
+        },
+        "AnalyticsJournal": {
+          "$path": "src/server/AnalyticsJournal.lua"
         }
       }
     },
