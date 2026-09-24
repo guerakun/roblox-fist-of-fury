@@ -708,6 +708,29 @@ local function registerActor(model: Model): any
     actorPoses[model] = actor
     return actor
 end
+-- Critical body warnings ignore cosmetic effect-density settings.
+local bodyTells: {[Model]: Highlight} = {}
+local function clearBodyTell(model: Model)
+    local flash = bodyTells[model]
+    if flash then flash:Destroy(); bodyTells[model] = nil end
+    local actor = actorPoses[model]
+    if actor then actor.tellUntil = nil end
+end
+local function bodyTell(event: any)
+    local model = event.targetModel
+    if typeof(model) ~= "Instance" or not model:IsA("Model") or not model.Parent then return end
+    clearBodyTell(model)
+    local duration = math.clamp(tonumber(event.duration) or .35, .30, 5)
+    local actor = registerActor(model)
+    if actor then actor.tellStart = os.clock(); actor.tellUntil = actor.tellStart + duration end
+    local color = preferences.highContrast and COLORS.orange or (typeof(event.color) == "Color3" and event.color or COLORS.red)
+    local flash = make("Highlight", {Name = "EnemyBodyTell", Adornee = model,
+        DepthMode = Enum.HighlightDepthMode.Occluded, FillColor = color, FillTransparency = .36,
+        OutlineColor = COLORS.text, OutlineTransparency = .05}, model)
+    bodyTells[model] = flash
+    Debris:AddItem(flash, duration)
+    task.delay(duration, function() if bodyTells[model] == flash then clearBodyTell(model) end end)
+end
 local hitFlashes: {[Model]: Highlight} = {}
 local damageEdge = make("Frame", {Name = "DamageEdge", BackgroundTransparency = 1, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1)}, gui)
 local damageStroke = make("UIStroke", {Color = COLORS.red, Thickness = 5, Transparency = 1}, damageEdge)
@@ -794,6 +817,7 @@ fxRemote.OnClientEvent:Connect(function(event: any)
     elseif kind == "BossStagger" then
         toast(string.upper(event.enemyName or "CURSE") .. " / EXPOSED — PUNISH NOW", COLORS.green)
         if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
+            clearBodyTell(event.targetModel)
             presentation.cancelWarnings(event.targetModel)
             for part, owner in pairs(hazardOwners) do
                 if owner == event.targetModel then part:Destroy(); hazardOwners[part] = nil end
@@ -809,10 +833,19 @@ fxRemote.OnClientEvent:Connect(function(event: any)
         toast("GUARD BROKEN / EVADE", COLORS.orange)
         burst(position, COLORS.orange, true, 1)
     elseif kind == "Telegraph" then
-        hazardFootprint(event, false)
+        if event.tellStyle == "Body" then bodyTell(event)
+        else hazardFootprint(event, false) end
         presentation.telegraph(event)
+    elseif kind == "EnemyFeint" then
+        bodyTell(event)
+    elseif kind == "EnemyCancel" then
+        if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
+            clearBodyTell(event.targetModel)
+            presentation.cancelWarnings(event.targetModel)
+        end
     elseif kind == "EnemyImpact" then
-        hazardFootprint(event, true)
+        if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then clearBodyTell(event.targetModel) end
+        if event.tellStyle ~= "Body" then hazardFootprint(event, true) end
         bossEffects.Emit(event)
         if root and (root.Position - position).Magnitude < 35 then cameraKick = math.max(cameraKick, 0.45) end
     end
@@ -908,7 +941,11 @@ local function sampleToolbox(dt: number)
         end
     end
     for model, actor in pairs(actorPoses) do
-        if not model.Parent or actor.humanoid.Health <= 0 then actorPoses[model] = nil
+        if not model.Parent or actor.humanoid.Health <= 0 then clearBodyTell(model); actorPoses[model] = nil
+        elseif actor.tellUntil and now < actor.tellUntil and toolboxData.Heavy then
+            -- Hold the imported heavy anticipation, never play its strike during the warning.
+            local progress = math.clamp((now - actor.tellStart) / math.max(.30, actor.tellUntil - actor.tellStart), 0, 1)
+            applyToolboxPose(actor.joints, toolboxData.Heavy, toolboxData.Heavy.duration * (.08 + progress * .12), dt)
         else
             local data = actor.action and toolboxData[actor.action]
             if data and now - actor.start > math.max(0.05, data.duration) then actor.action = nil; data = nil end

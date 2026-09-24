@@ -14,6 +14,7 @@ local EnemyAI = require(script.Parent.EnemyAI)
 local AttackDirector = require(script.Parent.AttackDirector)
 local Combat = {}
 local records, enemies = {}, {}
+local aiDirector = AttackDirector.New()
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
 local disconnectedSurvival = {}
 local MAX_DISCONNECTED_SURVIVORS = 256
@@ -490,6 +491,7 @@ function Combat.SpawnEnemy(kind, position, healthScale)
     return model
 end
 function Combat.ClearEnemies()
+    AttackDirector.Reset(aiDirector)
     battleEpoch += 1
     for model in pairs(enemies) do model:Destroy() end
     table.clear(enemies)
@@ -507,12 +509,14 @@ local function beginEnemyAttack(model, data, target, moveName, alive)
     end
     local direction = data.facing
     local move = EnemyMoves.Build(moveName, {origin = r.Position, target = targetRoot.Position, direction = direction, arena = arena, partyPositions = positions, spec = data.spec, phase = data.phase})
+    move.Windup = math.max(.30, move.Windup)
     data.attacking, data.attackSerial, data.moveIndex = true, data.attackSerial + 1, data.moveIndex + 1
     local serial, epoch = data.attackSerial, battleEpoch
     data.resolveAt, data.recoveryUntil = t + move.Windup, t + move.Windup + move.Recovery
+    AttackDirector.BeginAttack(aiDirector, model, t, data.recoveryUntil)
     data.attackAt = math.max(t + data.spec.Cooldown, data.recoveryUntil + .15)
     data.targetHistory[target] = t
-    Telemetry.Windup(data.kind, moveName, move.Windup, attackCount(), math.min(3, math.max(2, #alive)))
+    Telemetry.Windup(data.kind, moveName, move.Windup, attackCount(), AttackDirector.Cap(#alive))
     data.armoredUntil = move.Armored and data.resolveAt or 0
     humanoid(model):Move(Vector3.zero)
     r.CFrame = CFrame.lookAt(r.Position, r.Position + Vector3.new(direction, 0, 0))
@@ -520,7 +524,8 @@ local function beginEnemyAttack(model, data, target, moveName, alive)
     for _, volume in ipairs(move.Volumes) do
         fx("Telegraph", volume.position, {shape = volume.shape, size = volume.size, radius = volume.radius, height = volume.height,
             jumpable = volume.jumpable, direction = direction, duration = move.Windup, enemy = data.kind, enemyName = data.spec.Name,
-            mechanic = move.Name, color = volume.color, heavy = data.spec.Role ~= "Grunt", targetModel = model})
+            mechanic = move.Name, color = volume.color, heavy = data.spec.Role ~= "Grunt", targetModel = model,
+            tellStyle = data.spec.Role == "Grunt" and "Body" or "Floor", pose = "Windup"})
     end
     task.delay(move.Windup, function()
         if enemies[model] ~= data or data.attackSerial ~= serial or battleEpoch ~= epoch or encounter.status ~= "Combat" then return end
@@ -534,7 +539,8 @@ local function beginEnemyAttack(model, data, target, moveName, alive)
         fx("Attack", root(model).Position, {direction = direction, enemy = data.kind, action = "Heavy", targetModel = model})
         local hit = {}
         for _, volume in ipairs(move.Volumes) do
-            fx("EnemyImpact", volume.position, {shape = volume.shape, size = volume.size, radius = volume.radius, height = volume.height, color = volume.color, mechanic = move.Name, enemy = data.kind})
+            fx("EnemyImpact", volume.position, {shape = volume.shape, size = volume.size, radius = volume.radius, height = volume.height, color = volume.color, mechanic = move.Name, enemy = data.kind, targetModel = model,
+                tellStyle = data.spec.Role == "Grunt" and "Body" or "Floor"})
             for _, player in ipairs(Combat.GetAlivePlayers()) do
                 local pr = root(player.Character)
                 if pr and not hit[player] and EnemyMoves.Contains(volume, pr.Position) then
@@ -545,11 +551,11 @@ local function beginEnemyAttack(model, data, target, moveName, alive)
             end
         end
         attributes(model, data)
-        task.delay(move.Recovery, function() if enemies[model] == data and data.attackSerial == serial then data.attacking = false end end)
+        task.delay(move.Recovery, function() if enemies[model] == data and data.attackSerial == serial then data.attacking = false; AttackDirector.Release(aiDirector, model) end end)
     end)
 end
 local function aiStep(t)
-    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records,
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector,
         root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
         Config = Config, arena = arena, encounter = encounter, attributes = attributes,
         fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})

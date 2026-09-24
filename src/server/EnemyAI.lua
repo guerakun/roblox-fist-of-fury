@@ -1,53 +1,122 @@
--- WO-2.1: behavior-preserving extraction. Context keeps authoritative state in CombatService.
-local Director = require(script.Parent.AttackDirector)
-local EnemyAI = {}
-local closeMoves = {Cleaver = true, CrossingSweep = true, AlarmRing = true, TicketCut = true, BellStrike = true, Bite = true, SlagPunch = true}
-function EnemyAI.Step(t, context)
-    local Combat, enemies, records = context.Combat, context.enemies, context.records
-    local root, humanoid, knockOut = context.root, context.humanoid, context.knockOut
-    local CombatMath, Config, arena, encounter = context.CombatMath, context.Config, context.arena, context.encounter
-    local attributes, fx, beginEnemyAttack = context.attributes, context.fx, context.beginEnemyAttack
-    local function attackCount() return Director.CountActive(enemies, context.now) end
-    local alive = Combat.GetAlivePlayers()
-    for model, data in pairs(enemies) do
-        local r, h = root(model), humanoid(model)
-        if not r or not h or h.Health <= 0 then knockOut(model) continue end
-        if CombatMath.InBlastZone(r.Position, arena, Config.BlastMargin) then knockOut(model) continue end
-        if encounter.status ~= "Combat" then h:Move(Vector3.zero) continue end
-        local elite = data.spec.Role ~= "Grunt"
-        if elite and data.phase == 1 and data.percent >= data.threshold * .52 then
-            data.phase = 2
-            -- Reset only the next pattern choice; the captured windup and its warning resolve unchanged.
-            data.moveIndex = 0
-            attributes(model, data)
-            fx("BossPhase", r.Position, {phase = 2, enemy = data.kind, enemyName = data.spec.Name, targetModel = model})
+-- Server-owned movement and engagement state; damage remains in CombatService.
+local Director=require(script.Parent.AttackDirector)
+local EnemyAI={}
+local closeMoves={Cleaver=true,CrossingSweep=true,AlarmRing=true,TicketCut=true,BellStrike=true,Bite=true,SlagPunch=true}
+local function state(model,data,value)
+    if data.aiState~=value then data.aiState=value;model:SetAttribute("AIState",value) end
+end
+function EnemyAI.Step(t,c)
+    local alive=c.Combat.GetAlivePlayers()
+    local director=c.director
+    -- Stagger cancels a captured attack before its token is handed to another actor.
+    for model,data in pairs(c.enemies)do
+        if (t<data.stunnedUntil or (data.spec.Role=="Grunt" and t<data.launchedUntil)) and data.attacking and t>=(data.armoredUntil or 0) then
+            data.attacking=false;data.attackSerial+=1;data.resolveAt=t;data.armoredUntil=0
+            data.engaging=false;Director.Release(director,model)
+            local cancelledRoot=c.root(model)
+            if cancelledRoot then c.fx("EnemyCancel",cancelledRoot.Position,{targetModel=model,enemy=data.kind}) end
         end
-        if t < data.stunnedUntil or t < data.launchedUntil or t < data.recoveryUntil or data.attacking then h:Move(Vector3.zero) continue end
-        local pos = r.Position
-        local x, z = math.clamp(pos.X, arena.MinX + 6, arena.MaxX - 6), math.clamp(pos.Z, -12, 12)
-        if x ~= pos.X or z ~= pos.Z then r.CFrame += Vector3.new(x - pos.X, 0, z - pos.Z) end
-        local target, distance, bestScore
-        for _, player in ipairs(alive) do
-            local pr = root(player.Character)
-            if pr and not records[player].respawning then
-                local d = (Vector3.new(pr.Position.X, 0, pr.Position.Z) - Vector3.new(r.Position.X, 0, r.Position.Z)).Magnitude
-                local focusPenalty = math.max(0, 4 - (t - (data.targetHistory[player] or 0))) * 5
-                local score = d + focusPenalty
-                if not bestScore or score < bestScore then target, distance, bestScore = player, d, score end
+    end
+    for _,model in ipairs(Director.Sync(director,c.enemies,alive,t))do
+        local r=c.root(model)
+        if r then c.fx("EnemyCancel",r.Position,{targetModel=model,enemy=c.enemies[model].kind})end
+    end
+    for _,model in ipairs(Director.Trim(director,Director.Cap(#alive)))do
+        local data=c.enemies[model]
+        if data then
+            data.engaging=false
+            if data.attacking then
+                data.attacking=false;data.attackSerial+=1;data.resolveAt=t;data.armoredUntil=0
+                local r=c.root(model)
+                if r then c.fx("EnemyCancel",r.Position,{targetModel=model,enemy=data.kind})end
             end
         end
-        if not target then h:Move(Vector3.zero) continue end
-        local pr = root(target.Character)
-        data.facing = pr.Position.X >= r.Position.X and 1 or -1
-        local pattern = data.phase == 2 and data.spec.PhaseMoves or data.spec.Moves
-        local moveName = pattern and pattern[data.moveIndex % #pattern + 1] or "Melee"
-        local range = not elite and data.spec.Reach - 1 or (closeMoves[moveName] and data.spec.Reach or 65)
-        if distance > range or (not elite and math.abs(pr.Position.Z - r.Position.Z) > 3) then
-            h.WalkSpeed = data.spec.Speed
-            h:MoveTo(Vector3.new(pr.Position.X - data.facing * 4, r.Position.Y, math.clamp(pr.Position.Z, -11, 11)))
-        elseif t >= data.attackAt and attackCount() < Director.Cap(#alive) then
-            beginEnemyAttack(model, data, target, moveName, alive)
-        else h:Move(Vector3.zero) end
+    end
+    local candidates={}
+    for model,data in pairs(c.enemies)do
+        local r,h=c.root(model),c.humanoid(model)
+        if not r or not h or h.Health<=0 then c.knockOut(model);continue end
+        if c.CombatMath.InBlastZone(r.Position,c.arena,c.Config.BlastMargin)then c.knockOut(model);continue end
+        if c.encounter.status~="Combat" then h:Move(Vector3.zero);Director.Release(director,model);continue end
+        local elite=data.spec.Role~="Grunt"
+        if elite and data.phase==1 and data.percent>=data.threshold*.52 then
+            data.phase=2;data.moveIndex=0;c.attributes(model,data)
+            c.fx("BossPhase",r.Position,{phase=2,enemy=data.kind,enemyName=data.spec.Name,targetModel=model})
+        end
+        if t<data.stunnedUntil or t<data.launchedUntil then state(model,data,"Stagger");h:Move(Vector3.zero);continue end
+        if data.attacking then state(model,data,t<(data.resolveAt or 0) and "Attack" or "Recover");h:Move(Vector3.zero);continue end
+        if t<data.recoveryUntil then state(model,data,"Recover");h:Move(Vector3.zero);continue end
+        local pos=r.Position
+        local x,z=math.clamp(pos.X,c.arena.MinX+6,c.arena.MaxX-6),math.clamp(pos.Z,-12,12)
+        if x~=pos.X or z~=pos.Z then r.CFrame+=Vector3.new(x-pos.X,0,z-pos.Z)end
+        local target,distance,bestScore
+        for _,player in ipairs(alive)do
+            local pr=c.root(player.Character)
+            if pr and not c.records[player].respawning then
+                local d=(Vector3.new(pr.Position.X,0,pr.Position.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude
+                local focusPenalty=math.max(0,4-(t-(data.targetHistory[player] or 0)))*5
+                local assigned=director.slots[model]
+                local score=d+focusPenalty-(assigned and assigned.target==player and 8 or 0)
+                if not bestScore or score<bestScore then target,distance,bestScore=player,d,score end
+            end
+        end
+        if not target then state(model,data,"Enter");h:Move(Vector3.zero);Director.Release(director,model);continue end
+        local pr=c.root(target.Character)
+        data.facing=pr.Position.X>=r.Position.X and 1 or -1
+        local slot=Director.Assign(director,model,target,r.Position,pr.Position)
+        local pattern=data.phase==2 and data.spec.PhaseMoves or data.spec.Moves
+        local moveName=pattern and pattern[data.moveIndex%#pattern+1] or "Melee"
+        local range=not elite and data.spec.Reach-1 or (closeMoves[moveName] and data.spec.Reach or 65)
+        local token=director.tokens[model]
+        if token and token.target~=target then Director.Release(director,model);token=nil;data.engaging=false end
+        local inRange=distance<=range and (elite or (math.abs(pr.Position.Z-r.Position.Z)<=3 and (r.Position.X-pr.Position.X)*slot.offset.X>0))
+        if token and inRange and t>=data.attackAt then
+            data.engaging=false;data.lastAttackAt=t;state(model,data,"Attack")
+            c.beginEnemyAttack(model,data,target,moveName,alive)
+        else
+            local destination
+            if token then
+                data.engaging=true;state(model,data,"Engage")
+                destination=Vector3.new(pr.Position.X+(slot.offset.X<0 and -4 or 4),r.Position.Y,pr.Position.Z)
+            else
+                data.engaging=false
+                local goal=pr.Position+slot.offset
+                local nearSlot=(Vector3.new(goal.X,0,goal.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude<4
+                state(model,data,nearSlot and "Hold" or "Approach")
+                if nearSlot then
+                    -- Continuously change lane and range while waiting, never a stationary queue.
+                    goal+=Vector3.new(math.sin(t*2.1+slot.serial)*2.5,0,math.sin(t*1.6+slot.serial)*3)
+                    if t>=(data.feintAt or t+1) then
+                        data.feintAt=t+4+slot.serial%3
+                        c.fx("EnemyFeint",r.Position,{targetModel=model,duration=.35,direction=data.facing,enemy=data.kind})
+                    end
+                    data.feintAt=data.feintAt or t+2+slot.serial%3
+                end
+                destination=Vector3.new(goal.X,r.Position.Y,goal.Z)
+                if t>=data.attackAt and distance<=(elite and range or 20) then
+                    local facing=c.records[target].facing or 1
+                    local behind=(r.Position.X-pr.Position.X)*facing<0
+                    Director.Request(director,model,target,behind,data.lastAttackAt,t)
+                    candidates[model]={target=target,move=moveName,inRange=inRange}
+                end
+            end
+            -- Cross through a neighboring lane before closing the opposite-side slot.
+            if (r.Position.X-pr.Position.X)*slot.offset.X<0 and math.abs(r.Position.X-pr.Position.X)<10 then
+                destination=Vector3.new(destination.X,r.Position.Y,pr.Position.Z+(slot.serial%2==0 and 6 or -6))
+            end
+            destination=Vector3.new(math.clamp(destination.X,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(destination.Z,-11,11))
+            h.WalkSpeed=data.spec.Speed;h:MoveTo(destination)
+        end
+    end
+    for _,model in ipairs(Director.Grant(director,t,Director.Cap(#alive)))do
+        local candidate,data=candidates[model],c.enemies[model]
+        if candidate and data then
+            data.engaging=true
+            if candidate.inRange then
+                data.engaging=false;data.lastAttackAt=t;state(model,data,"Attack")
+                c.beginEnemyAttack(model,data,candidate.target,candidate.move,alive)
+            end
+        else Director.Release(director,model)end
     end
 end
 return EnemyAI
