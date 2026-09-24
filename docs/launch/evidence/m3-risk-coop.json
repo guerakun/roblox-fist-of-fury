@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-24",
+  "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+  "scope": "Actual two-client scripted enemy resolver and physics contacts on frozen M3; not human timing or device input",
+  "actual": {
+    "ok": true,
+    "result": {
+      "actualEnemyResolvers": [
+        {
+          "laterImpactEvents": 0,
+          "move": "CrossroadRuin",
+          "laterTellEvents": 0,
+          "initialVolumes": 2,
+          "actualPerfectBlock": true,
+          "pressedLead": 0.08864402770996094,
+          "secondTargetDamage": 0
+        },
+        {
+          "laterImpactEvents": 0,
+          "move": "HuskJab",
+          "laterTellEvents": 0,
+          "initialVolumes": 1,
+          "actualPerfectBlock": true,
+          "pressedLead": 0.08607602119445801,
+          "secondTargetDamage": 0
+        }
+      ],
+      "contestedPhysicalOrb": {
+        "scorePaid": 20,
+        "actualWinners": 1,
+        "eligibleContenders": 2
+      },
+      "physicalDevicesVerified": false,
+      "passed": true,
+      "humanTimingVerified": false
+    }
+  },
+  "review": "World independently reviewed before execution; accepted damage controls rule out spawn-immunity masking. Both clients observed cancellation and no later impact/followup events.",
+  "remaining": [
+    "Projectile-flight parry cancellation not covered by this fixture",
+    "Physical touch/controller dispatch",
+    "Complete co-op/lifecycle and M3 tier/rank series"
+  ]
+}
