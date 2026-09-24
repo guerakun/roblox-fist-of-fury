@@ -1,7 +1,7 @@
 -- Pure observational windows. Only actual actions enter the set; movement toward a slot is excluded.
 local Diversity={}
-function Diversity.New()
-    return {actors={},byKind={},windows={},partialWindows=0}
+function Diversity.New(observer)
+    return {actors={},byKind={},windows={},partialWindows=0,observer=observer}
 end
 local function finish(state,actor,complete)
     local window=state.actors[actor]
@@ -12,8 +12,13 @@ local function finish(state,actor,complete)
         state.byKind[window.kind]=summary
         summary.eligible+=1;if #actions>=2 then summary.passed+=1 end
         summary.minDistinct=summary.minDistinct and math.min(summary.minDistinct,#actions) or #actions
-        table.insert(state.windows,{kind=window.kind,start=window.start,duration=30,actions=actions,passed=#actions>=2})
-    else state.partialWindows+=1 end
+        local result={kind=window.kind,start=window.start,duration=30,actions=actions,passed=#actions>=2}
+        if state.observer then result.actorAlias,result.opportunity=state.observer.Finish(actor,true)end
+        table.insert(state.windows,result)
+    else
+        state.partialWindows+=1
+        if state.observer then state.observer.Finish(actor,false)end
+    end
     state.actors[actor]=nil
 end
 function Diversity.Engage(state,actor,kind,t)
@@ -21,7 +26,10 @@ function Diversity.Engage(state,actor,kind,t)
     if window and t-window.start>=30 then
         finish(state,actor,true);window=nil
     end
-    if not window then state.actors[actor]={kind=kind,start=t,last=t,actions={}} else window.last=t end
+    if not window then
+        state.actors[actor]={kind=kind,start=t,last=t,actions={}}
+        if state.observer then state.observer.Begin(actor,t)end
+    else window.last=t end
 end
 function Diversity.Action(state,actor,kind,action,t)
     if action=="Approach" or action=="Hold" or action=="Engage" or action=="Enter" or action=="Reposition" then return end
@@ -31,6 +39,7 @@ end
 function Diversity.Leave(state,actor,t)
     local window=state.actors[actor]
     if window then finish(state,actor,math.min(t,window.last)-window.start>=30)end
+    if state.observer then state.observer.Depart(actor)end
 end
 function Diversity.Flush(state,t)
     local actors={};for actor in pairs(state.actors)do table.insert(actors,actor)end

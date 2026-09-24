@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-24",
+  "scope": "Root isolated idle-hub Edit: exact pure modules with injected dependencies; temporary anchored models for telemetry regression. No active campaign mutation, live opportunity collection or performance claim.",
+  "newObserver": {
+    "scope": "Pure supplied-context diagnostics and unchanged diversity replay; no live opportunity or behavior evidence",
+    "revision": "enemy-opportunity-v1",
+    "passed": true,
+    "assertions": 26
+  },
+  "regressions": {
+    "CombatTelemetry": "PASS: hit/damage, stock/encounter attribution, windup caps, action diversity and honest missing metrics",
+    "TelemetryDiversityAI": {
+      "intermissionExcluded": true,
+      "qualifiedWindows": 1,
+      "rangeExitExcluded": true,
+      "integration": true
+    },
+    "ActionDiversityAI": {
+      "repeatedActionsDoNotQualify": true,
+      "fullWindows": 3,
+      "excludedMovement": true,
+      "partialWindows": 3
+    }
+  },
+  "files": {
+    "src/server/EnemyOpportunityDiagnostics.lua": "67462a944cc205f6dc2de977e4d31dc36992ff527cb34681c4fc8631655f6b02",
+    "src/server/ActionDiversity.lua": "d509965643025c829f2540cac447b8b0dc0fbb21a7498340bc9857704b21d31d",
+    "tests/EnemyOpportunityAI.spec.lua": "b70690c98fa97335484fd34a4ee164cca9e159cab855b42cdad4fb4cb44059f3",
+    "src/server/CombatTelemetry.lua": "8b0ca92897fcf930edaf32bce57374fdcc3cd78f62ba7595f21089e82ebbf6cc",
+    "tests/ActionDiversityAI.spec.lua": "6a75ad1054a08abff101acc202a006fc2fbf47bfcdaccb635238493ab69988d0",
+    "tests/TelemetryDiversityAI.spec.lua": "2b5fea2b1376fb1a35c08d699666acf7335b4e195d155697306a524af39cb64b",
+    "tests/CombatTelemetry.spec.lua": "f1ee9d7eab067161042d182b3a293591c3a00a80ee5d8d5464e350e6fa611da2"
+  },
+  "review": "World independent source review PASS; combat self-review and limited checkpoint-doc review PASS",
+  "installedCampaign": "Still dfb2ae3 through all fifteen tier trials; do not sync these source edits during the series"
+}

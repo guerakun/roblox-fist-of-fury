@@ -1,6 +1,6 @@
 -- Studio-only observer contract; never changes live persistence or gameplay records.
-return function()
-    local T=require(game.ServerScriptService.NightfallServer.CombatTelemetry)
+return function(injected)
+    local T=injected or require(game.ServerScriptService.NightfallServer.CombatTelemetry)
     T.Reset();T.BeginEncounter(2,3)
     local p={UserId=901}
     T.Hit(p,12.5);T.Hit(p,2.5);T.StockLoss(p)

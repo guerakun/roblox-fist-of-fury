@@ -1,5 +1,5 @@
-return function()
-    local D=require(game.ServerScriptService.NightfallServer.ActionDiversity)
+return function(injected)
+    local D=injected or require(game.ServerScriptService.NightfallServer.ActionDiversity)
     local state=D.New();local actor={}
     D.Engage(state,actor,"Husk",0)
     D.Action(state,actor,"Husk","Approach",1);D.Action(state,actor,"Husk","Hold",2);D.Action(state,actor,"Husk","Reposition",3)

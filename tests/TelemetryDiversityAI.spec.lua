@@ -1,5 +1,5 @@
-return function()
-    local T=require(game.ServerScriptService.NightfallServer.CombatTelemetry)
+return function(injected)
+    local T=injected or require(game.ServerScriptService.NightfallServer.CombatTelemetry)
     local model=Instance.new("Model");local r=Instance.new("Part");r.Name="HumanoidRootPart";r.Anchored=true;r.Position=Vector3.new(0,-200,0);r.Parent=model
     local h=Instance.new("Humanoid");h.Parent=model;model.Parent=workspace
     local character=Instance.new("Model");local pr=Instance.new("Part");pr.Name="HumanoidRootPart";pr.Anchored=true;pr.Position=Vector3.new(5,-200,0);pr.Parent=character;character.Parent=workspace

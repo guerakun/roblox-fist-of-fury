@@ -3,8 +3,10 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local Telemetry = {}
 local Diversity=require(script.Parent.ActionDiversity)
+local Opportunity=require(script.Parent.EnemyOpportunityDiagnostics)
 local enabled = RunService:IsStudio()
-local state, windows, diversity
+Telemetry.Enabled=enabled
+local state, windows, diversity, opportunity
 local function time() return workspace:GetServerTimeNow() end
 function Telemetry.Reset()
     state = {schema=1, started=time(), eligibleGruntTicks=0, idleGruntTicks=0,
@@ -12,7 +14,12 @@ function Telemetry.Reset()
         flankWindows=0, flankedWindows=0, hits={}, stocks={}, damage={}, encounters={},
         aiSeconds=0, aiSamples=0, aiPeakSeconds=0, cameraFrustum="not measured", rank="not implemented"}
     windows = {}
-    diversity=Diversity.New()
+    opportunity=Opportunity.New()
+    diversity=Diversity.New({
+        Begin=function(actor,t)Opportunity.Begin(opportunity,actor,t)end,
+        Finish=function(actor,complete)return Opportunity.Finish(opportunity,actor,complete)end,
+        Depart=function(actor)Opportunity.Depart(opportunity,actor)end,
+    })
 end
 Telemetry.Reset()
 function Telemetry.BeginEncounter(stage, wave)
@@ -55,6 +62,15 @@ end
 function Telemetry.Action(model,kind,action,t)
     if enabled then Diversity.Action(diversity,model,kind or "Unknown",action,t)end
 end
+function Telemetry.ActorAlias(model)
+    return enabled and Opportunity.Alias(opportunity,model)or false
+end
+function Telemetry.AIContext(model,t,fields)
+    if enabled then Opportunity.Context(opportunity,model,t,fields)end
+end
+function Telemetry.OpportunityEvent(model,name,t)
+    if enabled then Opportunity.Event(opportunity,model,name,t)end
+end
 function Telemetry.Sample(enemies, alive, now, combatActive)
     if not enabled then return end
     if not combatActive then Diversity.Flush(diversity,now);return end
@@ -66,7 +82,8 @@ function Telemetry.Sample(enemies, alive, now, combatActive)
             for _,player in ipairs(alive)do
                 local pr=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
                 if pr and (Vector2.new(pr.Position.X-r.Position.X,pr.Position.Z-r.Position.Z)).Magnitude<=28 then
-                    engaged[model]=true;Diversity.Engage(diversity,model,data.kind or "Unknown",now);break
+                    engaged[model]=true;Diversity.Engage(diversity,model,data.kind or "Unknown",now)
+                    Opportunity.Sample(opportunity,model,now);break
                 end
             end
         end
@@ -110,6 +127,7 @@ function Telemetry.Summary()
     local result=table.clone(state)
     result.elapsed=time()-state.started
     result.actionDiversity=Diversity.Summary(diversity)
+    result.opportunityDiagnostics=Opportunity.Summary(opportunity)
     result.idleRatio=state.eligibleGruntTicks>0 and state.idleGruntTicks/state.eligibleGruntTicks or false
     result.flankRatio=state.flankWindows>0 and state.flankedWindows/state.flankWindows or false
     result.aiMeanMs=state.aiSamples>0 and 1000*state.aiSeconds/state.aiSamples or false

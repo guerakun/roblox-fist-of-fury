@@ -299,7 +299,7 @@ function Combat.GetAIDiagnostics()
     for model,data in pairs(enemies)do
         local r,h=root(model),humanoid(model);local slot,token=aiDirector.slots[model],aiDirector.tokens[model]
         local target=slot and root(slot.target.Character)
-        table.insert(result.actors,{kind=data.kind,state=data.aiState,position=r and vector(r.Position),velocity=r and vector(r.AssemblyLinearVelocity),
+        table.insert(result.actors,{actorAlias=Telemetry.ActorAlias(model),kind=data.kind,state=data.aiState,position=r and vector(r.Position),velocity=r and vector(r.AssemblyLinearVelocity),
             moveDirection=h and vector(h.MoveDirection),walkTo=h and vector(h.WalkToPoint),canAttack=enemyVisible(model),target=target and vector(target.Position),
             targetId=slot and slot.target.UserId,slot=slot and vector(slot.offset),token=token~=nil,tokenRemaining=token and token.expires-t,
             attackIn=data.attackAt-t,recoveryIn=data.recoveryUntil-t,resolveIn=(data.resolveAt or 0)-t,attacking=data.attacking,
@@ -1035,6 +1035,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     AttackDirector.BeginAttack(aiDirector,model,t,data.recoveryUntil)
     data.targetHistory[target]=t
     Telemetry.Action(model,data.kind,move.Grab and "Grab" or moveName,t)
+    if move.Grab then Telemetry.OpportunityEvent(model,"grabAttempts",t)end
     Telemetry.Windup(data.kind,moveName,move.Windup,attackCount(),AttackDirector.Cap(#alive,difficultyProfile().TokenBonus))
     data.armoredUntil=move.Armored and data.resolveAt or 0
     humanoid(model):Move(Vector3.zero)
@@ -1069,6 +1070,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
                             victim.grabStunUntil=now()+1;victim.stunnedUntil=victim.grabStunUntil
                             pr.AssemblyLinearVelocity=Vector3.zero
                             Telemetry.Action(model,data.kind,"Grab",now())
+                            Telemetry.OpportunityEvent(model,"grabCaptures",now())
                             fx("EnemyGrab",pr.Position,{targetModel=model,targetUserId=player.UserId,duration=1,moveId=moveName})
                             local life=victim.lifeSerial
                             task.delay(1,function()
@@ -1157,7 +1159,7 @@ local function aiStep(t)
         cameraSpan=cameraSpan and cameraSpan+(cameraGoalSpan-cameraSpan)*alpha or cameraGoalSpan
     else cameraEstimate,cameraSpan=nil,nil end
     lastCameraSample=t
-    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, difficulty = difficultyProfile(), RecordAction = Telemetry.Action, CanAttack = enemyVisible, VisiblePosition = enemyPositionVisible, SafePosition = enemySafePosition, SummonPhase = Combat.SpawnPhaseAdds,
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, difficulty = difficultyProfile(), RecordAction = Telemetry.Action, ObserveAI = Telemetry.Enabled and Telemetry.AIContext or nil, ObserveEvent = Telemetry.Enabled and Telemetry.OpportunityEvent or nil, CanAttack = enemyVisible, VisiblePosition = enemyPositionVisible, SafePosition = enemySafePosition, SummonPhase = Combat.SpawnPhaseAdds,
         root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
         Config = Config, arena = arena, encounter = encounter, attributes = attributes,
         fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})

@@ -58,8 +58,8 @@
     "WO-2.2": {
       "owner": "combat",
       "status": "implemented; aggregate telemetry pending",
-      "evidence": "2026-09-24: fresh Studio AttackDirectorAI+EnemyAISlots PASS; world finalreview PASS; front/back slots, nonidleHold,2-5tokens, renewal/capshrink/targetdeparture invalidation, bodytell client contract; commit3bbc5cc; seed1101Victory292.37s/0stocks/430damage/idle10.58%/flank90.91%/cap0; notfive-runacceptance",
-      "next": "WO-2.3 archetypes; five-run aggregate M2 telemetry/frustum/human gates remain open"
+      "evidence": "2026-09-24: fresh Studio AttackDirectorAI+EnemyAISlots PASS; world finalreview PASS; front/back slots, nonidleHold,2-5tokens, renewal/capshrink/targetdeparture invalidation, bodytell client contract; commit3bbc5cc; seed1101Victory292.37s/0stocks/430damage/idle10.58%/flank90.91%/cap0; notfive-runacceptance 2026-09-24 additive opportunity observer:26pure assertions plus ActionDiversityAI/TelemetryDiversityAI/CombatTelemetry regressions PASS in isolated hubEdit; world source reviewPASS. Bounded run-local aliases, same-tick known-context counts and actual requests/grants/grab events; original action definitions/denominator and gameplay decisions unchanged. m2-opportunity-pure.json and M2_DIVERSITY_FOLLOWUP.md. Installed dfb2ae3 baseline unchanged; actual opportunity collection/overhead unrun.",
+      "next": "After frozen15, install reviewed observation-only source and run latest-M3 original drifting crowd plus separately labeled reachable-party diagnostic. Retain21/31 historicalfailure; no backstep tuning accepted."
     },
     "WO-2.3": {
       "owner": "combat",

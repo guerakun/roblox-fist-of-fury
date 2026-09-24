@@ -140,7 +140,9 @@ function EnemyAI.Step(t,c)
         local pr=c.root(target.Character)
         data.facing=pr.Position.X>=r.Position.X and 1 or -1
         local slot=Director.Assign(director,model,target,r.Position,pr.Position,c.arena,c.VisiblePosition)
-        if c.CanAttack and not c.CanAttack(model)then
+        local visible=c.CanAttack and c.CanAttack(model)
+        if c.ObserveAI then c.ObserveAI(model,t,{visible=visible,fixedSlotFeasible=slot.approachFeasible})end
+        if c.CanAttack and not visible then
             -- Offscreen actors must enter the shared view before reserving attack capacity.
             Director.Release(director,model);data.engaging=false;state(model,data,"Reposition")
             local desired=Vector3.new(pr.Position.X+slot.offset.X,r.Position.Y,math.clamp(pr.Position.Z+slot.offset.Z,-11,11))
@@ -195,6 +197,7 @@ function EnemyAI.Step(t,c)
         local token=director.tokens[model]
         if token and token.target~=target then Director.Release(director,model);token=nil;data.engaging=false end
         local inRange=(not c.CanAttack or c.CanAttack(model)) and distance<=range and (elite or (math.abs(pr.Position.Z-r.Position.Z)<=3 and (r.Position.X-pr.Position.X)*slot.offset.X>0))
+        if c.ObserveAI then c.ObserveAI(model,t,{inRange=inRange})end
         if token and not inRange and slot.approachFeasible==false then Director.Release(director,model);token=nil;data.engaging=false end
         if token and inRange and t>=data.attackAt then
             data.engaging=false;data.lastAttackAt=t;state(model,data,"Attack")
@@ -230,6 +233,7 @@ function EnemyAI.Step(t,c)
                     local facing=c.records[target].facing or 1
                     local behind=(r.Position.X-pr.Position.X)*facing<0
                     Director.Request(director,model,target,behind,data.lastAttackAt,t)
+                    if c.ObserveEvent then c.ObserveEvent(model,"tokenRequests",t)end
                     candidates[model]={target=target,move=moveName,inRange=inRange}
                 end
             end
@@ -244,6 +248,7 @@ function EnemyAI.Step(t,c)
         end
     end
     for _,model in ipairs(Director.Grant(director,t,Director.Cap(#alive,profile.TokenBonus)))do
+        if c.ObserveEvent then c.ObserveEvent(model,"tokenGrants",t)end
         local candidate,data=candidates[model],c.enemies[model]
         if candidate and data then
             data.engaging=true
