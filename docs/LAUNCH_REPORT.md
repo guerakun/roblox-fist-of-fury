@@ -37,7 +37,7 @@ The final M3 series uses Normal/Hard/Nightmare seeds1101-1105, fresh Gale/Guardi
 
 **M4 has not begun implementation.** Contextual player grabs/throws, breakable food/coin pickups, three durable weapons, offensive air attack/juggle finisher, records and onboarding remain required. [Client readiness](launch/M4_CLIENT_READINESS.md) and [pickup/weapon design](launch/M4_PICKUP_WEAPON_PLAN.md) preserve scope and dependencies without claiming runtime completion.
 
-**Security remains open:** SEC-03 movement-origin authority has a reviewed proposal but no production enforcement or adversarial runtime proof. Server-owned attack parameters and distance checks do not validate every client-replicated position. See [security review](launch/SECURITY_REVIEW.md) and [movement plan](launch/MOVEMENT_AUTHORITY_PLAN.md). This blocks a launch-ready claim independently of bot clears.
+**Security remains open:** SEC-03 movement-origin authority has a reviewed proposal but no production enforcement or adversarial runtime proof. Server-owned attack parameters and distance checks do not validate every client-replicated position. See [security review](launch/SECURITY_REVIEW.md) and [movement plan](launch/MOVEMENT_AUTHORITY_PLAN.md). This blocks a launch-ready claim independently of bot clears. Preparation of its paired runtime test was stopped by an automated possible-cybersecurity-risk check; no adversarial test ran. [Exact blocker and retained scope](launch/SEC03_TEST_BLOCKER.md).
 
 
 ## Owner decisions and art acceptance
