@@ -1,0 +1,8 @@
+{
+  "recorded":"2026-09-24",
+  "source":"97590bc campaign staging with07968e8 analytics, before WO-2.6 difficulty integration",
+  "passed":true,
+  "assertions":["two clients initialized","cleared miniboss and wave3 before boss","full party wipe produces Defeat","retry restores mid-district checkpoint","retry resumes wave3 and reaches boss again","same-campaign cleared encounter pays no duplicate coins","full campaign reaches Victory","fresh campaign resets run state","fresh campaign clears first encounter","new campaign legitimately awards same content again"],
+  "scope":"Both connected players checked at reset boundaries. Ordinary Ready/Restart remotes; scripted accepted damage and traversal. No same-identity reconnect or human difficulty claim. Coin equality/increase asserted; XP is not separately asserted in this fixture.",
+  "review":"World independent source PASS; final strengthened both-player fixture rerun PASS."
+}

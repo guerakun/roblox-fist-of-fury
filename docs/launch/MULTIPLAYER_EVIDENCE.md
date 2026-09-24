@@ -33,3 +33,8 @@ All reports use synthetic Studio names or anonymous Player keys. Root alone star
 ## Additional lobby lifecycle pass, 2026-09-24
 
 `LobbyLifecycle.server.lua` and its normal-input companion passed ten assertions on travel-integrated campaign behavior (66f5e10): ready/cancel ordering, an unready member leaving starts the remaining ready party, actual encounter progression to district two, every player leaving resets Waiting, and a verified new identity joins district one with fresh stocks/percent/statistics. Combat clearing and traversal were scripted; this is lifecycle evidence only. The first fixture raced cross-client readiness messages and legitimately started the campaign; waiting for cancellation acknowledgments fixed the fixture. See [anonymous report](evidence/lobby-lifecycle.json). Cases 1–4 requiring the same identity, complete checkpoint reward retry, and a fresh run after victory are still not certified.
+
+
+## Connected checkpoint and fresh-run lifecycle, 2026-09-24
+
+The final two-client `CheckpointLifecycle` fixture passed ten assertions on the staged-entrance build: both players wipe, both restore the mid-district checkpoint, retry resumes wave three, an already-paid encounter grants no additional coins, the full campaign reaches Victory, both players reset survival/run statistics for a fresh campaign, and the same first encounter legitimately pays under new campaign keys. The final strengthened both-player fixture was rerun after independent review. [Report](evidence/checkpoint-lifecycle.json). Ordinary Ready/Restart requests were used; damage and traversal were scripted. This does not establish same-identity reconnect retention or HumanBot difficulty. XP equality was not separately asserted. Re-run after M3 survival changes.
