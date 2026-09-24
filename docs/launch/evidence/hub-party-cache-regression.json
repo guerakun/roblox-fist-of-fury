@@ -1,0 +1,8 @@
+{
+  "sourceCommit": "8635fe0",
+  "passed": true,
+  "elapsed": 26.240514599950985,
+  "assertions": ["two initialized hub clients", "invite appears to recipient", "both clients share two-member party", "nonleader deployment rejected", "both clients observe queued party", "leader cancels queue for whole party", "member hero selection accepted", "private party simulation finishes together"],
+  "scope": "Two actual Studio clients sending ordinary hub remotes; ephemeral service adapter, no live MemoryStore or teleport.",
+  "fixtureNote": "An initial orchestration attempt was aborted because the preceding source-mirror command failed parsing; corrected mirror succeeded before this run. No initial test result was counted as a gameplay failure or pass."
+}
