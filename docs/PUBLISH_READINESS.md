@@ -1,12 +1,12 @@
 # Publish readiness — Curtain Break
 
-Drafted 2026-09-23 from the current source and recorded Studio evidence. **This is a development build with specific shipping checks still open.** A successful local preview, source build or mocked persistence test does not certify public-server behavior or parity with Jujutsu Shenanigans. The integration owner should append the final revision and runtime evidence below before marking release gates complete.
+Drafted 2026-09-23; original-cast requirements updated 2026-09-24 from the current source and recorded Studio evidence. **This is a development build with specific shipping checks still open.** A successful local preview, source build or mocked persistence test does not certify public-server behavior or parity with the requested Roblox combat-quality benchmark. The integration owner should append the final revision and runtime evidence below before marking release gates complete.
 
 ## Current build facts
 
 - The source campaign has exactly **three stages and twelve encounters**: a skirmish, miniboss, escalation and boss in each stage. City streets contains Crosswalk Executioner and Siren Marshal; the abandoned station contains Platform Widow and The Last Conductor; the abandoned factory contains Furnace Hound and Kiln Sovereign. Kiln Sovereign is the finale.
 - WorldBuilder preserves the continuous floor, controlled lane and three encounter gates. It creates 34 whole destructible prop assemblies. The destruction service caps active fragments at 30 and restores props after 20 seconds. The expanded world also includes reviewed/generated scenic mesh and material references.
-- Naruto, Luffy and Tanjiro are playable fan-theme R6 kits, with authored face/clothing details and reviewed static hair/hat mesh references in `src/shared/CharacterArt.lua`. This is an unofficial anime fan project. Do not present its characters, city fiction or store artwork as an official franchise release.
+- Gale, Piston and Tide are the stable original-hero IDs. Candidate names Rook Calder, Bo Marlowe and Isla Veyra remain pending owner approval. WO-1.1–1.3 replace identity, art and specials; no rename alone establishes original art. Machine scan, independent screenshot review and owner approval are separate M1 requirements.
 - Actual Toolbox-derived movement/combat keyframes, hitbox adaptation, particles and audio are documented in the asset register. The final asset inventory must also include the newer character art and generated foundry-pump/material assets.
 - All current heroes/stages are free to play. Coins and chapter XP are earned from server-authorized encounter rewards. The twelve-tier chapter track has no expiry. Combat boons are earned through XP and one is equipped at a time; the proposed paid pass contains cosmetic trails/titles only.
 - Current shipping controls are **SalesEnabled=false**, **ChapterPassId=0**, **StudioPersistence=false** in `src/shared/ProgressionConfig.lua`. Keep these values until the corresponding checks are complete. Studio practice progression intentionally resets.
@@ -17,7 +17,7 @@ Drafted 2026-09-23 from the current source and recorded Studio evidence. **This 
 | Evidence | Established scope | Does not establish |
 | --- | --- | --- |
 | `docs/VALIDATION.md`, initial smoke runs | Earlier build's basic hit validation, cooldown/rate handling, stocks, restart and forced gate transitions | Final twelve-encounter campaign balance or updated character/world performance |
-| `docs/media/coop-studio.jpg` and two-client notes | Two actual local clients joined the earlier slice and observed replicated fighters/damage | Four-player latency, complete co-op campaign, reconnect coverage or the final expansion |
+| Historical two-client notes in VALIDATION.md (retired-art screenshot removed from current tree) | Two actual local clients joined the earlier slice and observed replicated fighters/damage | Four-player latency, complete co-op campaign, reconnect coverage or the final expansion |
 | Earlier 21-prop destruction stress | Whole-assembly hiding, 30-fragment cap and restoration in the then-current server build | New 34-prop two-client/latency behavior |
 | `tests/ProfileStore.spec.lua` and integration-owner PASS report | Injected-adapter checks for lock contention, reconnect sessions, expiry, lost lock, failed loads, schema guard, sanitation and warning recovery | Roblox production DataStore permissions, real throttling, reconnect across live servers or durable live saves |
 | `tests/ProfileConcurrency.spec.lua` | Regression test exists for a final release queued behind a slow autosave | A live DataStore shutdown test unless its execution is separately recorded |
@@ -45,8 +45,8 @@ The server and client both restrict a real pass purchase to `purchaseAllowed` in
 ## Gate 2 — Final-owner asset access and presentation
 
 - [ ] Reconcile every external mesh, texture, audio and material ID from CharacterArt, AssetInstaller, ArtAssetsInstaller and Main.client with the asset register, including source, creator/owner and actual use.
-- [ ] Confirm intended final-owner use of the fan-character assets and public-facing anime names/art. Record the decision for each asset or substitute original assets before public release. Toolbox insertion alone is not an ownership record.
-- [ ] Launch the **published test universe** under its intended owner/group and verify all hair/hat meshes, foundry-pump textures, station material maps, particles and sounds load without permission or moderation errors.
+- [ ] Pass WO-1.5 machine scanning, review three silent original-hero gameplay screenshots independently, and obtain owner approval of candidate names/art. Check public icons, descriptions and keywords too. Toolbox insertion alone is not an ownership record.
+- [ ] Launch the **published test universe** under its intended owner/group and verify all current character art, foundry-pump textures, station material maps, particles and sounds load without permission or moderation errors.
 - [ ] Listen to the actual audio mix and inspect all three characters from front/side/back in every chapter under final lighting. Verify weapons/hair do not enlarge queryable hit targets.
 - [ ] Retain the sampled keyframe route if it is the shipping implementation. If converting to uploaded Animator assets, publish them to the final experience owner and test permissions before removing the working fallback.
 
@@ -84,7 +84,7 @@ Reference: [Roblox Data stores — Studio access and testing](https://create.rob
 
 ## Gate 6 — Creator Dashboard publication setup
 
-- [ ] Select the intended experience owner/group, final name/description/icon/thumbnails, supported devices, access audience and maximum party size. Verify the public page describes the actual co-op game and unofficial fan theme.
+- [ ] Select the intended experience owner/group, final name/description/icon/thumbnails, supported devices, access audience and maximum party size. Verify the public page describes the actual original co-op game.
 - [ ] Complete the current **content maturity & compliance questionnaire** using the build's actual combat, fear imagery, audiovisual content and interaction features. Confirm the resulting audience/access configuration in Creator Dashboard; do not infer it from the intended audience alone.
 - [ ] Verify account/experience publishing eligibility and any current Dashboard requirements. Keep test access restricted until the relevant gates above pass; change audience/access deliberately as part of release.
 - [ ] Perform a final published-client smoke test from a non-owner test account and verify joins, assets, save/rejoin and the first boss encounter.
@@ -105,4 +105,4 @@ Reference: [Roblox create and publish games and places](https://create.roblox.co
 | Sales enabled? | No — current source false / pass ID 0 |
 | Approved access audience and maturity result | Pending Creator Dashboard setup |
 ## Handoff status
-Account usage limits interrupted work around 03:31 EDT. See PROGRESS.md and the final VALIDATION.md section for the latest actual evidence. The public repository is a development handoff, not a public Roblox launch. The main place is a clean Rojo source build whose world is generated on Play. Latest stock-sharing and expanded multiplayer regressions remain open; paid sales are disabled.
+The earlier overnight slice was interrupted by account usage limits around 03:31 EDT. Current launch-program status is at the top of PROGRESS.md. See PROGRESS.md and the final VALIDATION.md section for the latest actual evidence. The public repository is a development handoff, not a public Roblox launch. The main place is a clean Rojo source build whose world is generated on Play. Latest stock-sharing and expanded multiplayer regressions remain open; paid sales are disabled.

@@ -193,7 +193,7 @@ function WorldBuilder.Build()
 	-- I: crossing. Billboard canyon, striped pedestrian crossing and disrupted traffic.
 	local first = {{13,25,52},{42,30,65},{75,29,44},{109,30,76},{145,33,53},{173,20,63}}
 	for i, b in ipairs(first) do building(b[1],b[2],b[3], i%2==0 and C.amber or C.cyan,"CrossingBuilding"..i) end
-	sign("DistrictMarquee", "渋谷\nSHIBUYA / NIGHTFALL", 75, 34, -20.3, 27, 12, C.ink, C.cyan)
+	sign("DistrictMarquee", "ASHGATE\nCROSSING / NIGHTFALL", 75, 34, -20.3, 27, 12, C.ink, C.cyan)
 	sign("EmergencyScreen", "21:31\nSTAY TOGETHER", 43, 43, -20.2, 27, 17, C.red, C.white)
 	sign("CinemaBoard", "映画\nMIDNIGHT\nCINEMA", 109, 49, -20.2, 22, 24, C.purple, C.white)
 	sign("CrossingWayfinding", "01  /  SCRAMBLE CROSSING   →", 104, 10, -17, 35, 2.4, C.ink, C.cyan)
@@ -303,7 +303,7 @@ function WorldBuilder.Build()
 	beam("StationHandrail",Vector3.new(288.4,3,-17),Vector3.new(288.4,7,-28),.2,C.silver)
 	sign("StationChapter","02 / ABANDONED STATION",211,20,-18,52,4,C.ink,C.cyan)
 	sign("StationExit13","13\nEXIT CLOSED",190,9,-16.1,8,6,C.amber,C.ink)
-	sign("StationSuspended","渋谷駅 / SHIBUYA\nALL SERVICES SUSPENDED",269,22,-20,46,6,C.ink,C.white)
+	sign("StationSuspended","ASHGATE TRANSIT\nALL SERVICES SUSPENDED",269,22,-20,46,6,C.ink,C.white)
 	sign("PlatformNumber","04\nLAST DEPARTURE",316,17,-18,15,7,C.ink,C.cyan)
 	sign("StationRoute","MAINTENANCE ACCESS →  INDUSTRIAL LINE",321,12,-17.5,43,2.5,stationBlue,C.white)
 	-- A clock stopped at the evacuation time and a torn timetable imply sudden abandonment.

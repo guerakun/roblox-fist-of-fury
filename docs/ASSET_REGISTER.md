@@ -11,7 +11,7 @@ Imported and inspected in Roblox Studio on 2026-09-23. Toolbox/Creator Store is 
 
 Animations are sampled from pose data instead of relying on private animation upload permissions. This preserves the actual Toolbox motion for the R6 prototype. Production should publish reviewed animations to the final experience owner and migrate to Animator tracks. Particle texture availability must be rechecked in the published experience.
 
-No anime video or soundtrack is bundled. Toolbox character hair meshes are included as listed below. Naruto, Luffy and Tanjiro are prototype fan-theme kits; final publication rights remain outstanding. Source attribution does not imply ownership of the anime franchises.
+No reference-game video or soundtrack is bundled. The launch cast is being rebuilt with original authored geometry; retired imported character meshes are not approved for the launch build. Original-art runtime evidence and owner approval remain pending.
 
 Quarantine workflow: import only into ServerStorage.ToolboxReview in Edit mode; inspect every LuaSourceContainer without requiring it; export only reviewed data; remove raw imported objects before Play/save. The build contains no external numeric require, loadstring or HTTP runtime dependency.
 
@@ -21,16 +21,11 @@ Quarantine workflow: import only into ServerStorage.ToolboxReview in Edit mode; 
 - [City Night Ambience 3, 9112759731](https://create.roblox.com/store/asset/9112759731), ProSoundEffects — quiet environment loop.
 Actual Sound instances inserted in Studio; client source recreates the same IDs for reproducible builds. Final published-universe audio permission testing remains required.
 
-## Overnight character mesh imports
-All three free Creator Store models were inserted into Edit-mode quarantine and inspected; no LuaSourceContainer was present. Only the following mesh/texture data is reconstructed by CharacterArt.lua. Raw models, welds and unrelated objects are discarded.
+## Original hero art and retired assets
+Gale, Piston and Tide use native-part candidate designs under WO-1.2. No new external character asset IDs are planned. Exact implementation/inspection results belong in CHARACTER_ART.md and PROGRESS.md.
 
-| Source | Creator | Retained data |
-|---|---|---|
-| [Naruto PTS Hair Free — 1453913561](https://create.roblox.com/store/asset/1453913561) | meshuploader213 | Hair/headband mesh 1453909835; texture 1453912288 |
-| [Luffy's Straw Hat (includes hair) — 13178556114](https://create.roblox.com/store/asset/13178556114) | MonkeyWizard_OOA | Hair mesh 943796917; hat mesh 5063791566 / texture 5063791598 |
-| [Tanjiro Hair — 16580641649](https://create.roblox.com/store/asset/16580641649) | uchirratobi1438 | Hair meshes 3657762884 and 3828742380; texture 3828765577 |
-
-Meshes are normalized to the custom R6 rigs. Cosmetic geometry does not participate in combat queries. Original authored eyes, face marks and clothing details supplement the imported hair. Marketplace attribution is not franchise publication permission.
+### Preserved (retired) ideas
+Earlier prototype hair/accessory imports and identifying face/outfit motifs are removed from the active inventory. Their original records remain in Git history. Preserve the reviewed-import quarantine method, R6 compatibility and cosmetic/query separation, not the retired assets. Toolbox motion, particles and hitbox sources above remain active.
 
 ## Original generated environment art
 Roblox Studio mesh generation produced an original four-part foundry pump, published asset **130740920499312**, totaling approximately 3,500 triangles. Three static instances dress the factory background. No executable scripts are imported.

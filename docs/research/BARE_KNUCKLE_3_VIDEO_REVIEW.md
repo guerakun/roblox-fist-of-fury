@@ -1,6 +1,6 @@
 # Bare Knuckle III video review — evidence and Curtain Break comparison
 
-Research-only review, 2026-09-23. No production mechanics were added or changed for this review.
+Historical research-only review, 2026-09-23, against the pre-launch-program slice. No production mechanics were added for that review. Original-cast text scrubbed 2026-09-24; the table remains dated baseline evidence. The owner subsequently approved selected launch mechanics in [the launch plan](../launch/LAUNCH_PLAN.md); current status belongs in PROGRESS.md.
 
 ## Exact reference and access status
 
@@ -69,7 +69,7 @@ SEGA's [official Bare Knuckle III page](https://vc.sega.jp/vc_bknuckle3/) docume
 | Two-player simultaneous play | **Implemented, with a different scope:** the current project supports up to four co-op players (`Config.MaxPlayers`). This does not prove final four-player runtime performance. |
 | A charged special can avoid a health cost | **Different:** hero specials currently use fixed cooldowns. There is no equivalent health-spend/recharged-safe-special economy. |
 | Score upgrades dash attacks through three levels; a lost life reduces the level | **Missing equivalent:** Dash is a movement/escape action. Earned chapter XP and a single boon are separate progression systems, not score-evolved dash attacks. |
-| Weapon-specific specials consume weapon durability | **Missing equivalent:** there is no gameplay weapon-pickup, carried-weapon inventory or durability system. Tanjiro's authored sword and enemy weapons are character presentation, not collectible equipment. |
+| Weapon-specific specials consume weapon durability | **Missing equivalent:** there is no gameplay weapon-pickup, carried-weapon inventory or durability system. The baseline blade-kit prop and enemy weapons are character presentation, not collectible equipment. |
 | Scenario branching | **Missing equivalent:** the campaign follows the fixed city → abandoned station → abandoned factory sequence. |
 | Encounter-dependent secret character recruitment | **Missing equivalent:** SEGA describes freeing the kangaroo by defeating its handler first. Curtain Break offers its three heroes directly; it has no comparable conditional recruitment encounter. |
 
@@ -117,4 +117,4 @@ The following is a source audit alongside the sampled video, not a claim that ev
 6. What changes between a normal enemy group, a set piece and a boss beyond enemy health?
 7. Which stage geometry changes actual movement decisions, rather than only changing background art?
 
-These questions preserve the user's reference and potential future discussion. They are not an approved implementation list. Gameplay changes remain out of scope for this research task.
+These questions preserve the user's reference and potential future discussion. They are not themselves an implementation list. The subsequent launch plan selects the approved v1 subset; unanswered research details and other ideas remain preserved without expanding overnight scope.

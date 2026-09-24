@@ -12,7 +12,7 @@ The game uses controlled side-view stages. Walk along X and use a small amount o
 | Dash | Q | Left trigger | Dash |
 | Hold guard | F | Left bumper | Hold Block |
 | Air recovery | E | Right bumper | Recovery |
-| Select Naruto / Luffy / Tanjiro | 1 / 2 / 3 | D-pad left / right cycles | Hero name |
+| Select Rook Calder / Bo Marlowe / Isla Veyra (candidate names) | 1 / 2 / 3 | D-pad left / right cycles | Hero name |
 | Ready in the lobby | Enter | Start | Ready |
 | Restart after end screen | R | Start | Play Again |
 
@@ -20,7 +20,7 @@ The first grounded jump uses Roblox Humanoid jumping. A second airborne press re
 
 ## Camera and accessibility
 
-- Scripted side-view camera follows the party with smooth movement and stage bounds. Camera fitting samples party positions at 10 Hz; effects and movement update per frame.
+- Scripted side-view camera follows the party with smooth movement and stage bounds. Party discovery runs at 10 Hz; camera target and eye sample and follow living party positions together every render frame. Movement runs separately after input. See CAMERA_REGRESSION.md.
 - Health is represented by readable damage percentage and discrete stock marks. Cooldown buttons show numeric time remaining.
 - Buttons support mouse activation in addition to keyboard, gamepad, and touch inputs. Input resets when the app loses focus.
 - The custom controller replaces Roblox default controls so keyboard, thumbstick, and touch directions stay aligned with the authored lane.
@@ -28,7 +28,7 @@ The first grounded jump uses Roblox Humanoid jumping. A second airborne press re
 
 ## Imported asset contract
 
-The client actually samples imported Toolbox R6 pose data from `Nightfall.Shared.ToolboxAnimations`: Combat Animations **14578890309** by PixellDaZuera and Dash **109267687059124** by z0efx63. Light/alternate light/heavy/guard/dash plus idle/walk are interpolated from their original keyframes. Special uses the imported heavy clip until distinct hero specials are authored. Teammates and enemies are sampled on each client; server combat timing remains authoritative.
+The client actually samples imported Toolbox R6 pose data from `Nightfall.Shared.ToolboxAnimations`: Combat Animations **14578890309** by PixellDaZuera and Dash **109267687059124** by z0efx63. Light/alternate light/heavy/guard/dash plus idle/walk are interpolated from their original keyframes. Bespoke original hero special poses are scheduled in WO-1.3; the historical baseline reused Heavy. Teammates and enemies are sampled on each client; server combat timing remains authoritative.
 
 The installed Hit VFX template is cloned for impacts. Enemy attacks show red ground footprints during windup; boss overload has a distinct banner and burst. Toolbox audio references are Punch Impact1 **132504023010884**, whoosh **135315310485417**, and City Night Ambience3 **9112759731**. Impacts are deduplicated and limited to eight concurrent transient sounds. Audio still depends on Roblox asset availability/permissions in the published experience.
 
@@ -42,7 +42,7 @@ When no compatible effect exists, bounded neon impact particles make attacks vis
 
 ## Required hands-on QA
 
-The source implementation should not be labeled on par with Jujutsu Shenanigans until these are observed in a running Roblox client:
+The source implementation should not be labeled on par with the requested Roblox combat-quality benchmark until these are observed in a running Roblox client:
 
 1. Solo and 2–4 player Studio sessions: every hit confirms once, party framing remains readable, and stocks/restarts agree for all clients.
 2. Keyboard, Xbox-style controller, and phone landscape: movement, guard release, hero selection, ability labels, and restart remain usable with safe-area insets.
@@ -54,13 +54,13 @@ Current limitations: no input rebinding, no dedicated portrait-phone layout, no 
 
 ## Hero special presentation
 
-Each server-confirmed Special attack now has a distinct client effect with a charging phase followed by a release at the configured windup:
+WO-1.3 replaces the retired special visuals with the following original languages. See PROGRESS.md for implementation and runtime evidence; these are not acceptance claims:
 
-- **Naruto / Spiral Burst:** a growing cyan-white sphere with four rotating trail satellites surges forward, then dissipates.
-- **Luffy / Elastic Cannon:** a visible skin-colored fist draws back, extends on a long elastic arm, and recoils. Red cuff and cream speed lines keep its silhouette readable.
-- **Tanjiro / Tidal Arc:** a bright blade trail releases a sweeping teal crescent with white foam edges, then fades.
+- **Gale / Cyclone Drive:** corkscrew kick and forearm wind ribbons.
+- **Piston / Recoil Cannon:** mechanical gauntlet, piston/chain extension and recoil steam.
+- **Tide / Undertow Arc:** rotating glaive sweep and broad water crescent.
 
-These are authored procedural visual effects layered onto imported Toolbox combat animation/audio. They are not additional imported Toolbox assets. Special character animation still reuses the imported Heavy clip; bespoke skeletal specials remain a quality milestone.
+These are authored procedural visual effects layered onto imported Toolbox combat animation/audio. They are not additional imported Toolbox assets. Bespoke skeletal poses and VFX coverage must be checked against each server-defined windup, range and width.
 
 The effect scheduler caps concurrent hero specials at eight, uses one temporary render connection, and removes all parts in approximately one second. Parts are anchored, non-colliding, and non-queryable. Release sound and camera kick happen after windup. The visuals do not create hitboxes, move characters, apply damage, or freeze simulation; authoritative server attacks remain unchanged. Visual travel is stylized and is not a simulated projectile collision test.
 ## Three-chapter encounter HUD

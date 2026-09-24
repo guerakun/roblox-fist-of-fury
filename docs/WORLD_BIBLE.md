@@ -2,9 +2,9 @@
 
 ## Project identity and non-negotiable intent
 
-Build an anime ensemble cooperative PvE brawler in a Jujutsu Kaisen city setting. The user specifically requested characters from Naruto, One Piece and Demon Slayer. Preserve that crossover ambition in the roster plan; do not silently replace it with unrelated generic heroes. This slice uses a Shibuya-inspired district and authored rescue mission. It does not claim its crossover story is anime canon.
+Build a fully original anime-styled ensemble PvE brawler in fictional Ashgate. The owner approved original heroes on 2026-09-23: Gale, Piston and Tide, with candidate names pending owner approval. The rescue mission connects a commercial crossing, abandoned station and industrial relay; it does not reproduce an external story or geography.
 
-The world is a directed left-to-right beat-em-up route, inspired by Bare Knuckle / Streets of Rage stage progression, with Super Smash Bros.-inspired impact and launch combat. It is not a sandbox. Jujutsu Shenanigans is the requested Roblox quality benchmark for responsive abilities, impactful audiovisual feedback and city detail. A procedural slice is a foundation, not evidence that this benchmark has already been reached.
+The world is a directed left-to-right beat-em-up route, inspired by Bare Knuckle / Streets of Rage stage progression, with Super Smash Bros.-inspired impact and launch combat. It is not a sandbox. The quality target is responsive abilities, impactful audiovisual feedback and readable city detail. A procedural slice is a foundation, not evidence that this benchmark has already been reached.
 
 ## Geography and implementation contract
 
@@ -58,7 +58,7 @@ Road joints, crossing stripes, restrained wet reflections, bollards, benches, ve
 
 The user explicitly requires Toolbox assets for VFX, animations, hitbox combat logic and movement. The procedural environment does not substitute for that request. Keep source asset IDs, creator names, insertion results, script inspection notes, and actual adopted components in the asset inventory maintained by the integration owner. Prefer coherent asset families and measured VFX over miscellaneous visual noise. Do not count an asset as integrated because it appears in a shopping list.
 
-For character additions retain Naruto, Luffy and Tanjiro as the requested thematic references. Distinctive silhouettes, pose language, move timing and readable color accents matter more than copying an outfit onto the same moveset. Document any asset ownership or animation publication requirements before release. The current build's real, playable roster is defined by its actual character configuration, not this future roster ambition.
+The launch roster uses original Gale, Piston and Tide silhouettes and pose languages: wind courier, mechanical gauntlet mechanic and water-glaive responder. Display names belong only in configuration. Native geometry replaces retired imported character art; current implementation and approval evidence are separate from design intent. Record actual new asset IDs and ownership requirements before release.
 
 ## Quality acceptance and remaining craft passes
 
@@ -67,7 +67,7 @@ For character additions retain Naruto, Luffy and Tanjiro as the requested themat
 - Verify the first 30 seconds communicates attack, dodge, direction and cooperative objective without a wall of tutorial text.
 - Playtest moving and attacking simultaneously, launch recovery, enemy collision clusters, simultaneous ability effects and teammate rescue conditions.
 - Validate on a representative mobile device; thousands of simple Parts still need measured frame-time and memory budgets. Consider replacing repeated facade details with reusable MeshParts after the composition is approved.
-- Add spatial sound, polished animation blending, authored character silhouettes, boss camera beats, civilian story interactions, and a multiplayer-verified destructible response before describing the result as comparable to Jujutsu Shenanigans.
+- Add spatial sound, polished animation blending, authored character silhouettes, boss camera beats, civilian story interactions, and a multiplayer-verified destructible response before describing the result as comparable to the requested Roblox combat-quality benchmark.
 - Preserve ideas that are deferred in this document or the project backlog with status. Do not delete the rescue story or roster intention just because implementation is staged.
 
 ## Deferred expansions, preserved
@@ -76,11 +76,11 @@ Future missions: rain-soaked service alley, underground interchange, rooftop rel
 
 Future set pieces: a curtain that retracts in strips, emergency screens updating after victories, a train arriving after seal destruction, and street lights recovering as allies advance. Each should communicate game state, not exist only as decoration.
 
-## Previous route concepts, preserved rather than discarded
+## Preserved (retired) ideas — previous route concepts
 
 The initial slice placed a shopping arcade in chapter two and the station in chapter three. The user subsequently specified exactly city streets, abandoned station and abandoned factory, so those initial compositions are no longer the active three chapters. The arcade remains a future side-route or later campaign chapter. Original design notes follow for reuse:
 
-### 02 — Dōgenzaka arcade
+### 02 — Lantern arcade (retired route)
 
 Warm amber lantern rhythm, six individually identified shops, awning stripes, blade signs, roof ribs and shutter details. Narrower-looking architecture changes the rhythm without shrinking the combat lane. Rear roof ribs frame the view without covering the camera with a solid roof. The lantern color shift signals progress even when the UI is hidden.
 
@@ -105,6 +105,6 @@ The first stage-2/3 preview captures showed empty sky above long repeating wall 
 All additions remain static, non-colliding and non-queryable scenery; no new dynamic loops, destructible tags or attack-like red ground fills were introduced. Geometry count and visibility should be checked in the regenerated preview and the real gameplay camera. The first screenshots were composition evidence, not the final mobile performance result.
 ## Hero color fidelity / lighting revision
 
-A character preview showed the orange jacket tending yellow and skin approaching white. The previous high blue-white ColorShift_Top (163/192/221) combined with high ambient, direct illumination, specular response and character fill risked washing out material colors. The revised world uses neutral top/bottom color shift, brightness 1.85, exposure 0, shadow ambient 84/90/106, outdoor ambient 96/102/118, diffuse scale 0.55 and specular scale 0.45. Post-processing is nearly neutral (250/251/255 tint, zero saturation adjustment, contrast 0.04), with bloom 0.1 and threshold 1.3. Local cyan/amber practical lights still define the chapters, and the existing reduced character fill remains owned by CharacterFactory.
+A retired prototype character preview showed a warm-colored outfit tending yellow and skin approaching white. The previous high blue-white ColorShift_Top (163/192/221) combined with high ambient, direct illumination, specular response and character fill risked washing out material colors. The revised world uses neutral top/bottom color shift, brightness 1.85, exposure 0, shadow ambient 84/90/106, outdoor ambient 96/102/118, diffuse scale 0.55 and specular scale 0.45. Post-processing is nearly neutral (250/251/255 tint, zero saturation adjustment, contrast 0.04), with bloom 0.1 and threshold 1.3. Local cyan/amber practical lights still define the chapters, and the existing reduced character fill remains owned by CharacterFactory.
 
-This is a moderation pass, not a completed color-calibration result. Verify Naruto's orange jacket and skin, Tanjiro's green/black checks and Luffy's red vest in all three chapters at Studio quality 21 and the target mobile quality. Preserve visible lane contrast; if a local section becomes too dark, increase that area's neutral practical light rather than restoring a global color wash. Official lighting behavior reference: https://create.roblox.com/docs/environment/lighting .
+This is a moderation pass, not a completed color-calibration result. Verify the new charcoal/amber wind outfit, brass/teal mechanical outfit and deep-blue/foam blade outfit in all three chapters at Studio quality 21 and the target mobile quality. Preserve visible lane contrast; if a local section becomes too dark, increase that area's neutral practical light rather than restoring a global color wash. Official lighting behavior reference: https://create.roblox.com/docs/environment/lighting .

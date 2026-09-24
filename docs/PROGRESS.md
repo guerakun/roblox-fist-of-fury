@@ -1,6 +1,6 @@
 # Morning summary
 
-M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; world/docs scrub ready to save. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.2 art, WO-1.4 save, WO-2.2 director, and WO-5.5 fixed-count/lifecycle/latency tests.
+M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; WO-1.4 original story/docs and Ashgate signage saved; art replacement underway. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.2 art, WO-1.4 save, WO-2.2 director, and WO-5.5 fixed-count/lifecycle/latency tests.
 
 ## Launch program status
 
@@ -9,10 +9,10 @@ M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 st
 | WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup; commit ebd49d4, tag pushed | baseline preserved; tag is rollback reference |
 | WO-0.2 | root | closed | 2026-09-24: five fresh seeds 1101-1105; 5/5 clears; mean278.27s, 0.80 stocks, 543 damage; anonymous reports; closing commit be91f0f | release Phase B; compare WO-2.1 extraction seed1101 before syncing M1 changes |
 | WO-0.3 | root (combat handoff after M0) | closed | 2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations; commit c1a037d | hand off telemetry ownership to combat for M2 |
-| WO-1.1 | presentation | closed | 2026-09-24: Studio HeroMigration spec PASS (stable IDs, old keys/case/defaults, coins and kit values); ProfileStore11calls and EnemyMoves38patterns PASS; world independent review; normal client selection Tide snapshot confirmed | WO-1.2 original art and WO-1.3 specials; names pending owner approval |
+| WO-1.1 | presentation | closed | 2026-09-24: Studio HeroMigration spec PASS (stable IDs, old keys/case/defaults, coins and kit values); ProfileStore11calls and EnemyMoves38patterns PASS; world independent review; normal client selection Tide snapshot confirmed; commit3b41a0f | WO-1.2 original art and WO-1.3 specials; names pending owner approval |
 | WO-1.2 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.3 | presentation | queued | not run | follow launch phase dependencies |
-| WO-1.4 | world | implemented, review pending | world/docs scrub and two retired screenshots removed; scoped scan zero; stage signs Ashgate | independent review and commit |
+| WO-1.4 | world | closed | 2026-09-24: presentation independent review PASS; scoped docs/signs prohibited scan zero; two obsolete screenshots removed; retired ideas preserved without identities | WO-1.5 whole-repo gate after art replacement; owner names/art review pending |
 | WO-1.5 | root | queued | not run | follow launch phase dependencies |
 | WO-2.1 | combat | closed | 2026-09-24: 25 legacy/extracted traces, nine caps, clock boundary and EnemyMoves PASS; source structural equivalence reviewed by presentation/world; extraction-seed1101.json Victory265.15s/1stock/448damage (baseline273.32s/1/497); commit b38e04b | WO-1.1 Combat defaults, then WO-2.2 slots/tokens |
 | WO-2.2 | combat | queued | not run | follow launch phase dependencies |
@@ -72,7 +72,7 @@ Record actual tests separately from planned tests. Forced progression verifies t
 - ProfileStore fake-adapter tests passed load/save/rejoin, unique per-load session tokens, contention, expiry, failed-load protection, schema handling and save warning recovery. A separate 16.2-second delayed-save test verified latest mutation persisted before release and lease was cleared.
 - Practice economy tests passed duplicate reward/claim rejection, cosmetic purchase/equip, earned Haste, rejection of premium-for-coins forgery and invalid tier values. Live DataStore is not tested.
 - Actual keyboard P toggled the journal; Return readied and began the first fight.
-- Reviewed Toolbox hair/hat meshes now supplement the three heroes; faces/clothing have another authored detail pass. Original generated pump and station material added. Background art has a second abandonment/readability pass.
+- Retired prototype character meshes previously supplemented the heroes; that historical face/clothing pass is superseded by the original-cast launch work. Original generated pump and station material added. Background art has a second abandonment/readability pass.
 - Review caught runtime MaterialVariant.BaseMaterial security failure; fixed with serialized MaterialService metadata and Edit-only fallback. Rojo build passes.
 - Remaining immediate integration: latest hero/UI fixes, boss-specific cosmetic effects, stage audio, compact journal/loading-state fixes. Then fresh solo and expanded co-op tests, saved-place sync and GitHub milestone.
 - Current paid sales remain disabled. Fair economy rationale and exact reward numbers preserved in MONETIZATION.md.

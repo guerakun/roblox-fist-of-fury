@@ -1,5 +1,5 @@
 {
-  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; world/docs scrub ready to save. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.2 art, WO-1.4 save, WO-2.2 director, and WO-5.5 fixed-count/lifecycle/latency tests.",
+  "summary": "M0 closed (be91f0f): five fresh HumanBot runs, 5/5 clears, mean 278.27s, 0.80 stocks, 543 damage. WO-2.1 extraction passed 25 deterministic traces, nine token caps, EnemyMoves and one live campaign: 265.15s, one stock, 448 damage versus same-seed baseline 273.32s, one stock, 497 damage. Timing/combat noise remains; deterministic equivalence is the behavior evidence. WO-1.1 hero metadata/profile migration integrated and Studio specs passed; WO-1.4 original story/docs and Ashgate signage saved; art replacement underway. First 2-to-4-client campaign passed 15 assertions; fixed 2/3/4 and lifecycle/lag cases remain. Names/art and human testing need owner review. No live settings/sales/publication changed. Next: WO-1.2 art, WO-1.4 save, WO-2.2 director, and WO-5.5 fixed-count/lifecycle/latency tests.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -22,7 +22,7 @@
     "WO-1.1": {
       "owner": "presentation",
       "status": "closed",
-      "evidence": "2026-09-24: Studio HeroMigration spec PASS (stable IDs, old keys/case/defaults, coins and kit values); ProfileStore11calls and EnemyMoves38patterns PASS; world independent review; normal client selection Tide snapshot confirmed",
+      "evidence": "2026-09-24: Studio HeroMigration spec PASS (stable IDs, old keys/case/defaults, coins and kit values); ProfileStore11calls and EnemyMoves38patterns PASS; world independent review; normal client selection Tide snapshot confirmed; commit3b41a0f",
       "next": "WO-1.2 original art and WO-1.3 specials; names pending owner approval"
     },
     "WO-1.2": {
@@ -39,9 +39,9 @@
     },
     "WO-1.4": {
       "owner": "world",
-      "status": "implemented, review pending",
-      "evidence": "world/docs scrub and two retired screenshots removed; scoped scan zero; stage signs Ashgate",
-      "next": "independent review and commit"
+      "status": "closed",
+      "evidence": "2026-09-24: presentation independent review PASS; scoped docs/signs prohibited scan zero; two obsolete screenshots removed; retired ideas preserved without identities",
+      "next": "WO-1.5 whole-repo gate after art replacement; owner names/art review pending"
     },
     "WO-1.5": {
       "owner": "root",

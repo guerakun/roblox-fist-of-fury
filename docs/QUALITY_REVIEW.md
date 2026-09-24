@@ -4,7 +4,7 @@ Review date: 2026-09-23. Reviewer: separate world/review subagent. Scope: read-o
 
 ## Verdict
 
-This is an ambitious first playable slice, not verified Jujutsu Shenanigans quality. It has a controlled three-stage city route, server-owned combat calculations, character kits, stocks, UI and a documented Toolbox provenance workflow. The most substantial gap is moment-to-moment combat presentation and multiplayer proof, not the number of buildings or named abilities. Do not describe it as a finished anime crossover experience or claim benchmark parity from source inspection.
+This historical review concerns an early playable slice, not a quality certification. It has a controlled three-stage city route, server-owned combat calculations, character kits, stocks, UI and a documented Toolbox provenance workflow. The most substantial gap is moment-to-moment combat presentation and multiplayer proof, not the number of buildings or named abilities. Do not describe it as a finished original-cast experience or claim benchmark parity from source inspection.
 
 ## Findings reported during integration
 
@@ -26,13 +26,13 @@ A later read of CharacterFactory.lua, EncounterService.lua, CombatService.lua an
 - **P1 progression deadlock not present:** the encounter director automatically resets/transports players into each next stage. However, it never references the physical Gates folder and uses StageClear between waves. **P2 remains:** the HUD says the curtain is open and asks players to advance while a closed curtain and arena clamp remain; the mission advances by automatic teleport instead of walking the authored route. Resolve with deliberate gate opening/advance flow, or accurately communicate checkpoint transition and inter-wave state.
 - **P2 warning accuracy remains:** the server sends radius = spec.Reach but attacks use Range = spec.Reach + 2. The shown rectangle understates actual reach by two studs on each attacked side. Send actual attack dimensions; verify warning and damage overlap.
 - **Still open in source:** remote teammate attack-pose playback and enemy motion replication. Sampled Toolbox poses apply only to the local humanoid; server enemy motion still writes the non-replicated Transform property.
-- **Character identity improved:** CharacterFactory now supplies headband/hair/jacket details for Naruto, straw hat/vest for Luffy and checkered haori/earrings/scabbard for Tanjiro. These are authored block-rig silhouettes; animation quality and recognition remain to be tested.
+- **Historical character-art pass (retired):** the prototype added recognizable accessory/outfit motifs. The original-IP launch direction supersedes this pass completely; changing labels does not satisfy the replacement requirement. Its runtime art observations do not validate the new cast.
 
 No runtime behavior is marked passed by this source recheck. Keep subsequent fixes and actual Studio observations in the final test report.
 
 ## Measurable production polish gaps
 
-1. **Character identity.** Authored R6 silhouettes now distinguish the heroes, while special behavior remains largely shared with different numbers. Deliver at least one visually unique special for Naruto, Luffy and Tanjiro. Acceptance: testers identify each selected hero from a silent gameplay screenshot without reading its name. This does not require claiming that present prototype names are completed character assets.
+1. **Character identity.** Authored R6 silhouettes now distinguish the heroes, while special behavior remains largely shared with different numbers. Deliver at least one visually unique special for Gale, Piston and Tide. Acceptance: testers identify each selected hero from a silent gameplay screenshot without reading its name. This does not require claiming that present prototype names are completed character assets.
 2. **Audio.** The reviewed source contains no gameplay Sound playback. Add original or permission-cleared impacts, whooshes, guard feedback, KO cues, station ambience and an appropriately mixed music layer. Acceptance: a tester can distinguish hit, block, whiff and KO by sound; four simultaneous attacks do not clip or drown out warnings.
 3. **Move readability.** Present kit differences are mostly range/damage/width differences. Add per-kit pose and effect language: forward spiral charge, elastic long-range strike and broad sword/water sweep. Acceptance: each special's visible reach agrees with server hit coverage and contact time within an agreed frame budget.
 4. **Smash-inspired loop.** Percentage scaling and recovery exist, but percent-limit KOs make combat primarily threshold attrition. Continuous floors and closed physical gates prevent many ring-outs. Decide and document the intended hybrid. Acceptance: if launch-and-recovery mastery is promised, demonstrate meaningful recoverable launches and fair blast-zone KOs in every stage, not only automatic defeat at a damage cap.
@@ -59,7 +59,7 @@ Keep server and both client Output panels available. Record the source revision 
 
 ## What cannot be established by this review or a solo test
 
-Actual enjoyment, Jujutsu Shenanigans parity, party coordination, latency fairness, peer animation replication, reliable two-player progression, mobile GPU/memory behavior, published-experience particle/animation permissions and accessibility quality all require additional evidence. A successful server simulation or forced victory command establishes only the exercised state transitions; it does not establish that normal player inputs can finish the game or that the combat feels polished.
+Actual enjoyment, benchmark parity, party coordination, latency fairness, peer animation replication, reliable two-player progression, mobile GPU/memory behavior, published-experience particle/animation permissions and accessibility quality all require additional evidence. A successful server simulation or forced victory command establishes only the exercised state transitions; it does not establish that normal player inputs can finish the game or that the combat feels polished.
 
 ## Final root integration and runtime verification
 Earlier source findings above describe the reviewed snapshots. Final implementation now opens gates and waits for all living players at the exit; Intermission differs from Advance. Telegraph reach matches attacks. Real Toolbox animation data is sampled on each client for local, peer and enemy R6 rigs; server joint animation was removed to avoid competing writes. Three reviewed audio assets are wired. Runtime hit, rate-limit, stock/wipe/retry and forced full progression tests passed; see VALIDATION.md. Remaining production polish and multiplayer stress targets remain open.

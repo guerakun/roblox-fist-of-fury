@@ -8,11 +8,11 @@ The game is a controlled 2.5D co-op brawler: move right through three 180-stud d
 
 | District | Waves | Miniboss at +75 | Boss at +135 |
 | --- | --- | --- | --- |
-| Shibuya Streets, x0..180 | Crossing Under Curse / miniboss / The Alarms Awaken / boss | Crosswalk Executioner | Siren Marshal |
+| Ashgate Crossing, x0..180 | Crossing Under Curse / miniboss / The Alarms Awaken / boss | Crosswalk Executioner | Siren Marshal |
 | Abandoned Station, x180..360 | Last Service / miniboss / Platform Zero / boss | Platform Widow | The Last Conductor |
 | Abandoned Factory, x360..540 | Cold Furnace / miniboss / Pressure Rising / boss | Furnace Hound | Kiln Sovereign |
 
-Each miniboss and boss has an original R6 silhouette in EnemyFactory and its own deterministic attack pattern in EnemyMoves. No anime character models or animations were copied for the enemies. Reviewed Toolbox keyframes animate the common R6 skeletons. The character heroes retain Naruto, Luffy and Tanjiro kit identities, with distinct original placeholder visuals.
+Each miniboss and boss has an original R6 silhouette in EnemyFactory and its own deterministic attack pattern in EnemyMoves. No anime character models or animations were copied for the enemies. Reviewed Toolbox keyframes animate the common R6 skeletons. The original launch heroes retain wind rushdown, mechanical long reach and wide blade archetypes under stable IDs Gale, Piston and Tide. Current art and acceptance status are tracked separately.
 
 ## Six encounter identities
 
@@ -51,12 +51,12 @@ Map src/shared to ReplicatedStorage.Nightfall.Shared and src/server to ServerScr
 
 Combat exports Init, GetSnapshot, BroadcastState, SetEncounterState, SetArena, SetWalkingLimit, SetCheckpoint, ResetPlayers, BeginRun, BeginEncounter, GetParticipants, AddCoinsEarned, GetAlivePlayers, GetPlayerCount, GetEnemies, SpawnEnemy, ClearEnemies, ApplyHit, SetRestartCallback, SetReadyCallback, GetReadyCount, ClearReady and ResetLobby. Encounter exports Init and Restart. There are no client-accessible debugging, spawning or reward functions.
 
-Client Action payloads remain Light/Heavy/Special/Dash/Block/Recovery/Jump/SelectCharacter/Restart/Ready with direction=+1/-1, held=true/false, hero=Naruto/Luffy/Tanjiro, and ready=true/false. Ready is accepted only in Waiting. The server validates types, action names, damage ownership, cooldowns and a 30-requests-per-second budget. Clients never send targets or damage numbers.
+Client Action payloads remain Light/Heavy/Special/Dash/Block/Recovery/Jump/SelectCharacter/Restart/Ready with direction=+1/-1, held=true/false, hero=Gale/Piston/Tide, and ready=true/false. Ready is accepted only in Waiting. The server validates types, action names, damage ownership, cooldowns and a 30-requests-per-second budget. Clients never send targets or damage numbers.
 
 Snapshot adds ready/readyCount/playersTotal, targetX/objective/walkingMaxX, and boss=false or {name,kind,percent,threshold,phase,role,poise,poiseLimit,armored,exposed}, waveTitle, encounterName, encounterKind, nextWaveAt, checkpointLabel, resultReason, and runStats={kills,damageDealt,damageTaken,coinsEarned,duration}. nextWaveAt and cooldowns are workspace:GetServerTimeNow timestamps. Bosses also expose Role/Phase/Poise/PoiseLimit/Armored/Percent/PercentLimit attributes. Hit FX has exact targetModel and targetUserId. New FX include StageIntro, Checkpoint, BossStagger and EnemyImpact. Telegraph and EnemyImpact carry the same footprint fields: position, shape, size, radius, height, jumpable, color and mechanic.
 
 ## Verification gates
 
-Run EnemyMoves tests for lane gaps, circle edges, fixed positions, the jump threshold, four-player mark deduplication, and structural move invariants. In Studio test each elite's phase one and phase two, poise breaks, guard direction, recovery, stock respawn, ready cancellation, party-ready departure, both checkpoint retries, each within-district Traverse threshold, stage rally, late join and departure, a full run, and a fresh run after victory. Verify no duplicate rewards after retry. Test actual multiplayer before claiming multiplayer quality or parity with Jujutsu Shenanigans. Source review and single-client runtime checks do not establish that quality claim.
+Run EnemyMoves tests for lane gaps, circle edges, fixed positions, the jump threshold, four-player mark deduplication, and structural move invariants. In Studio test each elite's phase one and phase two, poise breaks, guard direction, recovery, stock respawn, ready cancellation, party-ready departure, both checkpoint retries, each within-district Traverse threshold, stage rally, late join and departure, a full run, and a fresh run after victory. Verify no duplicate rewards after retry. Test actual multiplayer before claiming multiplayer quality or parity with the requested Roblox combat-quality benchmark. Source review and single-client runtime checks do not establish that quality claim.
 
 References: [Roblox spatial queries](https://create.roblox.com/docs/reference/engine/classes/WorldRoot), [Humanoid movement](https://create.roblox.com/docs/reference/engine/classes/Humanoid), [network ownership](https://create.roblox.com/docs/physics/network-ownership).

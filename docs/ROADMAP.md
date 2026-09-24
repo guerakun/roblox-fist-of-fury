@@ -5,7 +5,8 @@ Three stages (city, station, factory), twelve encounters and six distinct elites
 
 Implementation alone does not close verification gates. See VALIDATION.md and PUBLISH_READINESS.md for evidence.
 
-## Current polish priorities
+## Historical polish priorities (superseded by launch work orders)
+The authoritative v1 order is now launch/LAUNCH_PLAN.md. The list below preserves earlier integration needs; consult PROGRESS.md before treating any item as current.
 1. Integrate the latest compact touch HUD and verify actual phone-safe bounds.
 2. Complete expanded two-to-four-client campaign and late-join/ready tests.
 3. Verify reconnect stock retention and checkpoint retry reward deduplication.
@@ -18,14 +19,14 @@ Implementation alone does not close verification gates. See VALIDATION.md and PU
 - Human solo/co-op sessions for challenge, duration, animation timing and enjoyment.
 - Hardware mobile/controller checks and latency testing.
 - Combat sound mix and distinct hit/block/whiff/KO listening review.
-- Final franchise/marketplace permissions and Creator Dashboard settings.
+- Original-art approval, Marketplace asset permissions and owner-only Creator Dashboard settings.
 - Verify the saved place exactly corresponds to the reviewed source revision.
 - Keep paid offers disabled until persistent progress and cosmetic delivery are proven.
 
-## Quality target: Jujutsu Shenanigans
+## Quality target: responsive cooperative combat
 Use the benchmark for immediate control response, readable distinct abilities, layered animation/effects/audio and satisfying environment interaction. Do not infer parity from a passing build or automated clear. Our directed co-op campaign has different pacing from an open battleground.
 
-Next meaningful gameplay candidates are cooperative rescue/stock sharing, air-combo extensions, a practiced burst/awakening move, optional challenge modifiers and stronger authored environmental set pieces. Each requires its own implementation and playtest; these are not shipped claims.
+The earlier candidate list below is retained; the launch plan now decides launch versus deferred scope. Candidates were cooperative rescue/stock sharing, air-combo extensions, a practiced burst/awakening move, optional challenge modifiers and stronger authored environmental set pieces. Each requires its own implementation and playtest; these are not shipped claims.
 
 ## Preserved ideas
-Shopping arcade rescue, station basement, train platform siege, rooftop curtain anchors, blackout crossings, clone-assisted rescue, team launch finishers, water-flow crowd control, elastic ally rescue, timed survivor routes, elite curse mutations, replay score medals, paired relay activation and the train evacuation payoff. Earlier story drafts remain in STORY.md.
+Shopping arcade rescue, station basement, train platform siege, rooftop curtain anchors, blackout crossings, wind-assisted rescue, team launch finishers, water-flow crowd control, mechanical tether rescue, timed survivor routes, elite curse mutations, replay score medals, paired relay activation and the train evacuation payoff. Earlier story drafts remain in STORY.md.

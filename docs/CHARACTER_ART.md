@@ -1,21 +1,25 @@
-# Character art implementation notes
+# Original character art contract
 
-`CharacterFactory.lua` builds canonical R6 body parts and joints, original native face/clothing details, and the reviewed mesh references in `Shared/CharacterArt.lua`. The face art is drawn from native SurfaceGui shapes, not downloaded face decals or imported whole-character scripts.
+Launch work orders WO-1.1–1.3 replace the retired hero identity, external mesh set and recognizable outfit motifs. This document records the approved design direction; source completion and runtime evidence are tracked in PROGRESS.md. Candidate display names remain pending owner approval.
 
-## Identity details
+| Stable ID | Candidate display name | Original silhouette | Special language |
+|---|---|---|---|
+| Gale | Rook Calder | Silver-teal undercut; cropped charcoal track jacket with amber piping; fingerless wraps; forearm wind ribbons | CYCLONE DRIVE: corkscrew kick, ribbons and directional gust |
+| Piston | Bo Marlowe | Curly dark hair; welding goggles; teal mechanic overalls; red work gloves; oversized brass/steel gauntlet | RECOIL CANNON: mechanical fist, chain/piston extension, steam and recoil |
+| Tide | Isla Veyra | Long navy ponytail; coral clip; deep-sea blue coat with white foam trim; glaive | UNDERTOW ARC: rotating blade and water crescent |
 
-- Naruto: blue iris/pupil/glint eyes, three whisker marks per cheek, layered orange/navy sleeves and cuffs, raised collar and zipper pull, jacket back seam/crest, and rear headband ribbons.
-- Luffy: warm dark eyes, grin and under-eye stitches, chest scar, vest buttons/back/side seams, skin shins and simple sandals beneath the existing reviewed hair/straw-hat meshes.
-- Tanjiro: burgundy irises, forehead scar, native earring sun/ray motifs, checked haori front/back and sleeve front/back/outer surfaces, white collar, cuffs/hands, leg wraps, and sword binding/guard.
-
-The reviewed mesh IDs, texture IDs, native mesh scales, and attachment offsets in `CharacterArt.lua` were preserved. World mesh/material installation was reviewed without modification.
+Native authored parts are the first choice. No external character meshes are approved for the new cast. Any future generated asset must be recorded in ASSET_REGISTER.md with its actual ID and provenance. Per-hero labels, tips, colors and move names come from Config.Characters; stable IDs do not change when a display name changes.
 
 ## Rig and combat invariants
+Seven body parts and six canonical Motor6D joints preserve compatible R6 transforms. Cosmetic geometry is massless, welded, unanchored, non-colliding, non-touchable and non-queryable. The core body parts remain queryable. Hair, coat, gauntlet and glaive must not enlarge the combat target. Cosmetic SurfaceGuis die with their owning character; no per-frame art scripts are placed inside a rig.
 
-All seven body parts and six canonical Motor6D joints retain their original sizes and C0/C1 transforms. Imported meshes and authored cosmetic parts are massless, unanchored, welded to their owning body part, and `CanCollide=false`, `CanTouch=false`, `CanQuery=false`. The core body parts remain queryable. This prevents extended scabbards, hats, hair, or sleeve ornaments from enlarging the combat target. Cosmetic SurfaceGuis die with the parent part/model during respawn or hero replacement.
+## Acceptance evidence still required
+- Root captures one silent gameplay screenshot per hero, plus front/side/back inspection under stage lighting.
+- A reviewer who did not author the art checks each silhouette for recognizable external likeness.
+- Record actual CharacterPartCount and queryable-body count; old prototype counts are not measurements of these replacements.
+- Inspect seams, weapon attachment, pose transitions, special footprint coverage, respawn cleanup and four-player overlap.
+- Test real-device frame time and mobile readability. Native parts alone do not prove low rendering cost.
+- Owner approves names and art before M1 closes.
 
-Expected live BasePart counts with current mesh definitions: Naruto **26**, Luffy **26**, Tanjiro **52**. The factory records the actual total as `CharacterPartCount` for Studio verification. Fallback geometry also remains below the 80-part target. No per-frame scripts run inside the face or clothing art. SurfaceGuis have a 110-stud maximum render distance.
-
-## Verification still required in Studio
-
-Check front/side/back screenshots under actual stage lighting, hair and hat occlusion, seams during imported R6 motion, sword attachment during attacks, and respawn cleanup. Confirm three actual `CharacterPartCount` values and exactly seven queryable rig parts per hero. Four-player/mobile rendering of the extra face/clothing SurfaceGuis still needs a device pass; the part count alone does not prove frame-time quality.
+## Preserved (retired) ideas
+The earlier cast used imported character hair/accessories with recognizable face and outfit motifs. Those assets and identifying motifs are retired completely. Keep the readable three-role silhouette, native face-expression workflow and cosmetic/query separation. Historical asset details remain in Git history; they are not current inventory or publication candidates.
