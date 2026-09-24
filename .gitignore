@@ -8,3 +8,5 @@ tools/bin/
 tools/video-review/
 
 /curtain-break-launch-pack/
+
+__pycache__/

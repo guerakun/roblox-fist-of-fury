@@ -1,0 +1,147 @@
+{
+  "date": "2026-09-24",
+  "scope": "WO-3.7 enabled earned-only source, isolated combat physics + actual ephemeral profile and real requests; not live saves or hardware verification",
+  "enabled": true,
+  "normalizer": {
+    "bounds": true,
+    "neutralFallback": true,
+    "checks": 42,
+    "tradeoffMath": true,
+    "passed": true
+  },
+  "policy": {
+    "scope": "earned-only unlock and modifier policy; actual combat restrictions require runtime checks",
+    "passed": true,
+    "checks": 71
+  },
+  "clientCapabilities": {
+    "poses": {
+      "ownerRemoval": true,
+      "cancel": true,
+      "cleanup": true,
+      "entryCue": true,
+      "criticalProjectileAtEffectsZero": true,
+      "grabRelease": true,
+      "entryKinds": 4,
+      "poses": 32
+    },
+    "policy": {
+      "legacyDefaults": true,
+      "releaseCallbacks": 2,
+      "physicalInputVerified": false,
+      "checks": 18,
+      "jumpRecoveryPreserved": true,
+      "passed": true,
+      "restrictedActionPolicy": true
+    },
+    "widgets": {
+      "scales": 2,
+      "physicalInputVerified": false,
+      "minimumTarget": 48,
+      "disabledAndRestored": true,
+      "cooldownPreserved": true,
+      "passed": true,
+      "widgets": 3
+    }
+  },
+  "clientEnabledBoonUI": {
+    "widgets": {
+      "fullJournalLayoutVerified": false,
+      "physicalInputVerified": false,
+      "widgetsChecked": 6,
+      "minimumTouchTarget": 44,
+      "passed": true,
+      "disabledUnavailable": true
+    },
+    "policy": {
+      "disabledBoons": 3,
+      "enabledFirst": true,
+      "checks": 17,
+      "betweenFightGate": true,
+      "noPaidUnlock": true,
+      "passed": true,
+      "earnedThreshold": true
+    }
+  },
+  "combat": {
+    "ok": true,
+    "result": {
+      "berserkerStyleGain": 2,
+      "physicalDeviceVerified": false,
+      "injectedServerModifiers": true,
+      "glassDamageDealt": 12,
+      "anchorDashRejected": true,
+      "passed": true,
+      "forgedBlockRejected": true,
+      "glassDamageTaken": 12,
+      "realIntentRemotes": true,
+      "profileUnlockVerified": false,
+      "baseKnockback": 52,
+      "blockRevocation": true,
+      "capabilityRestore": true,
+      "anchorBurstRejected": true,
+      "anchorKnockback": 40
+    }
+  },
+  "profileEquip": {
+    "ok": true,
+    "result": {
+      "scope": "Actual practice profile and EquipBoon remote; combat damage/weight and physical device input have separate fixtures",
+      "passed": true,
+      "checks": [
+        "GlassCannon: disabled server rollout rejects equip despite currency/ownership/XP",
+        "GlassCannon: earned XP boundary cannot be bypassed by coins/ownership",
+        "GlassCannon: exact earned XP permits real equip request",
+        "GlassCannon: real profile provides both sides of trade-off",
+        "GlassCannon: combat cannot remove trade-off by equipping another boon",
+        "Berserker: disabled server rollout rejects equip despite currency/ownership/XP",
+        "Berserker: earned XP boundary cannot be bypassed by coins/ownership",
+        "Berserker: exact earned XP permits real equip request",
+        "Berserker: real profile disables authoritative guard capability",
+        "Berserker: combat cannot remove trade-off by equipping another boon",
+        "Anchor: disabled server rollout rejects equip despite currency/ownership/XP",
+        "Anchor: earned XP boundary cannot be bypassed by coins/ownership",
+        "Anchor: exact earned XP permits real equip request",
+        "Anchor: real profile disables authoritative dash capability",
+        "Anchor: combat cannot remove trade-off by equipping another boon",
+        "Unknown boon request rejected",
+        "Structured forged grant rejected"
+      ]
+    }
+  },
+  "preservedFailure": {
+    "result": {
+      "ok": true,
+      "result": {
+        "passed": false,
+        "error": "ServerScriptService.BoonCombatRuntimeAISpec:93: ServerScriptService.BoonCombatRuntimeAISpec:69: Berserker meter gain\nServerScriptService.BoonCombatRuntimeAISpec:69\nServerScriptService.BoonCombatRuntimeAISpec:20\nServerScriptService.BoonCombatRunner:8\nServerScriptService.BoonCombatRunner:4\n\nServerScriptService.BoonCombatRuntimeAISpec:93\nServerScriptService.BoonCombatRunner:8\nServerScriptService.BoonCombatRunner:4\n"
+      }
+    },
+    "diagnosis": "Fixture mixed raw gain units with normalized snapshot progress. Corrected assertion multiplies the full multiplier-plus-fraction delta by six; production code unchanged; independent review and fresh runtime passed."
+  },
+  "values": {
+    "GlassCannon": {
+      "XP": 600,
+      "damageDealt": 1.2,
+      "damageTaken": 1.2
+    },
+    "Berserker": {
+      "XP": 800,
+      "styleMeterGain": 2,
+      "canBlock": false
+    },
+    "Anchor": {
+      "XP": 1000,
+      "weight": 1.3,
+      "canDash": false,
+      "canBurst": false
+    }
+  },
+  "review": "Combat/world reviewed root real-profile fixture including final acknowledged forged request; world reviewed server/client enforcement and fixture-unit correction; root ran final tests",
+  "remaining": [
+    "Physical touch/controller/keyboard dispatch and full progression journal inspection",
+    "Final M3 seeded tier/rank campaigns and multiplayer regression",
+    "Human tier/co-op sessions",
+    "Live profile persistence in configured published test universe"
+  ]
+}

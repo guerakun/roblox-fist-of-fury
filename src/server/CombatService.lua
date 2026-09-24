@@ -21,6 +21,7 @@ local function runRules()return HeatConfig.Rules(runHeat)end
 local PressurePolicy = require(script.Parent.PressurePolicy)
 local SurvivalPolicy = require(script.Parent.SurvivalPolicy)
 local StylePolicy=require(script.Parent.StylePolicy)
+local CombatModifiers=require(script.Parent.CombatModifiers)
 local Risk=require(script.Parent.RiskPolicy)
 local ScorePickups=require(script.Parent.ScorePickupService)
 local pickups
@@ -71,9 +72,15 @@ local function recordOf(model)
     local player = Players:GetPlayerFromCharacter(model)
     return player and records[player] or enemies[model], player
 end
-local function modifiers(player)
-    local value = Progression.GetCombatModifiers(player) or {}
-    return {damageMultiplier = math.clamp(value.damageMultiplier or 1, 1, 1.5), knockbackMultiplier = math.clamp(value.knockbackMultiplier or 1, 1, 1.5), moveSpeedBonus = math.clamp(value.moveSpeedBonus or 0, 0, 6), damageReduction = math.clamp(value.damageReduction or 0, 0, .3)}
+local function modifiers(player)return CombatModifiers.Normalize(Progression.GetCombatModifiers(player))end
+local function enforceCapabilities(player,data)
+    local mods=modifiers(player)
+    if not mods.canBlock then
+        local wasBlocking=data.blocking
+        data.blocking=false;data.blockStartedAt=nil;data.perfectBlockConsumed=true
+        if wasBlocking and player.Character then player.Character:SetAttribute("Blocking",false)end
+    end
+    return mods
 end
 local function fx(kind, position, fields)
     local packet = fields or {}
@@ -168,6 +175,7 @@ end
 function Combat.GetSnapshot(player)
     local data = records[player]
     if not data then return nil end
+    local capabilities=enforceCapabilities(player,data)
     local boss = false
     for _, enemy in pairs(enemies) do
         if enemy.spec.Role ~= "Grunt" then
@@ -185,6 +193,7 @@ function Combat.GetSnapshot(player)
     stats.damageDealt, stats.damageTaken = math.floor(stats.damageDealt), math.floor(stats.damageTaken)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
         style=StylePolicy.Snapshot(style),districtResult=districtResult,districtReceipt=districtReceipt,
+        canBlock=capabilities.canBlock,canDash=capabilities.canDash,weightMultiplier=capabilities.weightMultiplier,
         canDesperation=desperationAllowed(player,data,now()),desperationCost=Risk.DesperationCost,
         desperationCooldown=math.max(0,(data.cooldowns.Desperation or 0)-now()),
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = table.clone(runHeat), heatPoints=runRules().points, runOptionsLocked=runOptionsLocked,
@@ -343,7 +352,7 @@ function Combat.AwardStyle(player,kind,id,fields)
     local state=beginStyleWave(data)
     if not state then return false end
     local event=table.clone(fields or {});event.kind,event.id=kind,id
-    event.gainMultiplier=(Progression.GetCombatModifiers(player)or {}).styleGainMultiplier or 1
+    event.gainMultiplier=modifiers(player).styleGainMultiplier
     return StylePolicy.Award(state,event)
 end
 function Combat.GetParticipants()
@@ -636,6 +645,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     if not data or not sourceData or not r or data.downed or data.respawning or sourceData.downed or t < data.invulnerableUntil then return false end
     if (victimPlayer ~= nil) == (sourcePlayer ~= nil) then return false end
     if victimPlayer and not enemyVisible(sourceModel) then Telemetry.BoundsRejected();return false end
+    local victimModifiers=victimPlayer and enforceCapabilities(victimPlayer,data)or nil
     local enemyId=data.spec and Archetypes.Id(data.kind,data.spec)
     if not victimPlayer and data.grabbedPlayer and sourcePlayer then releaseGrab(targetModel,true) end
     if victimPlayer and data.grabbedBy and data.grabbedBy~=sourceModel then releaseGrab(data.grabbedBy,true) end
@@ -670,7 +680,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
         damage *= mods.damageMultiplier
         knockbackMultiplier = mods.knockbackMultiplier
     end
-    if victimPlayer then damage *= 1 - modifiers(victimPlayer).damageReduction end
+    if victimPlayer then damage=CombatModifiers.Incoming(damage,victimModifiers)end
     local elite = data.spec and data.spec.Role ~= "Grunt"
     local lightArmor=enemyId=="Grappler" and light
     local armored = (elite or enemyId=="Brute") and t < data.armoredUntil or lightArmor
@@ -713,7 +723,8 @@ function Combat.ApplyHit(attacker, target, attack, direction)
             fx("GuardBreak", r.Position, {targetUserId = victimPlayer and victimPlayer.UserId, targetModel = targetModel})
         end
     end
-    local velocity = CombatMath.Knockback(data.percent, attack, data.weight or 1) * knockbackMultiplier
+    local effectiveWeight=victimPlayer and CombatModifiers.Weight(data.weight,victimModifiers)or(data.weight or 1)
+    local velocity = CombatMath.Knockback(data.percent, attack, effectiveWeight) * knockbackMultiplier
     velocity *= blocked and .2 or armored and .08 or elite and .5 or 1
     r.AssemblyLinearVelocity = Vector3.new(direction * velocity, blocked and 3 or armored and 0 or elite and math.min(attack.Lift, 8) or attack.Lift, r.AssemblyLinearVelocity.Z * .3)
     if sourcePlayer then
@@ -817,6 +828,9 @@ local function actionReceived(player, action, payload)
     end
     if action == "Block" and payload.held == false then data.blocking = false attributes(player.Character, data) return end
     if data.downed or data.respawning or data.grabbedBy then return end
+    local capabilities=enforceCapabilities(player,data)
+    if action=="Dash"and not capabilities.canDash then return end
+    if action=="Block"and payload.held==true and not capabilities.canBlock then return end
     data.revive=nil
     local movementAction = action == "Dash" or action == "Recovery" or action == "Jump"
     if encounter.status ~= "Combat" and not (movementAction and (encounter.status == "Intermission" or encounter.status == "Advance" or encounter.status == "Traverse" or encounter.status == "Waiting")) then return end
@@ -1284,7 +1298,8 @@ function Combat.Init()
             local x = t > data.launchedUntil and math.clamp(pos.X, arena.MinX + 4, walkingMaxX) or pos.X
             local z = math.clamp(pos.Z, Config.LaneMin, Config.LaneMax)
             if x ~= pos.X or z ~= pos.Z then r.CFrame += Vector3.new(x - pos.X, 0, z - pos.Z) end
-            local speed = Config.Characters[data.hero].Speed + modifiers(player).moveSpeedBonus
+            local capabilities=enforceCapabilities(player,data)
+            local speed = Config.Characters[data.hero].Speed + capabilities.moveSpeedBonus
             h.WalkSpeed = t < data.stunnedUntil and 0 or (data.blocking and 8 or speed)
             h.JumpPower = (data.blocking or t < data.stunnedUntil) and 0 or Config.JumpPower
             if h.FloorMaterial ~= Enum.Material.Air then data.recovered = false end

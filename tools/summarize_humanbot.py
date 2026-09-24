@@ -41,7 +41,12 @@ def ratio(numerator, denominator):
     return n / d if n is not None and d else None
 diversity = {}
 for row in rows:
-    for kind, values in row['diversityByKind'].items():
+    values_by_kind = row['diversityByKind']
+    if values_by_kind == []:
+        values_by_kind = {}  # Empty Luau tables encode as JSON arrays.
+    if not isinstance(values_by_kind, dict):
+        raise ValueError('Malformed action-diversity map')
+    for kind, values in values_by_kind.items():
         out = diversity.setdefault(kind, {'eligible': 0, 'passed': 0, 'minDistinct': None})
         out['eligible'] += values.get('eligible', 0)
         out['passed'] += values.get('passed', 0)

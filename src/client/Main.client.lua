@@ -26,6 +26,7 @@ local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
 local HeroSpecials = require(script.Parent:WaitForChild("HeroSpecials"))
 local EnemyPresentation = require(script.Parent:WaitForChild("EnemyPresentation"))
 local FocusGuard = require(script.Parent:WaitForChild("FocusGuard"))
+local ActionCapabilities = require(script.Parent:WaitForChild("ActionCapabilities"))
 local DesperationControl = require(script.Parent:WaitForChild("DesperationControl"))
 local DesperationHUD = require(script.Parent:WaitForChild("DesperationHUD"))
 local riskFeedback = require(script.Parent:WaitForChild("RiskFeedback")).new({player=player,colors=COLORS})
@@ -77,6 +78,7 @@ local function releaseBlock()
     blockInput = nil
     actionRemote:FireServer("Block", {held = false})
 end
+local actionCapabilities = ActionCapabilities.new(releaseBlock)
 local focusGuard = FocusGuard.new({input = UserInputService, player = player, releaseBlock = releaseBlock,
     clearHeld = function()
         heldKeys = {}; gamepadMove = Vector2.zero; touchMove = Vector2.zero; touchInput = nil
@@ -405,7 +407,7 @@ end
 
 local function send(action: string, held: boolean?)
     if action == "Block" and held == false then releaseBlock(); return end
-    if focusGuard:Blocked() then return end
+    if not actionCapabilities:Allows(action, held) or focusGuard:Blocked() then return end
     if action == "Jump" then
         if snapshot.downed or snapshot.blocking or localBlocking or ending.Visible then return end
         if humanoid and humanoid.Health > 0 then
@@ -453,7 +455,7 @@ end
 for action, button in pairs(abilityButtons) do
     if action == "Block" then
         button.InputBegan:Connect(function(input)
-            if not focusGuard:Blocked() and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then blockInput = input; send("Block", true) end
+            if actionCapabilities:Allows("Block", true) and not focusGuard:Blocked() and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then blockInput = input; send("Block", true) end
         end)
         button.InputEnded:Connect(function(input)
             if input == blockInput then send("Block", false) end
@@ -790,6 +792,7 @@ stateRemote.OnClientEvent:Connect(function(state: any)
     if state.kind == "Toast" or state.kind == "Message" then toast(state.text or state.message or ""); return end
     local wasDowned = snapshot.downed
     for key, value in pairs(state) do snapshot[key] = value end
+    actionCapabilities:Update(snapshot, localBlocking or blockInput ~= nil)
     desperationControl:Update(snapshot)
     if snapshot.downed and not wasDowned then focusGuard:Reset("downed") end
     local hero = snapshot.hero
@@ -1011,8 +1014,7 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
         for name, text in pairs(abilityLabels) do
             local finish = (snapshot.cooldowns or {})[name]
             local remaining = type(finish) == "number" and math.max(0, finish - now) or 0
-            text.Text = remaining > 0 and string.format("%.1fs", remaining) or string.upper(name)
-            text.TextColor3 = remaining > 0 and COLORS.muted or COLORS.text
+            actionCapabilities:RenderButton(abilityButtons[name], text, name, remaining, COLORS)
         end
         if desperationControl:Available() and not desperationTouchMode() then
             desperationHintActive = true
