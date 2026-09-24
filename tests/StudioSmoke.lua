@@ -16,7 +16,7 @@ return function()
  local hit=game.ReplicatedStorage.Nightfall.Assets.VFX.Hit
  for _,v in hit:GetDescendants() do assert(not v:IsA('LuaSourceContainer'),'VFX contains executable source') end
  local factory=require(game.ServerScriptService.NightfallServer.CharacterFactory)
- for _,hero in {'Naruto','Luffy','Tanjiro'} do
+ for _,hero in {'Gale','Piston','Tide'} do
   local rig=factory.Create(hero)
   assert(rig:FindFirstChild('Torso') and rig:FindFirstChild('Right Arm'),'R6 rig')
   assert(rig:FindFirstChildOfClass('Humanoid') and rig.PrimaryPart,'valid character')

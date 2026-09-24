@@ -85,7 +85,7 @@ RunService:BindToRenderStep("AutoplayQA",Enum.RenderPriority.Last.Value+50,funct
    if t-lastAction>.16 and (not danger or danger.jumpable) then
     lastAction=t
     local serverNow=workspace:GetServerTimeNow()
-    local hero=config.Characters[state.hero or "Naruto"]
+    local hero=config.Characters[state.hero or "Gale"]
     if serverNow>=(state.cooldowns.Special or 0) and math.abs(delta.X)<hero.Special.Range-1 and math.abs(delta.Z)<hero.Special.Width/2 then
      R.Action:FireServer("Special",{direction=direction})
     elseif math.abs(delta.X)<8 and math.abs(delta.Z)<3 then
