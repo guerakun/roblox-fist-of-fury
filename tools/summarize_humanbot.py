@@ -17,6 +17,8 @@ for path in args.reports:
         raise ValueError(f'{path}: incomplete run cannot enter the aggregate')
     telemetry = bot.get('telemetry') or {}
     audit = raw.get('frustum') or {}
+    server_hits = telemetry.get('hits')
+    server_hit_count = sum(server_hits.values()) if isinstance(server_hits, dict) else (0 if server_hits == [] else None)
     rows.append({
         'file': path.name, 'seed': bot['seed'], 'clear': bot.get('clear', False), 'outcome': bot.get('outcome'),
         'seconds': bot['seconds'], 'stocksLost': sum(bot['stocksLostByDistrict'].values()) if isinstance(bot.get('stocksLostByDistrict'), dict) else None,
@@ -24,7 +26,7 @@ for path in args.reports:
         'idleTicks': telemetry.get('idleGruntTicks'), 'eligibleTicks': telemetry.get('eligibleGruntTicks'),
         'flankedWindows': telemetry.get('flankedWindows'), 'flankWindows': telemetry.get('flankWindows'),
         'capViolations': telemetry.get('capViolations'), 'minWindup': telemetry.get('minWindup'),
-        'frustumFixture': audit.get('fixture'), 'frustumAuditedHits': audit.get('hits'), 'frustumOutside': audit.get('outside'),
+        'serverAcceptedHits': server_hit_count, 'frustumFixture': audit.get('fixture'), 'frustumAuditedHits': audit.get('hits'), 'frustumOutside': audit.get('outside'),
         'frustumInvalidViewportHits': audit.get('invalidViewportHits'),
         'diversityByKind': telemetry.get('actionDiversity', {}).get('byKind', {}),
     })
@@ -54,10 +56,12 @@ result = {
     'pooledIdleRatio': ratio('idleTicks', 'eligibleTicks'),
     'pooledFlankedWindows': total('flankedWindows'), 'pooledFlankWindows': total('flankWindows'),
     'pooledFlankRatio': ratio('flankedWindows', 'flankWindows'),
+    'serverAcceptedHits': total('serverAcceptedHits'),
+    'hitObservationCoverageComplete': all(r['serverAcceptedHits'] is not None and r['frustumAuditedHits'] is not None and r['frustumInvalidViewportHits'] is not None and r['serverAcceptedHits']==r['frustumAuditedHits']+r['frustumInvalidViewportHits'] for r in rows),
     'capViolations': total('capViolations'), 'actionDiversityByKind': diversity,
     'frustum': {key: sum(r[key] for r in rows) if all(r[key] is not None for r in rows) else None
                 for key in ('frustumAuditedHits', 'frustumOutside', 'frustumInvalidViewportHits')},
-    'completeMetrics': {key: all(r[key] is not None for r in rows) for key in ('stocksLost', 'idleTicks', 'eligibleTicks', 'flankedWindows', 'flankWindows', 'capViolations', 'frustumAuditedHits', 'frustumOutside', 'frustumInvalidViewportHits')},
+    'completeMetrics': {key: all(r[key] is not None for r in rows) for key in ('serverAcceptedHits', 'stocksLost', 'idleTicks', 'eligibleTicks', 'flankedWindows', 'flankWindows', 'capViolations', 'frustumAuditedHits', 'frustumOutside', 'frustumInvalidViewportHits')},
     'frustumFixturesValid': all(isinstance(r['frustumFixture'], dict) and r['frustumFixture'].get('passed') is True and r['frustumFixture'].get('width', 0)>1 and r['frustumFixture'].get('height', 0)>1 for r in rows),
     'rows': rows,
     'limit': 'Bot campaigns only. Missing/zero eligible archetype windows are inconclusive; no human/device acceptance implied.',

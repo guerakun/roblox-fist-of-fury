@@ -1,6 +1,6 @@
 # M2 engineering evidence — acceptance remains open
 
-Recorded 2026-09-24. Root owns Studio execution and the dated commit ledger in [PROGRESS](../PROGRESS.md). This document consolidates observed results, source reviews and remaining gates. The final five-session HumanBot series on frozen source `9f29012` is **in progress**; seed 1101 is running and no final result is recorded here yet. No result below closes the human or device requirements.
+Recorded 2026-09-24. Root owns Studio execution and the dated commit ledger in [PROGRESS](../PROGRESS.md). This document consolidates observed results, source reviews and remaining gates. The final five-session HumanBot series on frozen source `9f29012` is **in progress**; seed 1101 has completed; the other four results and final aggregate remain pending. No result below closes the human or device requirements.
 
 ## Baseline and campaign diagnostics
 
@@ -17,6 +17,14 @@ The [baseline measurement contract](HUMANBOT_BASELINE.md) fixes seeds 1101–110
 Sources: [baseline summary](evidence/baseline-summary.json), [extraction](evidence/extraction-seed1101.json), [director](evidence/director-seed1101.json), [pre-camera diagnostic](evidence/m2-initial-seed1101.json). Baseline gameplay is `v0-overnight` (`ca00266`); its completed measurement checkpoint is `be91f0f`. Intermediate diagnostics use different source revisions and are not an aggregate five-run result or a controlled estimate of one isolated change.
 
 The pre-camera diagnostic recorded 81 client Hit projections and zero outside projections, but its initial fixture used a 1x1 viewport. Its end viewport was 2508x879, and per-hit sizes were not recorded by that observer revision. Preserve that limitation; do not use it to close the actual-camera gate. Its diversity report contains only one complete eligible window, for an elite, and 128 partial windows. It therefore does not establish ordinary-archetype diversity, despite its successful campaign clear. Baseline rank and frustum are unavailable, not zero.
+
+### First frozen-build run and camera reconciliation
+
+[Seed 1101](evidence/m2-final-1101.json) records gameplay source `9f29012`, bot policy `b21b807` and audit revision `a129630`. World independently reconciled **80 accepted server enemy hits = 80 audited client events + 0 invalid-viewport hits**. All eighty retained events are marked visible and have valid per-event dimensions; the fixture passes at 2508x879. Outside-hit count is zero. Client and server stock ledgers both total four, with one lost in district 1, one in district 2 and two in district 3; fractional server damage differs from the 991 snapshot by less than one point.
+
+This is an actual-camera observation for one run at Hit receipt, not a universal frustum guarantee or a completed five-run series. The run's diversity report has one complete elite window and 73 partial windows, so ordinary-archetype diversity remains inconclusive. Zero cap breaches, 8.42% idle and 100% qualified flanking apply only to this individual frozen-build run until the aggregate is complete.
+
+Root also executed the synthetic summarizer regression: missing metrics remain null rather than zero, measured zeros remain zero, invalid 1x1 fixtures are flagged, and duplicate seeds/unfinished reports are rejected. The baseline recomputation still matches the stored pooled figures. This validates the exercised analyzer cases, not every possible malformed report.
 
 ## Four-client, twelve-enemy crowd diagnostics
 

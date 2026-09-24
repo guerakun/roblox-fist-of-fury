@@ -9,9 +9,15 @@ Imported and inspected in Roblox Studio on 2026-09-23. Toolbox/Creator Store is 
 | Hitbox | [117986110024473](https://create.roblox.com/store/asset/117986110024473), Hitbox Module, oSkyz_25 | Spatial overlap query technique adapted into `ToolboxHitbox.lua` | Original preserved in `vendor/SkyzHitbox.lua`; one-shot bounds query, exclusions and server validation added |
 | Impact VFX | [92765511929343](https://create.roblox.com/store/asset/92765511929343), Vfx Block Magic Particle Effect Anime Glow Hit, le0_y2015 | Three particle textures/configurations reconstructed in `AssetInstaller.lua`; burst rates tuned | REJECTED all five embedded scripts and unrelated GUI/constraint objects. Source scripts included disguised texture utilities and unwanted GUI changes; never activated |
 
-Animations are sampled from pose data instead of relying on private animation upload permissions. This preserves the actual Toolbox motion for the R6 prototype. Production should publish reviewed animations to the final experience owner and migrate to Animator tracks. Particle texture availability must be rechecked in the published experience.
+Animations are sampled from pose data instead of relying on private animation upload permissions. This preserves the actual Toolbox motion for the R6 prototype. Production should publish reviewed animations to the final experience owner and migrate to Animator tracks. Particle texture availability must be rechecked in the published experience. The reconstructed child textures from the reviewed impact pack `92765511929343` are explicitly registered below; these are existing runtime dependencies, not additional imports:
 
-No reference-game video or soundtrack is bundled. The launch cast is being rebuilt with original authored geometry; retired imported character meshes are not approved for the launch build. Original-art runtime evidence and owner approval remain pending.
+| Runtime emitter | Texture ID | Provenance and gate |
+|---|---|---|
+| ImpactCross | 16004095914 | Reviewed impact pack above; reconstructed in AssetInstaller; final-universe availability/permission pending |
+| ImpactSparks | 13644087339 | Same reviewed pack and published-universe gate |
+| ImpactRing | 7216847656 | Same reviewed pack and published-universe gate |
+
+No reference-game video or soundtrack is bundled. The launch cast uses native-part original candidate geometry in source; retired imported character meshes are not approved for the launch build. Structural runtime checks are recorded in CHARACTER_ART.md and the launch art evidence. Rendered likeness review and owner approval remain pending.
 
 Quarantine workflow: import only into ServerStorage.ToolboxReview in Edit mode; inspect every LuaSourceContainer without requiring it; export only reviewed data; remove raw imported objects before Play/save. The build contains no external numeric require, loadstring or HTTP runtime dependency.
 
