@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.Config)
 local Progression = require(script.Parent.ProgressionService)
+local Planner = require(script.Parent.EnemyWavePlanner)
 local Encounter = {}
 local combat
 local active, initialized = false, false
@@ -49,14 +50,18 @@ local function defeat()
     setState({status = "Defeat", resultReason = "The party exhausted its stocks. Retry from the last checkpoint.", nextWaveAt = 0})
     active = false
 end
-local function waitForWave(token)
+local function waitForWave(token,pulses,spawnPulse,settings)
     local emptySince
+    local nextPulse,lastPulseAt=2,os.clock()
     while token == generation do
         local count = enemyCount()
-        setState({enemiesRemaining = count})
-        -- A simultaneous final KO is a clear if at least one stock-bearing player survives.
         local alive = combat.GetAlivePlayers()
-        if count == 0 and #alive > 0 then return true end
+        if nextPulse<=#pulses and #alive>0 and Planner.ShouldSpawn(count,os.clock()-lastPulseAt,settings)then
+            spawnPulse(nextPulse);nextPulse+=1;lastPulseAt=os.clock();count=enemyCount()
+        end
+        setState({enemiesRemaining = count})
+        -- A wave cannot clear while a reserved reinforcement pulse remains.
+        if count == 0 and nextPulse>#pulses and #alive > 0 then return true end
         if #alive == 0 then
             emptySince = emptySince or os.clock()
             if os.clock() - emptySince >= 3.5 then defeat() return false end
@@ -139,24 +144,20 @@ local function run(startStage, startWave, token)
             -- Scale once per wave. Late joiners never heal an in-progress boss.
             local partySize = math.clamp(combat.GetPlayerCount(), 1, Config.MaxPlayers)
             local healthScale = 1 + (partySize - 1) * (wave.Kind == "Wave" and .18 or .28)
-            local kinds = {}
-            for kind in pairs(wave.Enemies) do table.insert(kinds, kind) end
-            table.sort(kinds)
-            local spawnIndex = 0
-            for _, kind in ipairs(kinds) do
-                local baseCount = wave.Enemies[kind]
-                local total = baseCount + (wave.Kind == "Wave" and math.floor((partySize - 1) * .5) or 0)
-                for _ = 1, total do
-                    spawnIndex += 1
-                    local x = wave.SpawnX + (wave.Kind == "Wave" and (spawnIndex % 3) * 5 or 0)
-                    local z = wave.Kind == "Wave" and ((spawnIndex % 3) - 1) * 7 or 0
-                    combat.SpawnEnemy(kind, Vector3.new(x, 0, z), healthScale)
+            local pulses,totalBudget=Planner.Plan(wave,partySize)
+            local function spawnPulse(index)
+                if token~=generation then return end
+                for _,entry in ipairs(pulses[index])do
+                    combat.SpawnEnemyEntry(entry.kind,entry.entry,stageNumber,waveNumber,healthScale,entry.index,entry.rear)
                 end
+                setState({pulse=index,pulses=#pulses,spawnBudget=totalBudget})
+                if index>1 then fx("Reinforcements",stage,{title="REINFORCEMENTS",pulse=index,pulses=#pulses,count=#pulses[index]})end
             end
+            spawnPulse(1)
             setState({status = "Combat", wave = waveNumber, waveTitle = wave.Title, encounterKind = wave.Kind,
                 enemiesRemaining = enemyCount(), nextWaveAt = 0, targetX = wave.SpawnX, objective = "CLEAR / " .. wave.Title})
             fx("Wave", stage, {title = wave.Title, role = wave.Kind})
-            if not waitForWave(token) then return end
+            if not waitForWave(token,pulses,spawnPulse,wave.Pulse) then return end
             awardClear(stageNumber, waveNumber, wave.Kind)
             if wave.Kind == "Miniboss" then
                 checkpointStage, checkpointWave = stageNumber, waveNumber + 1
@@ -188,6 +189,7 @@ function Encounter.Restart()
         campaignId = (game.JobId ~= "" and game.JobId or HttpService:GenerateGUID(false)) .. ":" .. campaignNumber
         checkpointStage, checkpointWave = 1, 1
         combat.BeginRun()
+        if Progression.BeginCampaign then Progression.BeginCampaign(Players:GetPlayers(),campaignId)end
     end
     generation += 1
     active = true

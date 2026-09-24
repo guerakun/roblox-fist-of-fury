@@ -62,6 +62,23 @@ function Presentation.new(folder: Instance, preferences: any): any
             local duration = math.clamp(tonumber(event.duration) or .6, .3, 2)
             TweenService:Create(cue, TweenInfo.new(duration), {FillTransparency=1,OutlineTransparency=1}):Play()
             Debris:AddItem(cue,duration+.02)
+            local arrivalRoot = model:FindFirstChild("HumanoidRootPart")
+            if arrivalRoot and arrivalRoot:IsA("BasePart") then
+                local oldDirection = arrivalRoot:FindFirstChild("EntryDirection")
+                if oldDirection then oldDirection:Destroy() end
+                local directionCue = Instance.new("BillboardGui")
+                directionCue.Name = "EntryDirection"; directionCue.Adornee = arrivalRoot
+                directionCue.Size = UDim2.fromOffset(130,24); directionCue.StudsOffsetWorldSpace = Vector3.new(0,3.5,0)
+                directionCue.AlwaysOnTop = false; directionCue.MaxDistance = 220; directionCue.Parent = arrivalRoot
+                local text = Instance.new("TextLabel")
+                text.Size = UDim2.fromScale(1,1); text.BackgroundTransparency = 1
+                text.TextColor3 = Color3.fromRGB(213,241,247); text.TextStrokeTransparency = .3
+                text.Font = Enum.Font.GothamBold; text.TextSize = 12
+                local labels = {Left="→ ARRIVING",Right="← ARRIVING",Door="DOOR ENTRY",Drop="↓ DROPPING IN"}
+                text.Text = labels[event.entry] or "ARRIVING"; text.Parent = directionCue
+                TweenService:Create(text,TweenInfo.new(duration),{TextTransparency=1,TextStrokeTransparency=1}):Play()
+                Debris:AddItem(directionCue,duration+.02)
+            end
         elseif event.kind == "EnemyCancel" then
             for p, owner in pairs(projectileOwners) do if owner == event.targetModel then p:Destroy() end end
             for userId, owner in pairs(grabOwners) do if owner == event.targetModel then release(userId) end end

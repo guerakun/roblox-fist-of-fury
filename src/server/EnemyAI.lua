@@ -81,11 +81,12 @@ function EnemyAI.Step(t,c)
             if c.SummonPhase then c.SummonPhase(model,data)end
             c.fx("BossPhase",r.Position,{phase=2,enemy=data.kind,enemyName=data.spec.Name,targetModel=model})
         end
-        if t<(data.entryUntil or 0) or (data.entryKind=="Drop" and h.FloorMaterial==Enum.Material.Air) then
+        if not data.entryComplete and (t<(data.entryUntil or 0) or (data.entryKind=="Drop" and h.FloorMaterial==Enum.Material.Air)) then
             state(model,data,"Enter");h.WalkSpeed=data.spec.Speed
             h:MoveTo(Vector3.new(math.clamp(r.Position.X+(data.entryDirection or 1)*4,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(r.Position.Z,-11,11)))
             continue
         end
+        data.entryComplete=true
         if t<data.stunnedUntil or t<data.launchedUntil then state(model,data,"Stagger");h:Move(Vector3.zero);continue end
         if data.attacking then state(model,data,t<(data.resolveAt or 0) and "Attack" or "Recover");h:Move(Vector3.zero);continue end
         if t<data.recoveryUntil then state(model,data,"Recover");h:Move(Vector3.zero);continue end

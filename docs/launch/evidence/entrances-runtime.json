@@ -1,0 +1,10 @@
+{
+  "recorded":"2026-09-24",
+  "passed":true,
+  "world":{"encounters":12,"markers":48,"sceneryParts":60,"schema":1},
+  "planner":{"wavePartyCases":48,"pulseTriggers":4,"budgetsConserved":true},
+  "runtime":{"markersFound":true,"entryKinds":4,"dropGroundedGate":true,"rearAtMidArena":true,"minimumGrace":true},
+  "presentation":{"poses":30,"entryKinds":4,"cleanup":true,"grabRelease":true,"criticalProjectileAtEffectsZero":true,"ownerRemoval":true,"cancel":true},
+  "fixtureCorrection":"First anchored Drop fixture did not observe landing after test unanchor. Untouched production Drop landed by0.5s, Concrete floor, Approach by1s. Corrected fixture restores server network ownership and Freefall after test-only anchor; fresh Play passes.",
+  "limits":"Full campaign pulse continuity, five HumanBot comparisons, actual frustum/human readability remain pending. Elite rear entry is phase-two reinforcement; arena boundaries can prevent behind-party placement."
+}

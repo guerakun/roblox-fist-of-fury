@@ -113,7 +113,7 @@ function Combat.GetSnapshot(player)
     stats.damageDealt, stats.damageTaken = math.floor(stats.damageDealt), math.floor(stats.damageTaken)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves,
-        enemiesRemaining = encounter.enemiesRemaining, status = encounter.status, blocking = data.blocking,
+        enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
         downed = data.downed, grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0},
         ready = data.ready, travelLocked = travelLocked, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
         rescueTarget = ally and {name = ally.DisplayName, userId = ally.UserId} or false,
@@ -554,6 +554,30 @@ function Combat.SpawnEnemy(kind, position, healthScale)
     fx("Spawn", position, {enemy = kind, enemyName = spec.Name, role = spec.Role})
     return model
 end
+function Combat.SpawnEnemyEntry(kind,entryKind,stageNumber,waveNumber,healthScale,index,rear)
+    local stage=Config.Stages[stageNumber]
+    local wave=stage.Waves[waveNumber]
+    local city=workspace:FindFirstChild("NightfallCity")
+    local folder=city and city:FindFirstChild("EnemyEntries")
+    local group=folder and folder:FindFirstChild("Stage"..stageNumber.."_Wave"..waveNumber)
+    local marker=group and group:FindFirstChild(entryKind)
+    local position=marker and marker.Position or Vector3.new(wave.SpawnX,entryKind=="Drop" and 14 or 0,entryKind=="Door" and -12 or 0)
+    local low,high=math.huge,-math.huge
+    for _,player in ipairs(Combat.GetAlivePlayers())do local pr=root(player.Character);if pr then low=math.min(low,pr.Position.X);high=math.max(high,pr.Position.X)end end
+    local stagger=((index or 1)-1)%3*2
+    if entryKind=="Left" and low~=math.huge then position=Vector3.new(low-14-stagger,0,position.Z)
+    elseif entryKind=="Right" and high~=-math.huge then position=Vector3.new(high+18+stagger,0,position.Z)end
+    position=Vector3.new(math.clamp(position.X,stage.MinX+6,math.min(stage.MaxX-6,walkingMaxX-2)),position.Y,math.clamp(position.Z,-12,12))
+    local model=Combat.SpawnEnemy(kind,position,healthScale)
+    local data=enemies[model]
+    data.entryUntil=now()+.6;data.entryKind=entryKind;data.entryDirection=entryKind=="Right" and -1 or 1
+    model:SetAttribute("EntryKind",entryKind);model:SetAttribute("EntryUntil",data.entryUntil)
+    model:SetAttribute("EntryMarkerFound",marker~=nil)
+    model:SetAttribute("RearEntryAchieved",rear==true and low~=math.huge and position.X<low-3)
+    local landing=Vector3.new(position.X,0,position.Z)
+    fx("EnemyEntry",root(model).Position,{targetModel=model,entry=entryKind,duration=.6,sourcePosition=marker and marker.Position or position,landingPosition=landing})
+    return model
+end
 function Combat.SpawnPhaseAdds(model,data)
     if data.summonsIssued then return end
     data.summonsIssued=true
@@ -562,17 +586,8 @@ function Combat.SpawnPhaseAdds(model,data)
         if enemies[model]~=data or epoch~=battleEpoch or encounter.status~="Combat" then return end
         local alive=Combat.GetAlivePlayers()
         if #alive==0 then return end
-        local lo,hi=math.huge,-math.huge
-        for _,player in ipairs(alive)do local pr=root(player.Character);if pr then lo=math.min(lo,pr.Position.X);hi=math.max(hi,pr.Position.X)end end
-        if lo==math.huge then return end
         for i=1,math.clamp(data.spec.PhaseSummons or 2,0,2)do
-            local left=i%2==1
-            local x=math.clamp(left and lo-20 or hi+20,arena.MinX+6,math.min(arena.MaxX-6,walkingMaxX-2))
-            local add=Combat.SpawnEnemy("Husk",Vector3.new(x,0,left and -9 or 9),1+(Combat.GetPlayerCount()-1)*.18)
-            local entry=enemies[add]
-            entry.entryUntil=now()+.6;entry.entryKind=left and "Left" or "Right";entry.entryDirection=left and 1 or -1
-            add:SetAttribute("EntryKind",entry.entryKind)
-            fx("EnemyEntry",root(add).Position,{targetModel=add,entry=entry.entryKind,duration=.6})
+            Combat.SpawnEnemyEntry("Husk",i%2==1 and "Left" or "Right",stageIndex,math.max(1,encounter.wave),1+(Combat.GetPlayerCount()-1)*.18,i,#alive<=2 and i%2==1)
         end
     end)
 end

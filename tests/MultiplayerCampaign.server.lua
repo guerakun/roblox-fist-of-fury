@@ -131,8 +131,9 @@ local function run()
     task.wait(.35)
     spawnConnection:Disconnect()
     local firstCombat=state()
-    local expectedInitial=0
-    for _,count in pairs(Config.Stages[1].Waves[1].Enemies) do expectedInitial+=count+math.floor((initialCount-1)*.5) end
+    local planner=require(game.ServerScriptService.NightfallServer.EnemyWavePlanner)
+    local initialPulses=planner.Plan(Config.Stages[1].Waves[1],initialCount)
+    local expectedInitial=#initialPulses[1] -- Reinforcements are reserved, not duplicate initial spawns.
     if not check("exactly one initial enemy set",firstCombat.stage==1 and firstCombat.wave==1 and firstSpawnCount==expectedInitial and countEnemies()==expectedInitial,
         {stage=firstCombat.stage,wave=firstCombat.wave,spawned=firstSpawnCount,enemies=countEnemies()}) then finish("Duplicate initial wave");return end
     for _,player in ipairs(initialPlayers) do command(player,{kind="Drive",enabled=true}) end

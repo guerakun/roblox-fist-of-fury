@@ -21,12 +21,18 @@ return function(Presentation)
     api.Emit({kind="EnemyCancel",targetModel=owner})
     assert(#folder:GetChildren()==0, "Cancelled projectile remains")
     api.Emit({kind="EnemyProjectile",origin=Vector3.new(1,4,0),endpoint=Vector3.new(11,4,0),duration=1,targetModel=owner})
-    api.Emit({kind="EnemyEntry",targetModel=owner,duration=.3})
-    assert(owner:FindFirstChild("EnemyEntryCue"), "Entry cue missing")
-    task.wait(.4)
-    assert(not owner:FindFirstChild("EnemyEntryCue"), "Entry cue cleanup")
     owner:Destroy(); task.wait()
     assert(#folder:GetChildren()==0, "Removed enemy projectile remains")
+    local entryOwner=Instance.new("Model"); entryOwner.Parent=workspace
+    local entryRoot=Instance.new("Part"); entryRoot.Name="HumanoidRootPart"; entryRoot.Anchored=true
+    entryRoot.CanCollide=false; entryRoot.CanQuery=false; entryRoot.CanTouch=false; entryRoot.Position=Vector3.new(0,-300,0); entryRoot.Parent=entryOwner
+    for _,kind in ipairs({"Left","Right","Door","Drop"}) do
+        api.Emit({kind="EnemyEntry",targetModel=entryOwner,entry=kind,duration=.3})
+        assert(entryOwner:FindFirstChild("EnemyEntryCue") and entryRoot:FindFirstChild("EntryDirection"), "Entry cue missing "..kind)
+        task.wait(.4)
+        assert(not entryOwner:FindFirstChild("EnemyEntryCue") and not entryRoot:FindFirstChild("EntryDirection"), "Entry cue cleanup "..kind)
+    end
+    entryOwner:Destroy()
     local player = game.Players.LocalPlayer
     local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     assert(root, "Local rig required for rescue cue test")
@@ -36,5 +42,5 @@ return function(Presentation)
     api.Emit({kind="EnemyGrabRelease",targetUserId=player.UserId})
     assert(not root:FindFirstChild("CoopGrabRescue"), "Rescue cue remains")
     folder:Destroy()
-    return {poses=30,criticalProjectileAtEffectsZero=true,cleanup=true,cancel=true,ownerRemoval=true,grabRelease=true,entryCue=true}
+    return {poses=30,criticalProjectileAtEffectsZero=true,cleanup=true,cancel=true,ownerRemoval=true,grabRelease=true,entryCue=true,entryKinds=4}
 end

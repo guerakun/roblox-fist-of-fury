@@ -76,6 +76,13 @@ Config.Stages[2].Waves[1].Enemies = {Pitcher = 1, Leaper = 1, Husk = 2}
 Config.Stages[2].Waves[3].Enemies = {Warden = 1, Grappler = 1, Brute = 1}
 Config.Stages[3].Waves[1].Enemies = {Pitcher = 1, Leaper = 1, Brute = 1}
 Config.Stages[3].Waves[3].Enemies = {Strider = 1, Grappler = 1, Warden = 1, Brute = 1}
+-- Authored entrance sequence and bounded reinforcement timing; enemy budgets remain unchanged in M2.
+for _,stage in ipairs(Config.Stages)do
+    for _,wave in ipairs(stage.Waves)do
+        wave.Entries={"Left","Right","Door","Drop"}
+        wave.Pulse={After=12,AliveThreshold=1}
+    end
+end
 -- One-way legacy-ID fingerprints support retired save records without retaining display labels.
 -- Exact compatibility fixtures and provenance live in docs/launch/HERO_MIGRATION.md.
 local legacyHeroFingerprints = {[261244702] = "Gale", [266550891] = "Piston", [3479830332] = "Tide"}

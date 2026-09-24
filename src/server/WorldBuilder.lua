@@ -2,6 +2,7 @@
 -- Forward is +X. The camera looks from +Z. Combat floor top is Y=0.
 local Lighting = game:GetService("Lighting")
 local CollectionService = game:GetService("CollectionService")
+local Config = require(game.ReplicatedStorage.Nightfall.Shared.Config)
 local WorldBuilder = {}
 
 local C = {
@@ -658,6 +659,49 @@ function WorldBuilder.Build()
 			local other = arrow:Clone(); other.Position += Vector3.new(0,0,1.8); other.CFrame *= CFrame.Angles(0,math.rad(-80),0); other.Parent = streets
 		end
 	end
+	-- Authored entrance anchors use floor coordinates: Combat adds the rig's root height.
+	-- The director may adjust side anchors relative to the party within server bounds.
+	local entryMarkers, entryScenery = folder("EnemyEntries"), folder("EnemyEntryScenery")
+	entryMarkers:SetAttribute("SchemaVersion", 1)
+	for stageIndex, stage in ipairs(Config.Stages) do
+		for waveIndex, wave in ipairs(stage.Waves) do
+			local entryName = "Stage"..stageIndex.."_Wave"..waveIndex
+			local group = Instance.new("Folder")
+			group.Name, group.Parent = entryName, entryMarkers
+			group:SetAttribute("Stage", stageIndex)
+			group:SetAttribute("Wave", waveIndex)
+			group:SetAttribute("WaveCenterX", wave.SpawnX)
+			local center = math.clamp(wave.SpawnX, stage.MinX+6, stage.MaxX-6)
+			local dropX = math.clamp(center+8, stage.MinX+6, stage.MaxX-6)
+			local positions = {
+				Left = Vector3.new(math.clamp(center-24, stage.MinX+6, stage.MaxX-6),0,-7),
+				Right = Vector3.new(math.clamp(center+24, stage.MinX+6, stage.MaxX-6),0,7),
+				Door = Vector3.new(center,0,-12),
+				Drop = Vector3.new(dropX,14,-7),
+			}
+			for _, kind in ipairs({"Left", "Right", "Door", "Drop"}) do
+				local marker = part(kind, Vector3.one*.5, positions[kind], C.cyan, group)
+				marker.Transparency, marker.CastShadow = 1, false
+				marker:SetAttribute("EntryKind", kind)
+				if kind == "Drop" then marker:SetAttribute("LandingPosition", Vector3.new(dropX,0,-7)) end
+			end
+			-- A shallow service doorway sits behind the -14 lane boundary. It cannot
+			-- block movement or damage queries and uses no attack-like floor glow.
+			local doorway = Instance.new("Model")
+			doorway.Name, doorway.Parent = entryName, entryScenery
+			doorway:SetAttribute("Stage", stageIndex)
+			doorway:SetAttribute("Wave", waveIndex)
+			doorway:SetAttribute("EntryKind", "Door")
+			local trim = stageIndex == 2 and C.cyan or C.amber
+			part("ServiceDoorRecess",Vector3.new(6.4,8,.3),Vector3.new(center,4,-15.25),C.ink,doorway)
+			for _, dx in ipairs({-3.5,3.5}) do
+				part("ServiceDoorJamb",Vector3.new(.6,8.5,.6),Vector3.new(center+dx,4.25,-14.85),C.silver,doorway,Enum.Material.Metal)
+			end
+			part("ServiceDoorLintel",Vector3.new(7.6,.6,.6),Vector3.new(center,8.5,-14.85),C.concrete,doorway,Enum.Material.Metal)
+			glow("ServiceDoorIndicator",Vector3.new(2,.16,.12),Vector3.new(center,7.9,-14.49),trim,doorway)
+		end
+	end
+	city:SetAttribute("EntryMarkerVersion", 1)
 	city:SetAttribute("RouteLength",540)
 	city:SetAttribute("BuildVersion","Nightfall-2-ThreeDistricts")
 	return city

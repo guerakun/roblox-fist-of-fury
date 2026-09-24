@@ -12,7 +12,7 @@ The game is a controlled 2.5D co-op brawler: move right through three 180-stud d
 | Abandoned Station, x180..360 | Last Service / miniboss / Platform Zero / boss | Platform Widow | The Last Conductor |
 | Abandoned Factory, x360..540 | Cold Furnace / miniboss / Pressure Rising / boss | Furnace Hound | Kiln Sovereign |
 
-Each miniboss and boss has an original R6 silhouette in EnemyFactory and its own deterministic attack pattern in EnemyMoves. No anime character models or animations were copied for the enemies. Reviewed Toolbox keyframes animate the common R6 skeletons. The original launch heroes retain wind rushdown, mechanical long reach and wide blade archetypes under stable IDs Gale, Piston and Tide. Current art and acceptance status are tracked separately.
+Each miniboss and boss has an original R6 silhouette in EnemyFactory and its own authored move family in EnemyMoves. No anime character models or animations were copied for the enemies. Reviewed Toolbox keyframes animate the common R6 skeletons. The original launch heroes retain wind rushdown, mechanical long reach and wide blade archetypes under stable IDs Gale, Piston and Tide. Current art and acceptance status are tracked separately.
 
 ## Six encounter identities
 
@@ -107,3 +107,33 @@ Grappler capture is unblockable: the initial grab deals 20% of base damage and a
 The server rejects attacks outside a conservative estimate of the campaign camera: 44-degree field of view, supported aspect ratio at least 9:16, four-stud inset, party goal and smoothed center checks, and distance clamped to 52-140 studs. This is an estimated attack-permission envelope, not proof of every client's actual view. `EnemyFrustumAudit.client.lua` separately projects the attacker through the victim's real camera at Hit receipt; no actual zero-offscreen-hit result is claimed by the projection math alone.
 
 Root recorded the following actual Studio evidence for this work order: fourteen moves/seven policies and boundary geometry passed; six enemy rigs contained 19-22 parts with seven queryable core parts and six motors; thirty client pose/cancel/cleanup checks passed; the actual two-client scripted capture fixture passed ally rescue, canceled throw and unrescued timed-throw cases. The rescue fixture applies a server-side ally hit directly, so it is not human input/range validation. Source was independently reviewed. Five-run campaign comparison, actual frustum results, a four-player/twelve-enemy MicroProfiler capture, human readability and device play remain open. See the dated work-order ledger in [PROGRESS.md](PROGRESS.md) for the current acceptance state.
+
+
+## Elite decisions and phase pressure (WO-2.4)
+
+Implemented at `b37549c`. Elites now select weighted moves rather than repeat the old fixed rotation; those old rotations remain preserved in Config as the source move pools. Close moves start with weight 5 within reach and 0.25 beyond it; ranged/area moves start at 1.5 nearby and 4 beyond reach. Two or more players in the target lane multiply area weight by 1.6. A repeated move receives a 0.25 multiplier. The signature gets double weight when available and an eight-second cooldown; observed airborne state reduces selected jumpable moves to 0.35 weight. Airborne/action observations retain the 0.35-second delay. Server random rolls select from the pool, with deterministic injected rolls used by specs.
+
+Phase two begins at 52% of the defeat threshold and issues a one-time pair of Husk side entrants. During phase two, an eligible ordinary attack has a 20% feint chance, limited by a six-second feint cooldown. A feint lasts 0.40 seconds, deals no damage, recovers for 0.20 seconds and does not count as use of a desperation move. At 80% of the defeat threshold, each elite may select its own desperation once; it bypasses feint selection and retains a long floor warning and punish window.
+
+| Elite desperation | Warning | Recovery |
+|---|---:|---:|
+| CrossroadRuin | 1.15 s | 1.45 s |
+| AlarmCollapse | 1.20 s | 1.50 s |
+| WidowSpiral | 1.20 s | 1.40 s |
+| FinalDeparture | 1.40 s | 1.60 s |
+| CinderHowl | 1.10 s | 1.40 s |
+| CoreMeltdown | 1.40 s | 1.65 s |
+
+Root recorded six-elite weighted-policy specs and actual phase-two two-summon, one-shot, entry-grace, harmless-feint and desperation-start fixtures as passing. These fixtures establish those branches; full campaign variety, difficulty and human readability remain M2 acceptance work.
+
+## Wave pulses and authored entries (WO-2.5)
+
+Implemented source keeps the existing per-kind enemy counts and per-kind co-op addition of `floor((partySize-1)*0.5)` for skirmishes. Party size, total spawn budget and resilience scaling freeze when the wave begins, so a late join cannot enlarge a reserved pulse or heal an existing enemy. Skirmishes use two pulses, or three when the frozen budget is at least six. The next reserved pulse arrives when at most one enemy remains or twelve seconds have elapsed since the previous pulse, provided someone is alive. Zero current enemies cannot clear a wave while any planned pulse remains. Campaign-generation checks cancel stale pulse work on resets.
+
+Every wave has the Left/Right/Door/Drop entry list and pulse settings in Config. Skirmish entries cycle through that list; the first entrant is forced to Left for one or two players. Left placement is relative to the leftmost living player, 14 studs behind with a 0/2/4-stud stagger, clamped inside the arena and walking ceiling. Right placement uses the rightmost player plus 18 studs and that stagger. `RearEntryAchieved` records whether the actual spawn is more than three studs behind the party minimum. A player pressed against the arena's left edge prevents this guarantee; source does not claim a rear spawn in that case.
+
+Elite waves begin with a Door entrance and use their one-time phase-two pair as the separate reinforcement group, rather than an ordinary timer pulse. This interprets the elite rear-entry requirement through the phase-two summon. An elite defeated before phase two does not produce that rear entrant, so it is not unconditional every-wave rear-entry evidence.
+
+Door markers are floor coordinates; Drop starts at Y=14 before the rig root-height offset. Every entry has at least 0.60 seconds of attack grace. Drop also waits for actual Humanoid grounding; an `entryComplete` latch prevents later combat launches from replaying the entrance state. Existing attack cooldown and on-screen permission checks still apply after entry. Markers and native non-queryable doorway geometry are documented in [WORLD_BIBLE.md](WORLD_BIBLE.md).
+
+The pure planner spec covers all twelve waves at one through four players, conserving each archetype budget and testing four pulse-trigger cases. The entry runtime fixture is prepared to verify four authored markers, a rear entry at mid-arena, initial grace and Drop grounding. Source review passed; root runtime results and the five-run campaign/frustum/human comparisons must be recorded in PROGRESS before treating these as measured gameplay evidence. The authored-marker structural test is separate from pulse behavior and visible composition approval.
