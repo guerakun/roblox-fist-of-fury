@@ -88,8 +88,8 @@
     "WO-3.1": {
       "owner": "combat",
       "status": "implemented; policy and actual client runtime passed; curve pending",
-      "evidence": "m3-pressure.json:33pressureboundaries/48wavecasesPASS;actualBurstcost8/lock4s/freeordinaryDash/costKO/.8comboBreaker/preservedbreakerPASS;initialfixturefailurepreserved;worldreviewPASS",
-      "next": "WO3.2persistentstocks/percent/revive; finalM3HumanBotNormal/Hard/Nightmare curve stillpending"
+      "evidence": "m3-pressure.json:33pressureboundaries/48wavecasesPASS;actualBurstcost8/lock4s/freeordinaryDash/costKO/.8comboBreaker/preservedbreakerPASS;initialfixturefailurepreserved;worldreviewPASS M3_TUNING_REVIEW diagnostic from first3 frozen Normal defeats:467.552s mean,1088.8169serverdamage,286audited hits,0outside/invalid; all inferred one-stock boss entry. Root recomputed and corrected aggregate-hit typo before world review confirmation. Candidate NormalWindupScale1.00to1.10 is proposed only, not implemented/accepted.",
+      "next": "Finish all15 frozen trials, choose one measured tuning experiment; retain failed Normal curve, avoid pooling revisions or crediting unimplemented M4 food."
     },
     "WO-3.2": {
       "owner": "combat",
