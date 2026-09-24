@@ -7,6 +7,7 @@ P.SalesEnabled = false
 P.ChapterPassId = 0 -- Configure an owned game pass only after live persistence/asset validation.
 P.ChapterName = "AFTER THE LAST TRAIN"
 P.XPPerTier = 150
+P.BountyReward = {Coins=25,XP=0} -- Optional earned reward; excluded from rank/Heat base.
 P.Rewards = {Wave = {Coins = 25, XP = 35}, Miniboss = {Coins = 60, XP = 75}, Boss = {Coins = 120, XP = 120}}
 P.Boons = {
     -- Disabled until authoritative restrictions and actual combat checks are integrated.

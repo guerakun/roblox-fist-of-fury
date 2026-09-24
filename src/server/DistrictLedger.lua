@@ -45,6 +45,16 @@ function Ledger:Record(stage,wave,coins,xp)
     s.baseCoins+=coins s.baseXP+=xp
     return true
 end
+function Ledger:RecordBounty(stage,wave,coins,xp)
+    if not stageId(stage) or not waveId(wave) or not finite(coins) or not finite(xp)
+        or coins%1~=0 or xp%1~=0 or coins>self.policy.Cap or xp>self.policy.Cap then return false end
+    local s=self:_stage(stage);s.bounties=s.bounties or {}
+    local prior=s.bounties[wave]
+    if prior then return prior.coins==coins and prior.xp==xp end
+    if s.result then return false end
+    s.bounties[wave]={coins=coins,xp=xp}
+    return true
+end
 function Ledger:Base(stage)
     local s=self:_stage(stage) if not s then return nil end
     return {coins=s.baseCoins,xp=s.baseXP}
@@ -81,11 +91,13 @@ function Ledger:Receipt(stage,status)
     if status~=nil and status~='pending' and status~='readOnly' and status~='paid' and status~='capped' and status~='capacity' then return nil,'invalid status' end
     local allBase=true
     for _,w in pairs(s.waves) do if not w.payment then allBase=false end end
+    for _,b in pairs(s.bounties or {})do if not b.payment then allBase=false end end
     local inferred=s.districtPayment and allBase and (s.anyCapped and 'capped' or 'paid') or 'pending'
     -- A caller cannot advertise paid/capped before the ledger has actually settled.
     if status=='paid' or status=='capped' then status=inferred end
     local payload={resultId=self.campaignId..':'..stage,baseCoins=s.baseCoins,baseXP=s.baseXP,
         basePaidCoins=s.paidCoins,basePaidXP=s.paidXP,
+        bountyCoins=s.bountyPaidCoins or 0,bountyXP=s.bountyPaidXP or 0,
         coins=s.districtPayment and s.districtPayment.coins or 0,xp=s.districtPayment and s.districtPayment.xp or 0,
         rankMultiplier=s.bonus and s.bonus.rankMultiplier or false,
         difficultyMultiplier=s.bonus and s.bonus.difficultyMultiplier or false,
@@ -112,6 +124,20 @@ function Ledger:PayEncounter(data,stage,wave)
     s.anyCapped=s.anyCapped or payment.status=='capped'
     w.receipt=paidReceipt(self,stage,payment,key)
     return copy(w.receipt),true
+end
+function Ledger:PayBounty(data,stage,wave)
+    if not stageId(stage) or not waveId(wave)then return nil,false,'invalid encounter' end
+    local s=self:_stage(stage);local bounty=s.bounties and s.bounties[wave]
+    if not bounty then return nil,false,'unrecorded bounty' end
+    if bounty.payment then return copy(bounty.receipt),false end
+    if data==nil then return self:Receipt(stage,'readOnly'),false,'readOnly' end
+    local key=self.campaignId..':'..stage..':'..wave..':bounty'
+    local payment,reason=self.policy.Grant(data,self.keys,self.order,key,bounty.coins,bounty.xp)
+    if not payment then return self:Receipt(stage,reason=='capacity' and 'capacity' or 'pending'),false,reason end
+    bounty.payment=payment;s.bountyPaidCoins=(s.bountyPaidCoins or 0)+payment.coins;s.bountyPaidXP=(s.bountyPaidXP or 0)+payment.xp
+    s.anyCapped=s.anyCapped or payment.status=='capped'
+    bounty.receipt=paidReceipt(self,stage,payment,key)
+    return copy(bounty.receipt),true
 end
 function Ledger:PayDistrict(data,stage)
     local s=self:_stage(stage) if not s or not s.result then return nil,false,'not completed' end

@@ -1,0 +1,12 @@
+{
+  "date": "2026-09-24",
+  "pure": {"passed": true, "bountyChecks": 25, "existingLedgerRegressionChecks": 59},
+  "actualOneClient": {
+    "passed": true,
+    "checks": ["Separate earned encounter and bounty payment", "Retry and duplicate participant cannot pay bounty twice", "Rank excludes bounty base and receipt reports actual components", "Observer equals paid deltas exactly", "Actual client bounty forgery ignored", "Retired campaign bounty callback rejected", "Read-only bounty is unpaid", "Same-campaign deferred bounty settles once", "Repeat pending flush does not repay", "Reentrant campaign rotation cannot settle remaining retired bounty"]
+  },
+  "contract": {"coins": 25, "xp": 0, "key": "campaign:stage:wave:bounty", "rankBaseIncludesBounty": false, "receiptFields": ["bountyCoins", "bountyXP"]},
+  "review": "World independent journal/API review passed stable keys, capped actual deltas, pending settlement and reentrant lifecycle guards.",
+  "scope": "Actual ephemeral Progression integration and forged client request; no spawned bounty enemy, full gameplay, physical inputs or live persistence claim",
+  "next": "Combat integrates bounty spawn/flee/KO and risk pickups; client displays separate actual bounty reward; run full gameplay fixtures"
+}

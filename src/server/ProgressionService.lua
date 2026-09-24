@@ -144,6 +144,22 @@ local function grantReward(player, kind, rewardKey)
     end
     return receipt, newlyPaid, true
 end
+local function grantBounty(player,campaign,stage,wave)
+    local ledger=ledgerFor(player,campaign)
+    local reward=Config.BountyReward
+    if not ledger or not ledger:RecordBounty(stage,wave,reward.Coins,reward.XP) then return false end
+    local record=records[player]
+    if paymentState(record)then return ledger:Receipt(stage,paymentState(record)) end
+    local receipt,newlyPaid=ledger:PayBounty(record.profile.data,stage,wave)
+    if newlyPaid then paid(player,receipt,'Bounty')end
+    return receipt
+end
+function Progression.AwardBounty(participants,campaign,stage,wave)
+    if type(participants)~='table' then return end
+    for _,player in ipairs(participants)do
+        if typeof(player)=='Instance' and player:IsA('Player')then grantBounty(player,campaign,stage,wave)end
+    end
+end
 function Progression.SetRewardObserver(callback)
     assert(callback==nil or type(callback)=='function')
     rewardObserver=callback
@@ -213,6 +229,9 @@ function Progression.AwardDistrict(player,result)
     for wave in pairs(ledger.stages[result.stage].waves) do
         grantReward(player,ledger.kinds[result.stage..':'..wave],result.campaignId..':'..result.stage..':'..wave)
     end
+    for wave in pairs(ledger.stages[result.stage].bounties or {})do
+        grantBounty(player,result.campaignId,result.stage,wave)
+    end
     -- Re-fetch the current journal immediately before mutation; no captured old journal pays.
     if ledgerFor(player,result.campaignId)~=ledger then return false end
     record=records[player]
@@ -236,6 +255,10 @@ flushPending=function(player)
     local ledger=ledgerFor(player,campaign)
     if not ledger or paymentState(records[player]) then return end
     for stage,item in pairs(ledger.stages) do
+        for wave in pairs(item.bounties or {})do
+            if ledgerFor(player,campaign)~=ledger then return end
+            grantBounty(player,campaign,stage,wave)
+        end
         for wave in pairs(item.waves) do
             if ledgerFor(player,campaign)~=ledger then return end
             grantReward(player,ledger.kinds[stage..':'..wave],campaign..':'..stage..':'..wave)
