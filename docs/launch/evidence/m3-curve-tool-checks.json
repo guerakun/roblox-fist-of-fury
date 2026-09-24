@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-24",
+  "suite": "TierCurveSummary.spec.py",
+  "passed": true,
+  "syntheticAssertions": 71,
+  "scope": "Offline parser/curve-gate integrity, not gameplay evidence",
+  "review": "World independently ran71 assertions and read all9 public trials with zero row errors; combat source/spec review PASS after tolerance fix",
+  "initialFailure": "Assertion71 exposed collector/analyzer floating-point floor tolerance mismatch; root aligned +1e-8, rerun passed",
+  "retainedCompatibility": "Legacy top-level reports supported with absent optional captured context explicitly unverified; frustum/device gates separate",
+  "files": {
+    "tools/summarize_tier_curve.py": "057751b43187aa69a7fe36be6fc0223d7d080046519def63254108727c5d54d9",
+    "tests/TierCurveSummary.spec.py": "0b6e20d3672cd407fa0f595ce9546971646e825877dcbc6e6261cfbd561fa5d4"
+  }
+}

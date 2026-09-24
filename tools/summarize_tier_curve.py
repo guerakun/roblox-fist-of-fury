@@ -24,6 +24,53 @@ def load(path):
     return json.loads(Path(path).read_text(encoding="utf-8-sig"))
 
 
+def validate_supplied_context(raw, row, errors):
+    """Legacy top-level reports remain readable; supplied evidence cannot contradict them."""
+    if "provenance" in raw:
+        provenance = raw["provenance"]
+        if not isinstance(provenance, dict):
+            errors.append("Invalid captured provenance")
+        else:
+            for key in ("sourceCommit", "botPolicyRevision", "difficulty"):
+                if provenance.get(key) != row[key]:
+                    errors.append("Captured provenance contradicts " + key)
+            for key in ("configurationStable", "selectedBeforeRun"):
+                if provenance.get(key) is not True:
+                    errors.append("Captured provenance does not establish " + key)
+            if provenance.get("heat") != []:
+                errors.append("Captured provenance must have no Heat")
+            if "initialSettings" in provenance:
+                settings = provenance["initialSettings"]
+                expected = {"hero": "Gale", "boon": "Guardian", "profileMode": "Practice",
+                            "players": 1, "xp": 0, "coins": 0, "heat": [], "difficulty": row["difficulty"]}
+                if not isinstance(settings, dict):
+                    errors.append("Invalid captured initial settings")
+                else:
+                    for key, value in expected.items():
+                        actual = settings.get(key)
+                        if type(actual) is not type(value) or actual != value:
+                            errors.append("Captured initial setting contradicts curve protocol: " + key)
+                    if "status" in settings and settings["status"] != "Waiting":
+                        errors.append("Captured initial state must be Waiting")
+    if "reconciliation" in raw:
+        reconciliation = raw["reconciliation"]
+        if not isinstance(reconciliation, dict):
+            errors.append("Invalid supplied reconciliation")
+        else:
+            for key in ("stocksMatch", "flooredDamageMatches", "observerInvariantsPassed"):
+                if key in reconciliation and reconciliation[key] is not True:
+                    errors.append("Supplied curve reconciliation failed: " + key)
+            if "serverDamage" in reconciliation:
+                damage = reconciliation["serverDamage"]
+                if not finite(damage) or row["damageTaken"] != math.floor(damage + 1e-8):
+                    errors.append("Server damage contradicts floored bot damage")
+            if "serverStocksByDistrict" in reconciliation:
+                stocks = reconciliation["serverStocksByDistrict"]
+                if not isinstance(stocks, dict) or set(stocks) != {"1", "2", "3"} or any(
+                        not finite(value) or int(value) != value for value in stocks.values()) or stocks != row["stocksLostByDistrict"]:
+                    errors.append("Server stock counters contradict bot counters")
+
+
 def read_trial(path):
     raw = load(path)
     errors = []
@@ -73,6 +120,9 @@ def read_trial(path):
     else:
         row["stocksLostByDistrict"] = stocks
         row["stocksLost"] = sum(stocks.values())
+        if row["stage"] is not None and any(value != 0 for stage, value in stocks.items() if int(stage) > row["stage"]):
+            errors.append("Stock losses recorded beyond terminal stage")
+    validate_supplied_context(raw, row, errors)
     districts = bot.get("districtResults")
     row["districtRanks"] = []
     if not isinstance(districts, list):
@@ -90,6 +140,10 @@ def read_trial(path):
             if stage in seen_stages or identity in seen_ids:
                 errors.append("Duplicate district clear")
                 continue
+            if "difficulty" in result and result["difficulty"] != row["difficulty"]:
+                errors.append("District result difficulty contradicts trial")
+            if "heat" in result and result["heat"] != []:
+                errors.append("District result must have no Heat")
             seen_stages.add(stage)
             seen_ids.add(identity)
             row["districtRanks"].append({"stage": stage, "rank": rank, "id": identity})
@@ -155,7 +209,8 @@ def summarize(paths, baseline_dir=None):
     result["sRankFrequency"] = s_count / rank_count if rank_count else None
     result["measuredCurvePassed"] = all(result["gates"].values())
     result["limits"] = ["Five trials per tier have 20 percentage-point resolution; no statistical certification.",
-        "Timeouts, missing ranks, missing metrics and mixed revisions prevent a pass.",
+        "Timeouts, missing ranks, missing metrics, mixed revisions and contradictory supplied evidence prevent a pass.",
+        "Legacy top-level reports remain supported; absent optional captured provenance/reconciliation is not independently verified.",
         "All recorded trials enter means; defeated campaigns still contribute already-cleared district ranks.",
         "Early-stock rarity and final-boss wipe concentration are qualitative review, not invented thresholds.",
         "Real human tests per tier, multiplayer, camera/device and reward-security evidence remain separate."]
