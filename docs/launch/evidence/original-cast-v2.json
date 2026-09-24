@@ -1,0 +1,39 @@
+{
+  "date": "2026-09-24",
+  "geometry": {
+    "Gale": {
+      "externalMeshes": 0,
+      "queryable": 7,
+      "motors": 6,
+      "revision": "OriginalCast2",
+      "parts": 36
+    },
+    "Piston": {
+      "externalMeshes": 0,
+      "queryable": 7,
+      "motors": 6,
+      "revision": "OriginalCast2",
+      "parts": 44
+    },
+    "Tide": {
+      "externalMeshes": 0,
+      "queryable": 7,
+      "motors": 6,
+      "revision": "OriginalCast2",
+      "parts": 40
+    }
+  },
+  "captures": [
+    "hero-gale-v2-normal.jpg",
+    "hero-gale-v2-front.jpg",
+    "hero-gale-v2-back.jpg",
+    "hero-piston-v2-normal.jpg",
+    "hero-piston-v2-front.jpg",
+    "hero-piston-v2-back.jpg",
+    "hero-tide-v2-normal.jpg",
+    "hero-tide-v2-front.jpg",
+    "hero-tide-v2-back.jpg"
+  ],
+  "scope": "Actual selected playable rigs in city. Front/back: local neutral-motor override and inspection camera. Normal: unaltered production camera and idle pose, hidden HUD in Waiting. No combat action/device acceptance.",
+  "review": "World independently viewed all nine. Broad values/readability improved; heroes remain small at this viewport, fine details disappear, crossing/windows dominate, Tide blade remains blocky. Owner art approval and crowd/effects/hardware inspection remain open."
+}

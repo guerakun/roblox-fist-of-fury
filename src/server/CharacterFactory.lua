@@ -108,10 +108,14 @@ function Factory.Create(hero)
         -- Low swept undercut, asymmetrical silver-teal silhouette, no imported mesh.
         detail("Undercut", Vector3.new(1.62, .22, 1.04), rgb(55, 85, 93), head, CFrame.new(0, .38, .08))
         for i = 0, 4 do
-            detail("SweptHair", Vector3.new(.46, .27, 1.08), art.Hair, head,
-                CFrame.new(-.58 + i * .27, .53 + i * .025, .045) * CFrame.Angles(0, -.08, -.19), Enum.PartType.Ball)
+            local crest = 1 - math.abs(i - 3) / 4
+            local shade = art.Hair:Lerp(rgb(102, 158, 170), i % 2 == 0 and .12 or .30)
+            detail("SweptHair", Vector3.new(.46, .30 + crest * .14, 1.08), shade, head,
+                CFrame.new(-.58 + i * .27, .53 + crest * .14, .045) * CFrame.Angles(-.09, -.08, -.19), Enum.PartType.Ball)
         end
         detail("SideSweep", Vector3.new(.76, .18, .23), art.Hair, head, CFrame.new(.3, .38, -.48) * CFrame.Angles(0, 0, -.2), Enum.PartType.Ball)
+        -- Broad wrap reads from either side camera; narrow front seams alone disappear at range.
+        detail("CourierYoke", Vector3.new(2.06, .40, 1.08), rgb(119, 147, 157), torso, CFrame.new(0, .65, 0))
         detail("CroppedHem", Vector3.new(2.04, .20, 1.05), rgb(26, 34, 43), torso, CFrame.new(0, -.56, 0))
         detail("Underlayer", Vector3.new(1.99, .35, 1.01), rgb(93, 117, 125), torso, CFrame.new(0, -.81, 0))
         detail("OffsetZip", Vector3.new(.055, 1.4, .06), art.Accent, torso, CFrame.new(.26, .2, -.53))
@@ -165,12 +169,13 @@ function Factory.Create(hero)
             detail("SideFringe", Vector3.new(.36, .38, .18), art.Hair, head,
                 CFrame.new(-.55 + i * .28, .30 - i * .07, -.52) * CFrame.Angles(0, 0, -.32), Enum.PartType.Ball)
         end
-        detail("PonytailTie", Vector3.new(.45, .29, .45), art.Accent, head, CFrame.new(0, .38, .66), Enum.PartType.Ball)
+        detail("PonytailTie", Vector3.new(.52, .36, .52), art.Accent, head, CFrame.new(0, .38, .66), Enum.PartType.Ball)
         for i = 1, 3 do
             detail("Ponytail", Vector3.new(.48 - i * .05, .67, .39), art.Hair, head,
                 CFrame.new(i * .12, .25 - i * .49, .76 + i * .07) * CFrame.Angles(-.13, 0, .16), Enum.PartType.Ball)
         end
-        detail("CoralClip", Vector3.new(.4, .13, .14), art.Accent, head, CFrame.new(-.69, .26, -.42) * CFrame.Angles(0, 0, -.5))
+        detail("CoralClip", Vector3.new(.48, .22, .25), art.Accent, head, CFrame.new(-.69, .26, -.42) * CFrame.Angles(0, 0, -.5))
+        detail("TidalMantle", Vector3.new(2.12, .42, 1.16), rgb(100, 155, 178), torso, CFrame.new(0, .67, .025))
         for _, x in ipairs({-.62, .62}) do
             detail("CoatTail", Vector3.new(.92, 1.34, 1.07), art.Outfit, torso, CFrame.new(x, -1.26, .05) * CFrame.Angles(0, 0, -x * .05))
             detail("FoamHem", Vector3.new(.94, .14, 1.09), rgb(218, 233, 236), torso, CFrame.new(x, -1.89, .05))
@@ -180,13 +185,13 @@ function Factory.Create(hero)
             detail("FoamCuff", Vector3.new(1.045, .2, 1.045), rgb(218, 233, 236), arm, CFrame.new(0, -.7, 0))
             detail("Hand", Vector3.new(1.01, .25, 1.01), skin, arm, CFrame.new(0, -.9, 0))
         end
-        local shaft = detail("GlaiveShaft", Vector3.new(.16, 4.6, .16), rgb(75, 106, 123), ra,
+        local shaft = detail("GlaiveShaft", Vector3.new(.19, 4.6, .19), rgb(108, 145, 161), ra,
             CFrame.new(.2, -.36, -.76) * CFrame.Angles(0, 0, -.10))
         for i = 0, 2 do detail("Grip", Vector3.new(.2, .10, .2), art.Accent, shaft, CFrame.new(0, -.22 + i * .18, 0)) end
-        local blade = detail("GlaiveBlade", Vector3.new(.67, 1.19, .12), rgb(174, 211, 226), shaft,
-            CFrame.new(.23, 1.86, 0) * CFrame.Angles(0, 0, -.24))
+        local blade = detail("GlaiveBlade", Vector3.new(.90, 1.35, .32), rgb(199, 227, 235), shaft,
+            CFrame.new(.28, 1.96, 0) * CFrame.Angles(0, .48, -.24))
         blade.Material = Enum.Material.Metal
-        detail("GlaiveHook", Vector3.new(.47, .15, .14), rgb(213, 237, 240), shaft, CFrame.new(.42, 1.34, 0) * CFrame.Angles(0, 0, .34))
+        detail("GlaiveHook", Vector3.new(.69, .23, .34), rgb(221, 239, 242), shaft, CFrame.new(.48, 1.35, 0) * CFrame.Angles(0, 0, .34))
     end
 
     local humanoid = Instance.new("Humanoid")
@@ -201,7 +206,7 @@ function Factory.Create(hero)
     model:SetAttribute("CharacterPartCount", count)
     model:SetAttribute("OriginalFaceArt", true)
     model:SetAttribute("OriginalFaceId", art.FaceId)
-    model:SetAttribute("ArtRevision", "OriginalCast1")
+    model:SetAttribute("ArtRevision", "OriginalCast2")
     model.PrimaryPart = root
     return model
 end
