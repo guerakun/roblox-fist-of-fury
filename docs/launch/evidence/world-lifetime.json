@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "result": {
+    "restoredProperties": true,
+    "stableBuildCounts": {
+      "classes": {
+        "ParticleEmitter": 3,
+        "Part": 2531,
+        "SpawnLocation": 1,
+        "SurfaceGui": 22,
+        "Folder": 20,
+        "PointLight": 20,
+        "TextLabel": 22,
+        "Model": 58,
+        "Attachment": 3,
+        "SpecialMesh": 12
+      },
+      "total": 2692,
+      "props": 34
+    },
+    "cleanupSeconds": 1.5402116000186652,
+    "elapsed": 41.18728459998965,
+    "peakDebris": 30,
+    "oldRestoreIsolated": true,
+    "assemblies": 34,
+    "restoreSeconds": 20.056355400010943,
+    "scope": "Isolated Studio structural/lifetime fixture; no memory-growth/render/device claim",
+    "repeatBreakRejected": true
+  },
+  "sourceCommit": "9f29012",
+  "fixtureCommit": "8ea45a8"
+}
