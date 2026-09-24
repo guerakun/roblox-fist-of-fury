@@ -179,7 +179,7 @@ local function toast(text: string, color: Color3?)
     end)
 end
 
-local ending = make("Frame", {Visible = false, BackgroundColor3 = COLORS.ink, BackgroundTransparency = 0.03,
+local ending = make("Frame", {Name = "CampaignResults", Visible = false, BackgroundColor3 = COLORS.ink, BackgroundTransparency = 0.03,
     AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.48), Size = UDim2.fromOffset(420, 348)}, canvas)
 round(ending, 14); outline(ending, COLORS.cyan, 0.25)
 local endingTitle = label(ending, "CURTAIN BROKEN", 30, COLORS.cyan, UDim2.fromOffset(22, 24), UDim2.fromOffset(376, 44))
@@ -232,7 +232,9 @@ local function resize()
     local touch = UserInputService.TouchEnabled
     if touchPad then touchPad.Visible = touch end
     if touchJump then touchJump.Visible = touch end
-    endingScale.Scale = math.min(1, width / 460, math.max(.25, (height - 24) / 348))
+    local travelReserve = player:GetAttribute("TravelPanelVisible") and 96 or 0
+    endingScale.Scale = math.min(1, width / 460, math.max(.25, (height - 24 - travelReserve) / 348))
+    ending.Position = UDim2.new(.5, 0, .48, -travelReserve * .48)
     abilities.Position = UDim2.new(1, -16, 1, -18)
     if touch then
         local sideSpace = (width - 252) * .5
@@ -976,6 +978,7 @@ workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
     resize()
 end)
 canvas:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
+player:GetAttributeChangedSignal("TravelPanelVisible"):Connect(resize)
 UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(function() resize(); inputLabels() end)
 resize()
 toast("STAY TOGETHER. BREAK THE CURTAIN.", COLORS.cyan)

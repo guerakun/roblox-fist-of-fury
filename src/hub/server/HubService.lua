@@ -9,11 +9,12 @@ local Matchmaking=require(script.Parent.MatchmakingService)
 local Adapter=require(script.Parent.MatchmakingAdapter)
 local Transport=require(script.Parent.TeleportCoordinator)
 local Preparation=require(script.Parent.DeparturePreparation)
+local ReturnParty=require(script.Parent.ReturnPartyService)
 local studio=game:GetService('RunService'):IsStudio()
 local profiles,messages,invitations,rates,busy,dispatching={},{},{},{},{},{}
-local service,adapter,store,transport,remotes,preparation
+local service,adapter,store,transport,remotes,preparation,returnParty
 local stopping=false
-local recovering={}
+local recovering={} local restoring={}
 local recoverMember
 local function report(p,message)if p.Parent then messages[p]=message end end
 local function unlocked(p,difficulty)
@@ -31,7 +32,7 @@ local function snapshot(p)
     local invites={}for id,info in pairs(invitations[p.UserId]or{})do if info.expires>os.time()then table.insert(invites,{partyId=id,leaderName=info.name})end end
     local profile=profiles[p]
     return {kind='HubState',party=party,invites=invites,players=available,message=messages[p],selectedHero=profile and profile.data.hero or 'Gale',
-        unlocks={Normal=true,Hard=unlocked(p,'Hard'),Nightmare=unlocked(p,'Nightmare')},studio=studio,saveStatus=profile and profile.mode or 'Loading',deploymentHeld=preparation.owned[p]~=nil or recovering[p]~=nil}
+        unlocks={Normal=true,Hard=unlocked(p,'Hard'),Nightmare=unlocked(p,'Nightmare')},studio=studio,saveStatus=profile and profile.mode or 'Loading',deploymentHeld=preparation.owned[p]~=nil or recovering[p]~=nil or restoring[p]~=nil}
 end
 local function publish(p)
     local ok,value=pcall(snapshot,p)
@@ -122,7 +123,7 @@ local function request(p,action,payload)
     if type(action)~='string' or (payload~=nil and type(payload)~='table') or busy[p]then return end
     local rate=rates[p]or{at=os.clock(),count=0}rates[p]=rate
     if os.clock()-rate.at>2 then rate.at=os.clock()rate.count=0 end rate.count+=1 if rate.count>10 then return end
-    if transport.pending[p] or preparation.owned[p] or recovering[p]then return end
+    if transport.pending[p] or preparation.owned[p] or recovering[p] or restoring[p]then return end
     payload=payload or{}busy[p]=true
     local ok,err=pcall(function()
         if action=='SelectHero'then
@@ -141,7 +142,7 @@ local function request(p,action,payload)
             local seen={}for _,id in ipairs(heat)do assert(type(id)=='string' and Config.HeatContracts and Config.HeatContracts[id] and not seen[id],'Contract unavailable.')seen[id]=true end
             local party=assert(service:PartyFor(p.UserId),'Party unavailable.')assert(party.leader==p.UserId,'Only the party leader can deploy.')
             for _,uid in ipairs(party.members)do local member=Players:GetPlayerByUserId(uid)assert(member and unlocked(member,difficulty),'Every member must be here and have this difficulty unlocked.')assert(store:CanMutate(profiles[member]),'Every member needs a loaded, writable save session before deployment.')end
-            assert(service:Queue(p.UserId,difficulty,heat,payload.mode),'Queue unavailable.')report(p,'Deployment queued.')
+            assert(service:Queue(p.UserId,difficulty,heat,payload.mode,party.revision),'Queue unavailable.')report(p,'Deployment queued.')
         elseif action=='Refresh'then return
         else error('Unknown request.')end
     end)
@@ -151,7 +152,7 @@ end
 function H.Init()
     remotes=game.ReplicatedStorage.HubRemotes
     store=ProfileStore.new(not studio and game:GetService('DataStoreService'):GetDataStore(ProfileConfig.DataStoreName)or nil,{ephemeral=studio})
-    adapter=Adapter.new({onReady=ready})service=Matchmaking.new(adapter)
+    adapter=Adapter.new({onReady=ready})service=Matchmaking.new(adapter)returnParty=ReturnParty.new(adapter)
     preparation=Preparation.new({profile=function(p)return profiles[p]end,canMutate=function(profile)return store:CanMutate(profile)end,release=function(profile)return store:Release(profile)end})
     transport=Transport.new({send=function(place,group,options)game:GetService('TeleportService'):TeleportAsync(place,group,options)end,delay=task.delay,
         exhausted=function(p,matchId)
@@ -165,7 +166,22 @@ function H.Init()
         local loaded=store:Load(p.UserId)
         if p.Parent~=Players then store:Release(loaded)return end
         profiles[p]=loaded
-        local ok=pcall(function()service:Create(p.UserId)end)if not ok then report(p,'Party service is reconnecting.')end
+        restoring[p]=true
+        task.spawn(function()
+            local delay=1
+            while p.Parent==Players and restoring[p]do
+                local ok=pcall(function()
+                    local join=p:GetJoinData()local returned,_,note=false,nil,nil
+                    if not studio and join.SourcePlaceId==Places.Campaign then returned,_,note=returnParty:Restore(p.UserId,join)end
+                    if not returned then assert(service:Create(p.UserId),'party creation deferred')end
+                    if note then report(p,note)end
+                end)
+                if p.Parent~=Players then pcall(function()service:Leave(p.UserId)end)restoring[p]=nil break end
+                if ok then restoring[p]=nil publish(p)break end
+                report(p,'Restoring your refuge party. Your progress is protected; please wait.')publish(p)
+                task.wait(delay)delay=math.min(30,delay*2)
+            end
+        end)
         if p.Parent~=Players then pcall(function()service:Leave(p.UserId)end)return end
         publish(p)
     end
@@ -174,7 +190,7 @@ function H.Init()
         local wasTeleporting=transport.pending[p]~=nil transport:Remove(p)preparation:Clear(p)
         if not wasTeleporting then pcall(function()service:Leave(p.UserId)end)end
         local profile=profiles[p]profiles[p]=nil if profile and profile.mode~='Released'then task.spawn(function()store:Release(profile)end)end
-        rates[p],busy[p],messages[p],recovering[p]=nil,nil,nil,nil
+        rates[p],busy[p],messages[p],recovering[p],restoring[p]=nil,nil,nil,nil,nil
     end)
     for _,p in ipairs(Players:GetPlayers())do task.spawn(joined,p)end
     task.spawn(function()

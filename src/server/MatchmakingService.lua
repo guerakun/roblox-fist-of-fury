@@ -77,7 +77,7 @@ function Service:Leave(userId)
     -- Stale queue tickets are revision-invalidated; remove is a best-effort cleanup.
     return true
 end
-function Service:Queue(leader,difficulty,heat,mode)
+function Service:Queue(leader,difficulty,heat,mode,expectedRevision)
     local allowed={Normal=true,Hard=true,Nightmare=true}
     assert(allowed[difficulty],'invalid difficulty')
     assert(type(heat)=='table' and #heat<=6,'invalid heat')
@@ -85,7 +85,7 @@ function Service:Queue(leader,difficulty,heat,mode)
     local normalized={} for _,id in ipairs(heat) do assert(type(id)=='string' and #id<=32,'invalid heat id') table.insert(normalized,id) end table.sort(normalized)
     local p=assert(self:PartyFor(leader),'party missing')
     local queued=self.a:Update('Party:'..p.id,function(old)
-        if not old or old.leader~=leader or old.status~='Idle' or #old.members<1 or #old.members>4 then return old end
+        if not old or old.leader~=leader or old.status~='Idle' or #old.members<1 or #old.members>4 or (expectedRevision and old.revision~=expectedRevision)then return old end
         old=copy(old) old.status='Queued' old.queueAt=self.clock() old.difficulty=difficulty old.heat=normalized old.mode=mode=='Solo' and 'Solo' or 'QuickMatch'
         old.revision+=1 return old
     end,self.ttl)
@@ -107,7 +107,18 @@ function Service:Refresh(userId)
     self.a:Update('Member:'..userId,function(old)return old end,self.ttl)
     self.a:Update('Party:'..p.id,function(old)return old end,self.ttl)
     if p.status=='Queued' then self.a:PutQueue(p.difficulty,{partyId=p.id,revision=p.revision,queuedAt=p.queueAt},self.ttl)
-    elseif p.matchId then local m=self.a:Get('Match:'..p.matchId) if m and m.status=='Ready' then self:Finalize(m) end end
+    elseif p.matchId then
+        local m=self.a:Get('Match:'..p.matchId)
+        if m and m.status=='Ready' then self:Finalize(m)
+        elseif not m or m.status=='Aborted' or (m.status=='Building' and m.created+60<self.clock())then
+            -- A removed queue ticket cannot repair an expired match. Refresh must release it too.
+            self.a:Update('Party:'..p.id,function(old)
+                if old and old.matchId==p.matchId and (old.status=='Matching' or old.status=='Matched')then
+                    old=copy(old)old.status='Idle'old.matchId=nil old.queueAt=nil old.revision+=1
+                end return old
+            end,self.ttl)
+        end
+    end
 end
 function Service:Finalize(match)
     local errors={}

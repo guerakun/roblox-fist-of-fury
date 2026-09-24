@@ -231,6 +231,32 @@ local function addPlayer(player)
         if not ok then warn("[Progression] Profile lifecycle failed: " .. tostring(err)) end
     end)
 end
+-- Server-only travel lifecycle; no client can release or replace a profile.
+function Progression.GetPreferredHero(player)
+    local deadline=os.clock()+15
+    repeat
+        local record=records[player]
+        if record and record.profile then return require(ReplicatedStorage.Nightfall.Shared.Config).NormalizeHeroId(record.profile.data.hero)end
+        task.wait(.1)
+    until player.Parent~=Players or os.clock()>deadline
+    return "Gale"
+end
+function Progression.GetTravelProfile(player)local r=records[player]return r and r.profile end
+function Progression.CanMutateTravelProfile(profile)return store:CanMutate(profile)end
+function Progression.ReleaseTravelProfile(profile)return store:Release(profile)end
+function Progression.ResumeAfterTravelFailure(player)
+    local record=records[player]if not record then return false end
+    local old=record.profile
+    if old and store:CanMutate(old)then return true end
+    if old and old.mode~="Released" then
+        if old.mode=="Unavailable" then notice(player,"Save session unavailable. Progress is read-only; rejoin to restore it.")return false end
+        if not store:Release(old)then return false end
+    end
+    local loaded=store:Load(player.UserId)
+    if records[player]~=record or player.Parent~=Players or shuttingDown then store:Release(loaded)return false end
+    record.profile=loaded;publish(player)
+    return store:CanMutate(loaded)
+end
 function Progression.Init()
     if initialized then return end
     initialized = true

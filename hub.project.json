@@ -36,6 +36,9 @@
         },
         "ProfileStore": {
           "$path": "src/server/ProfileStore.lua"
+        },
+        "ReturnPartyService": {
+          "$path": "src/server/ReturnPartyService.lua"
         }
       }
     },

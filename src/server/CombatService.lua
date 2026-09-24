@@ -28,6 +28,8 @@ local checkpointPosition = Vector3.new(arena.SpawnX, 4, 0)
 local walkingMaxX = arena.Waves[1].SpawnX + 30
 local remotes, restartCallback, readyCallback
 local initialized, battleEpoch = false, 0
+local admissionValidator, travelLocked = nil, false
+local pendingAdmissions, admissionSequence = {}, 0
 local encounter = {wave = 0, waves = 4, enemiesRemaining = 0, status = "Waiting", waveTitle = "ENTER THE CURTAIN", encounterKind = "Wave", nextWaveAt = 0, checkpointLabel = "DISTRICT ENTRANCE", resultReason = "", targetX = 0, objective = "CHOOSE A HERO / READY UP"}
 local function now() return workspace:GetServerTimeNow() end
 local function root(model) return model and model:FindFirstChild("HumanoidRootPart") end
@@ -113,7 +115,7 @@ function Combat.GetSnapshot(player)
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves,
         enemiesRemaining = encounter.enemiesRemaining, status = encounter.status, blocking = data.blocking,
         downed = data.downed, grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0},
-        ready = data.ready, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
+        ready = data.ready, travelLocked = travelLocked, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
         rescueTarget = ally and {name = ally.DisplayName, userId = ally.UserId} or false,
         canShareStock = ally ~= nil and shareCooldown <= 0, shareStockCooldown = shareCooldown,
         boss = boss, waveTitle = encounter.waveTitle, encounterName = encounter.waveTitle, encounterKind = encounter.encounterKind,
@@ -155,6 +157,26 @@ function Combat.SetCheckpoint(position, label)
 end
 function Combat.SetRestartCallback(callback) restartCallback = callback end
 function Combat.SetReadyCallback(callback) readyCallback = callback end
+function Combat.SetAdmissionValidator(callback)
+    assert(callback==nil or type(callback)=="function","Admission validator must be a function or nil")
+    admissionValidator=callback
+end
+function Combat.GetRunStatus() return encounter.status end
+function Combat.SetTravelLocked(locked)
+    assert(type(locked)=="boolean","Travel lock must be boolean")
+    travelLocked=locked
+    Combat.BroadcastState()
+end
+function Combat.ReadyForMatch(players)
+    if encounter.status~="Waiting" then return false end
+    local changed=false
+    for _,player in ipairs(players)do
+        local data=records[player]
+        if data and player.Parent==Players then data.ready=true;changed=true end
+    end
+    if changed then Combat.BroadcastState();if readyCallback then readyCallback()end end
+    return changed
+end
 function Combat.GetReadyCount() local count = 0 for _, data in pairs(records) do if data.ready then count += 1 end end return count end
 function Combat.ClearReady() for _, data in pairs(records) do data.ready = false end end
 function Combat.GetAlivePlayers()
@@ -435,6 +457,7 @@ local function performAttack(player, action, data)
 end
 local allowedActions = {Light = true, Heavy = true, Special = true, Dash = true, Block = true, Recovery = true, Jump = true, SelectCharacter = true, Restart = true, Ready = true, ShareStock = true}
 local function actionReceived(player, action, payload)
+    if travelLocked then return end
     local data = records[player]
     if not data or type(action) ~= "string" or not allowedActions[action] or (payload ~= nil and type(payload) ~= "table") then return end
     payload = payload or {}
@@ -444,6 +467,7 @@ local function actionReceived(player, action, payload)
     if data.rateCount > 30 then return end
     if action == "ShareStock" then Combat.ShareStock(player, payload.targetUserId) return end
     if action == "Ready" then
+        if admissionValidator then return end -- Only the server arrival gate readies reserved matches.
         if encounter.status == "Waiting" and (payload.ready == nil or type(payload.ready) == "boolean") then
             data.ready = payload.ready ~= false
             Combat.BroadcastState()
@@ -750,8 +774,29 @@ local function setupCharacter(player, model)
     Combat.BroadcastState()
 end
 local function addPlayer(player)
-    if records[player] then return end
-    records[player] = {hero = "Gale", percent = 0, stocks = Config.Stocks, cooldowns = {}, stunnedUntil = 0,
+    if records[player] or pendingAdmissions[player] then return end
+    admissionSequence+=1
+    local ticket=admissionSequence
+    pendingAdmissions[player]=ticket
+    local validator=admissionValidator
+    if validator then
+        local ok,allowed=pcall(validator,player)
+        if not ok or allowed~=true then
+            if pendingAdmissions[player]==ticket then pendingAdmissions[player]=nil end
+            if player.Parent==Players then player:Kick("This campaign join could not be validated. Return to the hub and try again.")end
+            return
+        end
+    end
+    if player.Parent~=Players or pendingAdmissions[player]~=ticket then return end
+    local preferred="Gale"
+    -- Profile loading may yield too; admission must succeed before consulting it.
+    if type(Progression.GetPreferredHero)=="function" then
+        local ok,hero=pcall(Progression.GetPreferredHero,player)
+        if ok then preferred=Config.NormalizeHeroId(hero)end
+    end
+    if player.Parent~=Players or pendingAdmissions[player]~=ticket then return end
+    pendingAdmissions[player]=nil
+    records[player] = {hero = preferred, percent = 0, stocks = Config.Stocks, cooldowns = {}, stunnedUntil = 0,
         launchedUntil = 0, invulnerableUntil = 0, busyUntil = 0, selectAt = 0, facing = 1, combo = 0, lastLight = 0,
         blocking = false, guard = 0, downed = false, recovered = false, rateStart = now(), rateCount = 0,
         hitAt = 0, lifeSerial = 0, contribution = 0, ready = false, runStats = freshStats(), runStart = now()}
@@ -767,6 +812,7 @@ local function addPlayer(player)
     task.spawn(spawnPlayer, player)
 end
 local function removePlayer(player)
+    pendingAdmissions[player]=nil
     local data = records[player]
     if not data then return end
     local count, oldestId, oldestTime = 0, nil, math.huge

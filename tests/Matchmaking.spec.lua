@@ -55,5 +55,11 @@ return function()
         local m=s:Step('Normal')check(m and m.status=='Ready','uncertain Ready is recovered as committed')
         check(s:PartyFor(1).status=='Matched','uncertain Ready never requeues claimed party')a.now=60 check(s:Step('Normal')==nil,'uncertain Ready cannot double match')
     end
+    do local a,s=fixture()
+        party(s,{1,2})s:Queue(1,'Normal',{},'Solo')local m=s:Step('Normal')
+        a.records['Match:'..m.id]=nil s:Refresh(1)
+        check(s:PartyFor(1).status=='Idle' and s:PartyFor(1).matchId==nil,'missing match released despite removed queue ticket')
+        check(s:Queue(1,'Normal',{},'Solo'),'expired deployment can requeue')
+    end
     return 'PASS: '..count..' party, lease, timeout, forgery, membership and injected-throttle assertions'
 end
