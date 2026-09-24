@@ -5,9 +5,12 @@ local Players=game:GetService("Players")
 local Http=game:GetService("HttpService")
 local C=require(game.ServerScriptService:WaitForChild("NightfallServer"):WaitForChild("CombatService"))
 local P=require(game.ServerScriptService.NightfallServer.ProgressionService)
+-- AFTER the frozen tier series only: install the sibling test-only ModuleScript with this observer.
+local EntryObserver=require(script.Parent:WaitForChild("StyleCampaignEntryObserver",10))
+local entryStates={}
 local watched,started,finished={},false,false
 local began=os.clock()
-local output={schema=1,observer="StyleCampaignAI",players={},failures={},policyChanged=false}
+local output={schema=1,observer="StyleCampaignAI",observerRevision="style-with-"..EntryObserver.Revision,players={},failures={},policyChanged=false}
 local failureKeys={}
 local function fail(message)if not failureKeys[message]and #output.failures<100 then failureKeys[message]=true;table.insert(output.failures,message)end end
 local function observe(player,snapshot)
@@ -15,6 +18,11 @@ local function observe(player,snapshot)
     if not record then
         record={alias="Player"..tostring(#output.players+1),districts={},seen={}}
         watched[player]=record;table.insert(output.players,record)
+        entryStates[record]=EntryObserver.New()
+    end
+    -- Reuse this existing snapshot pass; no additional polling or gameplay mutation.
+    if not EntryObserver.Observe(entryStates[record],snapshot,os.clock()-began)then
+        fail(record.alias..": invalid entry-observer sample")
     end
     local profile=P.GetSnapshot(player)
     if record.initialCoins==nil and profile.loading~=true and type(profile.coins)=="number"then record.initialCoins=profile.coins end
@@ -76,6 +84,7 @@ output.seconds=os.clock()-began;output.finished=finished
 local coverage=output.outcome=="Victory"and #output.players>0
 for _,record in ipairs(output.players)do
     record.seen=nil
+    record.encounterObservations=EntryObserver.Export(entryStates[record])
     local stages,receiptCoins={},0
     for _,district in ipairs(record.districts)do
         stages[district.stage]=true
