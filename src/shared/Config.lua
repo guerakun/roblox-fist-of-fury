@@ -38,6 +38,9 @@ Config.Difficulties={
     Hard={Aggression=1.2,TokenBonus=1,ReactionDelay=.22,EvadeChance=.45,WindupScale=.85,EliteHealthScale=1.15},
     Nightmare={Aggression=1.4,TokenBonus=2,ReactionDelay=.18,EvadeChance=.6,WindupScale=.72,EliteHealthScale=1.3},
 }
+Config.Pressure={HitInvulnerability=.15,ComboHits=3,ComboWindow=1.5,ComboInvulnerability=.8,
+    BurstDelay=.16,BurstCost=8,BurstCooldown=4,GruntCooldownMax=1.8}
+for _,profile in pairs(Config.Difficulties)do profile.Pressure=Config.Pressure end
 Config.Attacks = {
     Light = {Damage = 8, Knockback = 15, Growth = 0.24, Lift = 8, Range = 7, Width = 7, Windup = 0.10, Cooldown = 0.32, Stun = 0.26},
     Heavy = {Damage = 19, Knockback = 38, Growth = 0.52, Lift = 26, Range = 9, Width = 8, Windup = 0.30, Cooldown = 0.95, Stun = 0.50},
@@ -76,13 +79,13 @@ for id, spec in pairs(Archetypes.Specs) do Config.Enemies[id] = table.clone(spec
 Config.Enemies.Grunt.Archetype = "Husk"
 Config.Enemies.Runner.Archetype = "Strider"
 Config.Enemies.Brute.Archetype = "Brute"
-Config.Stages[1].Waves[1].Enemies = {Husk = 2, Warden = 1}
-Config.Stages[1].Waves[3].Enemies = {Strider = 2, Grappler = 1, Husk = 1}
-Config.Stages[2].Waves[1].Enemies = {Pitcher = 1, Leaper = 1, Husk = 2}
-Config.Stages[2].Waves[3].Enemies = {Warden = 1, Grappler = 1, Brute = 1}
-Config.Stages[3].Waves[1].Enemies = {Pitcher = 1, Leaper = 1, Brute = 1}
-Config.Stages[3].Waves[3].Enemies = {Strider = 1, Grappler = 1, Warden = 1, Brute = 1}
--- Authored entrance sequence and bounded reinforcement timing; enemy budgets remain unchanged in M2.
+Config.Stages[1].Waves[1].Enemies = {Husk = 4, Warden = 1}
+Config.Stages[1].Waves[3].Enemies = {Strider = 2, Grappler = 1, Husk = 3}
+Config.Stages[2].Waves[1].Enemies = {Pitcher = 1, Leaper = 1, Husk = 4}
+Config.Stages[2].Waves[3].Enemies = {Warden = 2, Grappler = 2, Brute = 2}
+Config.Stages[3].Waves[1].Enemies = {Pitcher = 2, Leaper = 3, Brute = 2}
+Config.Stages[3].Waves[3].Enemies = {Strider = 2, Grappler = 2, Warden = 2, Brute = 2}
+-- Authored entrance sequence and bounded reinforcement timing; M3 budgets add exactly two enemies per extra player.
 for _,stage in ipairs(Config.Stages)do
     for _,wave in ipairs(stage.Waves)do
         wave.Entries={"Left","Right","Door","Drop"}

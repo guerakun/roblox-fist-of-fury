@@ -7,8 +7,13 @@ return function()
         local expected,actual={},{}
         local expectedTotal=0
         for kind,count in pairs(wave.Enemies)do
-            expected[kind]=count+(wave.Kind=="Wave" and math.floor((party-1)*.5) or 0)
+            expected[kind]=count
             expectedTotal+=expected[kind]
+        end
+        if wave.Kind=="Wave" then
+            local kinds={} for kind in pairs(expected)do table.insert(kinds,kind)end table.sort(kinds)
+            for i=1,2*(party-1)do local kind=kinds[(i-1)%#kinds+1];expected[kind]+=1 end
+            expectedTotal+=2*(party-1)
         end
         local seen=0
         for _,pulse in ipairs(pulses)do

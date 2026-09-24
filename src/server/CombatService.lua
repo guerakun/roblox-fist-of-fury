@@ -15,6 +15,7 @@ local Telemetry = require(script.Parent.CombatTelemetry)
 local EnemyAI = require(script.Parent.EnemyAI)
 local AttackDirector = require(script.Parent.AttackDirector)
 local DifficultyPolicy = require(script.Parent.DifficultyPolicy)
+local PressurePolicy = require(script.Parent.PressurePolicy)
 local Combat = {}
 local records, enemies = {}, {}
 local aiDirector = AttackDirector.New()
@@ -123,7 +124,7 @@ function Combat.GetSnapshot(player)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = {},
         enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
-        downed = data.downed, grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0},
+        downed = data.downed, grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
         ready = data.ready, travelLocked = travelLocked, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
         rescueTarget = ally and {name = ally.DisplayName, userId = ally.UserId} or false,
         canShareStock = ally ~= nil and shareCooldown <= 0, shareStockCooldown = shareCooldown,
@@ -270,6 +271,7 @@ local function resetPosition(player, position)
     if not data or not r or not h then return end
     data.percent, data.blocking, data.downed, data.respawning = 0, false, false, false
     data.stunnedUntil, data.launchedUntil, data.recovered = 0, 0, false
+    data.recentHits = {}
     data.invulnerableUntil = now() + 2
     r.Anchored = false
     r.AssemblyLinearVelocity = Vector3.zero
@@ -406,7 +408,10 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     data.percent = math.min(999, data.percent + damage)
     local stun = blocked and .08 or attack.Stun
     if victimPlayer then
-        data.invulnerableUntil = t + .38 -- Avoid simultaneous attackers trapping a co-op player.
+        local duration,recent,breaker=PressurePolicy.HitProtection(data.recentHits,t,difficultyProfile().Pressure)
+        data.recentHits=recent
+        data.invulnerableUntil=t+duration
+        if breaker then fx("ComboBreaker",r.Position,{targetUserId=victimPlayer.UserId,targetModel=targetModel,duration=duration})end
         data.hitAt = t
         data.runStats.damageTaken += damage
         Telemetry.Hit(victimPlayer, damage)
@@ -528,7 +533,9 @@ local function actionReceived(player, action, payload)
     if data.downed or data.respawning or data.grabbedBy then return end
     local movementAction = action == "Dash" or action == "Recovery" or action == "Jump"
     if encounter.status ~= "Combat" and not (movementAction and (encounter.status == "Intermission" or encounter.status == "Advance" or encounter.status == "Traverse" or encounter.status == "Waiting")) then return end
-    if t < data.stunnedUntil and not (action == "Dash" and t - data.hitAt >= .16) then return end
+    local pressure=difficultyProfile().Pressure
+    local dashAllowed,burstCost=PressurePolicy.Burst(t,data.stunnedUntil,data.hitAt,data.cooldowns.Burst,pressure)
+    if t < data.stunnedUntil and not (action == "Dash" and dashAllowed) then return end
     local r, h = root(player.Character), humanoid(player.Character)
     if not r or not h or h.Health <= 0 then return end
     data.facing = CombatMath.Direction(payload.direction, data.facing)
@@ -536,11 +543,18 @@ local function actionReceived(player, action, payload)
     if action == "Block" then
         if payload.held == true then data.blocking = true attributes(player.Character, data) end
     elseif action == "Dash" and t >= (data.cooldowns.Dash or 0) then
-        data.cooldowns.Dash, data.invulnerableUntil = t + 1.4, t + .24
+        if not dashAllowed then return end
+        if burstCost>0 then
+            data.percent=math.min(999,data.percent+burstCost)
+            data.cooldowns.Burst=t+pressure.BurstCooldown
+            attributes(player.Character,data)
+            if data.percent>=Config.PlayerPercentLimit then knockOut(player.Character);return end
+        end
+        data.cooldowns.Dash, data.invulnerableUntil = t + 1.4, math.max(data.invulnerableUntil,t + .24)
         data.blocking, data.stunnedUntil = false, 0
         r.AssemblyLinearVelocity = Vector3.new(data.facing * 74, math.max(0, r.AssemblyLinearVelocity.Y), 0)
         data.launchedUntil = t + .18
-        fx("Dash", r.Position, {direction = data.facing, hero = data.hero, playerUserId = player.UserId})
+        fx("Dash", r.Position, {direction = data.facing, hero = data.hero, playerUserId = player.UserId,burst=burstCost>0,cost=burstCost})
     elseif action == "Recovery" or action == "Jump" then
         if h.FloorMaterial == Enum.Material.Air and not data.recovered then
             data.recovered = true
@@ -671,7 +685,9 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     local serial,epoch=data.attackSerial,battleEpoch
     data.resolveAt=t+move.Windup+(move.Flight or 0)+(move.FollowUp or 0)+(move.Grab and 1 or 0)
     data.recoveryUntil=data.resolveAt+move.Recovery
-    data.attackAt=math.max(t+DifficultyPolicy.Cooldown(data.spec.Cooldown,difficultyProfile()),data.recoveryUntil+.15)
+    local profile=difficultyProfile()
+    local cooldown=data.spec.Role=="Grunt" and math.min(data.spec.Cooldown,profile.Pressure.GruntCooldownMax)or data.spec.Cooldown
+    data.attackAt=math.max(t+DifficultyPolicy.Cooldown(cooldown,profile),data.recoveryUntil+.15)
     AttackDirector.BeginAttack(aiDirector,model,t,data.recoveryUntil)
     data.targetHistory[target]=t
     Telemetry.Action(model,data.kind,move.Grab and "Grab" or moveName,t)

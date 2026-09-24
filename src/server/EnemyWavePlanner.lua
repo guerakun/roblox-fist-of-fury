@@ -5,8 +5,13 @@ function Planner.Plan(wave,partySize)
     for kind in pairs(wave.Enemies)do table.insert(kinds,kind)end
     table.sort(kinds)
     for _,kind in ipairs(kinds)do
-        local count=wave.Enemies[kind]+(wave.Kind=="Wave" and math.floor((partySize-1)*.5) or 0)
+        local count=wave.Enemies[kind]
         for _=1,count do table.insert(flat,kind)end
+    end
+    if wave.Kind=="Wave" and #kinds>0 then
+        for i=1,2*(math.clamp(math.floor(partySize),1,4)-1)do
+            table.insert(flat,kinds[(i-1)%#kinds+1])
+        end
     end
     local count=wave.Kind=="Wave" and (#flat>=6 and 3 or math.min(2,#flat)) or 1
     local pulses={}

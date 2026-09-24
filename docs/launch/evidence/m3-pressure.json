@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "result": {
+    "burstLock": true,
+    "passed": true,
+    "burstCost": true,
+    "burstPreservesBreaker": true,
+    "comboBreaker": true,
+    "costKO": true,
+    "ordinaryDashFree": true
+  },
+  "pure": {
+    "pressureCases": 33,
+    "wavePartyCases": 48,
+    "passed": true
+  },
+  "initialFailure": "First run used earlier fixture and failed its first triple-hit assertion. Subsequent fixture settles deferred character setup; damage setup accounts for Guardian. Independent review also fixed Burst shortening combo-breaker protection. Latest rerun passed.",
+  "scope": "Studio real client requests and server scripted hit fixture; full HumanBot difficulty curve pending."
+}
