@@ -228,6 +228,12 @@
       "status": "source audits and owner plans recorded; listed fixes pending",
       "evidence": "ASSET_INPUT_REVIEW,SCENE_SOURCE_REVIEW,MOVEMENT_AUTHORITY_PLAN independentlyreviewed;existingparticleIDsregistered;actualpostVictory3427instances/52unparented(testbot39)/3575422audio bytes;ScriptMemoryflagunavailable,render1cube nonrepresentative;launchREADMEalllinksresolve",
       "next": "afterfreeze fixinputfocus/modalcleanup; SEC03movementproposalandphysical/publishedchecks remain open; WorldLifetimefixturequeued"
+    },
+    "WO-6.6": {
+      "owner": "world + root",
+      "status": "test fixture prepared; runtime queued behind frozen comparison",
+      "evidence": "WorldLifetime.spec sourceindependentlyreviewed;actualStudio requirecompilesfunctionPASS, bodyNOTexecuted;34props/30fragmentcap/cleanup/restore/rebuild/stalecallback checks prepared;IPgate135filesPASS",
+      "next": "rootisolatedWaitingStudio~45s afterfivebots; saveactualresult; nofalseworldlifetimeverification"
     }
   }
 }
