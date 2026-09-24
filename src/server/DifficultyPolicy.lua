@@ -1,5 +1,6 @@
 -- Server-only profile math; all final warnings retain the fairness floor.
 local Policy={}
+local Heat=require(game.ReplicatedStorage.Nightfall.Shared.HeatConfig)
 function Policy.Windup(base,profile,heatScale)
     return math.max(.30,base*(profile.WindupScale or 1)*(heatScale or 1))
 end
@@ -14,7 +15,22 @@ function Policy.Evade(data,profile)
 end
 function Policy.ValidOptions(profiles,difficulty,heat)
     if type(difficulty)~="string" or not profiles[difficulty] then return false end
-    -- Heat is deliberately unavailable until its server-owned M3 contract lands.
-    return heat==nil or (type(heat)=="table" and next(heat)==nil)
+    local normalized=Heat.Normalize(heat)
+    return normalized~=nil and (#normalized==0 or Heat.Enabled==true)
+end
+function Policy.SameOptions(firstTier,firstHeat,secondTier,secondHeat)
+    return ({Normal=true,Hard=true,Nightmare=true})[firstTier]==true
+        and firstTier==secondTier and Heat.SameSelection(firstHeat,secondHeat)
+end
+function Policy.Profile(profiles,difficulty,heat)
+    local base=type(difficulty)=='string' and profiles[difficulty]
+    if not base then return nil end
+    -- Composition can be inspected while rollout is disabled; admission must call ValidOptions.
+    return Heat.ApplyDifficulty(base,heat)
+end
+function Policy.EnemyHealthScale(role,profile,heat)
+    local rules=Heat.Rules(heat)
+    if not rules or type(profile)~='table' then return nil end
+    return role=='Grunt' and rules.gruntHealthScale or (profile.EliteHealthScale or 1)
 end
 return Policy

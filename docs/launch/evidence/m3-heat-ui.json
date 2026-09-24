@@ -3,7 +3,7 @@
   "scope": "Actual hub source with Heat still disabled. Test-only enabled metadata copies do not change the production gate.",
   "pure": {"passed": true, "checks": 35, "definitions": 6, "allPoints": 15, "allRewardPercent": 105, "disabledGate": true, "leaderQueueGates": true},
   "actualClient": {"passed": true, "actualHeatButtons": 6, "metadataRendererCases": 18, "pointsAndRewardSeparate": true, "productionEnabled": false, "physicalInputVerified": false},
-  "capture": "heat-disabled-ui.png",
+  "capture": "heat-disabled-ui.jpg",
   "visualObservation": "Actual hub capture shows the unavailable Heat heading and first disabled contract in the scrollable panel at a short landscape viewport. This is not physical scroll/controller validation or a full 3D world-art review.",
   "review": "World independently reviewed shared metadata, leader/queue gates, the separate Heat summary label and disabled option behavior.",
   "next": "Authoritative combat effects and immutable run options must pass before enabling Heat. Published travel and physical device selection remain separate gates."

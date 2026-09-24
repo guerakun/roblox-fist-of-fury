@@ -118,7 +118,7 @@
     "WO-3.6": {
       "owner": "root",
       "status": "admission/qualification safeguards Studio validated; full Heat integration unfinished and disabled",
-      "evidence": "m3-heat-qualification.json: pureAchievement85/Heat22/Matchmaking42 PASS; actual1client9 Progression qualification checks PASS with injected server results, not real combat completion. World source review PASS. DisabledHeat rejects forgedqueue/admission; mixedtier/Heat/missedwave cannot earn full-run awards; badge departure guards. All badge IDs0. m3-heat-ui.json:35pure metadata/gate checks andactualhub6buttons/18renderer casesPASS; screenshotheat-disabled-ui.png;worldreviewPASS;Enabledstillfalse.",
+      "evidence": "m3-heat-qualification.json: pureAchievement85/Heat22/Matchmaking42 PASS; actual1client9 Progression qualification checks PASS with injected server results, not real combat completion. World source review PASS. DisabledHeat rejects forgedqueue/admission; mixedtier/Heat/missedwave cannot earn full-run awards; badge departure guards. All badge IDs0. m3-heat-ui.json:35pure metadata/gate checks andactualhub6buttons/18renderer casesPASS; screenshotheat-disabled-ui.jpg;worldreviewPASS;Enabledstillfalse. m3-heat-math.json:2696checks across64Heatsetsx3tiersPASS; existing54warningfloor/12cap/9quotacasesPASS; presentationindependentreviewPASS. Helpers notyetconsumed bycombat. Captureextensioncorrected.jpg to matchunchangedJPEGbytes.",
       "next": "Root DifficultyPolicy math + combat all six Heat effects/immutable options; testbeforeEnabled=true; published/device gates remain"
     },
     "WO-3.7": {
