@@ -10,7 +10,7 @@
           {
             "revision": 5,
             "score": 9072,
-            "id": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1:1",
+            "id": "RunRef1:1:1",
             "duration": 135.79415106773376,
             "damageTaken": 250.27679999999998,
             "bossDamageTaken": 69.87400000000001,
@@ -41,7 +41,7 @@
           {
             "revision": 5,
             "score": 12616,
-            "id": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1:2",
+            "id": "RunRef1:1:2",
             "duration": 165.30987787246704,
             "damageTaken": 292.44960000000003,
             "bossDamageTaken": 130.824,
@@ -1336,8 +1336,8 @@
       {
         "scoreTarget": 6500,
         "heat": [],
-        "campaignId": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1",
-        "id": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1:1",
+        "campaignId": "RunRef1:1",
+        "id": "RunRef1:1:1",
         "duration": 135.79415106773376,
         "damageTaken": 250.27679999999998,
         "bossDamageTaken": 69.87400000000001,
@@ -1354,7 +1354,7 @@
           "heatMultiplier": 1,
           "status": "paid",
           "baseCoins": 230,
-          "resultId": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1:1",
+          "resultId": "RunRef1:1:1",
           "xp": 79,
           "rankMultiplier": 1.3
         },
@@ -1368,8 +1368,8 @@
       {
         "scoreTarget": 8500,
         "heat": [],
-        "campaignId": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1",
-        "id": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1:2",
+        "campaignId": "RunRef1:1",
+        "id": "RunRef1:1:2",
         "duration": 165.30987787246704,
         "damageTaken": 292.44960000000003,
         "bossDamageTaken": 130.824,
@@ -1386,7 +1386,7 @@
           "heatMultiplier": 1,
           "status": "paid",
           "baseCoins": 230,
-          "resultId": "7ab0aeab-cc53-4702-a155-c4fb771f17fd:1:2",
+          "resultId": "RunRef1:1:2",
           "xp": 79,
           "rankMultiplier": 1.3
         },
@@ -1580,8 +1580,14 @@
     "observerInvariantsPassed": true,
     "victoryCoverageComplete": null
   },
-  "privacy": "Account identifiers replaced by run-local Player labels; raw input stays in ignored build/private-qa.",
+  "privacy": "Account identifiers and generated run identifiers replaced by run-local aliases; raw input stays in ignored build/private-qa.",
   "scope": "Fresh solo scripted bot campaign. Telemetry rank placeholder is superseded by frozen districtResults. Human/device/live acceptance is separate.",
   "cameraMotionScope": "Not installed for this trial; frustum hit audit is separate from camera comfort.",
-  "reconciliationComplete": true
+  "reconciliationComplete": true,
+  "privacyAudit": {
+    "generatedRunIdentifiersAliased": 1,
+    "playerAliases": 1,
+    "unaliasedGuidCount": 0,
+    "externalAddresses": 0
+  }
 }

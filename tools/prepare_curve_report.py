@@ -3,6 +3,7 @@ import argparse
 import copy
 import json
 import math
+import re
 from pathlib import Path
 
 
@@ -30,7 +31,12 @@ def prepare(raw):
     aliases = {key: 'Player' + str(index + 1) for index, key in enumerate(ids)}
     for field in ('hits', 'stocks', 'damage'):
         if isinstance(telemetry.get(field), dict):
-            telemetry[field] = {aliases.get(key, key): value for key, value in telemetry[field].items()}
+            remapped = {}
+            for key, value in telemetry[field].items():
+                public_key = aliases.get(key, key)
+                assert public_key not in remapped, 'Telemetry alias key collision'
+                remapped[public_key] = value
+            telemetry[field] = remapped
     def values(value):
         assert value == [] or isinstance(value, dict)
         return value.values() if isinstance(value, dict) else []
@@ -51,7 +57,7 @@ def prepare(raw):
         'observerInvariantsPassed': observer.get('invariantsPassed') is True,
         'victoryCoverageComplete': observer.get('campaignCoverageComplete') if bot['clear'] else None,
     }
-    report['privacy'] = 'Account identifiers replaced by run-local Player labels; raw input stays in ignored build/private-qa.'
+    report['privacy'] = 'Account identifiers and generated run identifiers replaced by run-local aliases; raw input stays in ignored build/private-qa.'
     report['scope'] = 'Fresh solo scripted bot campaign. Telemetry rank placeholder is superseded by frozen districtResults. Human/device/live acceptance is separate.'
     if not report.get('cameraMotion'):
         report['cameraMotionScope'] = 'Not installed for this trial; frustum hit audit is separate from camera comfort.'
@@ -59,18 +65,50 @@ def prepare(raw):
         report['cameraMotionScope'] = 'Passive desktop observer adds unmeasured overhead; not physical-device or subjective comfort verification.'
     required = ('flooredDamageMatches', 'stocksMatch', 'frustumCountMatches', 'frustumFixtureValid', 'observerInvariantsPassed')
     report['reconciliationComplete'] = all(report['reconciliation'][key] is True for key in required) and (not bot['clear'] or report['reconciliation']['victoryCoverageComplete'] is True)
-    def identity_guard(value):
+    # All generated GUIDs are replaced too: no private-derived run identity is exported.
+    guid = re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b")
+    encoded = json.dumps(report, allow_nan=False)
+    run_aliases = {value: 'RunRef' + str(index + 1)
+                   for index, value in enumerate(sorted(set(guid.findall(encoded))))}
+    identity_patterns = [(re.compile(r'(?<![0-9])' + re.escape(identity) + r'(?![0-9])'), alias)
+                         for identity, alias in aliases.items()]
+    forbidden_key = re.compile(r'user.?id|account.?id|username|displayname|access.?token|password|secret|cookie|access.?code|private.?server', re.I)
+    address = re.compile(r'https?://|rbxassetid://|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}', re.I)
+
+    def clean_string(value):
+        assert not address.search(value), 'Unexpected external address in evidence'
+        value = guid.sub(lambda match: run_aliases[match.group()], value)
+        for pattern, alias in identity_patterns:
+            value = pattern.sub(alias, value)
+        return value
+
+    def clean(value):
         if isinstance(value, dict):
+            result = {}
             for key, item in value.items():
-                assert not key.lower().endswith('userid'), 'Unexpected named account identifier field: ' + key
-                identity_guard(item)
-        elif isinstance(value, list):
-            for item in value:
-                identity_guard(item)
-    identity_guard(report)
+                assert not forbidden_key.search(key), 'Unexpected identity/credential field: ' + key
+                public_key = clean_string(key)
+                assert public_key not in result, 'Sanitized key collision'
+                result[public_key] = clean(item)
+            return result
+        if isinstance(value, list):
+            return [clean(item) for item in value]
+        if isinstance(value, str):
+            return clean_string(value)
+        assert not isinstance(value, (int, float)) or str(value) not in aliases, 'Unexpected numeric account identifier'
+        return value
+
+    protected_provenance = {key: report[key] for key in ('sourceCommit', 'botPolicyRevision')}
+    report = clean(report)
+    for key, expected in protected_provenance.items():
+        assert report[key] == expected and report['provenance'][key] == expected, 'Aliasing would change protected provenance: ' + key
+    report['privacyAudit'] = {'generatedRunIdentifiersAliased': len(run_aliases),
+                              'playerAliases': len(aliases),
+                              'unaliasedGuidCount': 0, 'externalAddresses': 0}
     serialized = json.dumps(report, indent=2, allow_nan=False) + '\n'
-    for identity in ids:
-        assert '"' + identity + '"' not in serialized, 'Account identifier remains'
+    assert not guid.search(serialized), 'Unaliased generated identifier remains'
+    for pattern, _alias in identity_patterns:
+        assert not pattern.search(serialized), 'Account identifier remains'
     return report, serialized
 
 

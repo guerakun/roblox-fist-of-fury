@@ -10,7 +10,7 @@
           {
             "revision": 5,
             "score": 11117,
-            "id": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:1",
+            "id": "RunRef1:1:1",
             "duration": 137.51118898391724,
             "damageTaken": 223.23799999999994,
             "bossDamageTaken": 118.95600000000002,
@@ -41,7 +41,7 @@
           {
             "revision": 5,
             "score": 12759,
-            "id": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:2",
+            "id": "RunRef1:1:2",
             "duration": 156.34515404701233,
             "damageTaken": 314.82399999999996,
             "bossDamageTaken": 81.65,
@@ -72,7 +72,7 @@
           {
             "revision": 5,
             "score": 11062,
-            "id": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:3",
+            "id": "RunRef1:1:3",
             "duration": 177.24347591400146,
             "damageTaken": 489.85400000000016,
             "bossDamageTaken": 168.59000000000003,
@@ -1270,8 +1270,8 @@
       {
         "scoreTarget": 6500,
         "heat": [],
-        "campaignId": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1",
-        "id": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:1",
+        "campaignId": "RunRef1:1",
+        "id": "RunRef1:1:1",
         "duration": 137.51118898391724,
         "damageTaken": 223.23799999999994,
         "bossDamageTaken": 118.95600000000002,
@@ -1288,7 +1288,7 @@
           "heatMultiplier": 1,
           "status": "paid",
           "baseCoins": 230,
-          "resultId": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:1",
+          "resultId": "RunRef1:1:1",
           "xp": 79,
           "rankMultiplier": 1.3
         },
@@ -1302,8 +1302,8 @@
       {
         "scoreTarget": 8500,
         "heat": [],
-        "campaignId": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1",
-        "id": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:2",
+        "campaignId": "RunRef1:1",
+        "id": "RunRef1:1:2",
         "duration": 156.34515404701233,
         "damageTaken": 314.82399999999996,
         "bossDamageTaken": 81.65,
@@ -1320,7 +1320,7 @@
           "heatMultiplier": 1,
           "status": "paid",
           "baseCoins": 230,
-          "resultId": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:2",
+          "resultId": "RunRef1:1:2",
           "xp": 79,
           "rankMultiplier": 1.3
         },
@@ -1334,8 +1334,8 @@
       {
         "scoreTarget": 10000,
         "heat": [],
-        "campaignId": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1",
-        "id": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:3",
+        "campaignId": "RunRef1:1",
+        "id": "RunRef1:1:3",
         "duration": 177.24347591400146,
         "damageTaken": 489.85400000000016,
         "bossDamageTaken": 168.59000000000003,
@@ -1352,7 +1352,7 @@
           "heatMultiplier": 1,
           "status": "paid",
           "baseCoins": 230,
-          "resultId": "4f3504b4-d5b4-4543-8467-b537f15ac4de:1:3",
+          "resultId": "RunRef1:1:3",
           "xp": 79,
           "rankMultiplier": 1.3
         },
@@ -1941,8 +1941,14 @@
     "observerInvariantsPassed": true,
     "victoryCoverageComplete": true
   },
-  "privacy": "Account identifiers replaced by run-local Player labels; raw input stays in ignored build/private-qa.",
+  "privacy": "Account identifiers and generated run identifiers replaced by run-local aliases; raw input stays in ignored build/private-qa.",
   "scope": "Fresh solo scripted bot campaign. Telemetry rank placeholder is superseded by frozen districtResults. Human/device/live acceptance is separate.",
   "cameraMotionScope": "Passive desktop observer adds unmeasured overhead; not physical-device or subjective comfort verification.",
-  "reconciliationComplete": true
+  "reconciliationComplete": true,
+  "privacyAudit": {
+    "generatedRunIdentifiersAliased": 1,
+    "playerAliases": 1,
+    "unaliasedGuidCount": 0,
+    "externalAddresses": 0
+  }
 }
