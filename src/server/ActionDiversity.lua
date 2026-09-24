@@ -24,7 +24,7 @@ function Diversity.Engage(state,actor,kind,t)
     if not window then state.actors[actor]={kind=kind,start=t,last=t,actions={}} else window.last=t end
 end
 function Diversity.Action(state,actor,kind,action,t)
-    if action=="Approach" or action=="Hold" or action=="Engage" or action=="Enter" then return end
+    if action=="Approach" or action=="Hold" or action=="Engage" or action=="Enter" or action=="Reposition" then return end
     Diversity.Engage(state,actor,kind,t)
     state.actors[actor].actions[action]=true
 end

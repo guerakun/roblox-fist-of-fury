@@ -1,7 +1,7 @@
 -- Server-owned engagement positions and a party-wide windup budget.
 local Director = {}
 local offsets = {{5,0},{-5,0},{10,0},{-10,0},{12,8},{-12,-8}}
-function Director.New() return {slots={},tokens={},requests={},serial=0} end
+function Director.New() return {slots={},tokens={},requests={},lastGranted={},serial=0} end
 function Director.CountActive(enemies, now)
     local count=0
     for _,data in pairs(enemies)do if data.attacking and now()<data.resolveAt then count+=1 end end
@@ -13,7 +13,7 @@ function Director.BeginAttack(state,model,t,recoveryUntil)
     local token=state.tokens[model]
     if token then token.expires=math.max(t+3,recoveryUntil+.05) end
 end
-function Director.Reset(state) table.clear(state.slots);table.clear(state.tokens);table.clear(state.requests) end
+function Director.Reset(state) table.clear(state.slots);table.clear(state.tokens);table.clear(state.requests);table.clear(state.lastGranted) end
 function Director.Sync(state,enemies,alive,t)
     local targets, cancelled={},{};for _,p in ipairs(alive)do targets[p]=true end
     for model,slot in pairs(state.slots)do
@@ -30,6 +30,7 @@ function Director.Sync(state,enemies,alive,t)
             state.slots[model]=nil;state.tokens[model]=nil
         end
     end
+    for model in pairs(state.lastGranted)do if not enemies[model]then state.lastGranted[model]=nil end end
     for model,token in pairs(state.tokens)do
         local data=enemies[model]
         if not data or t>=token.expires or ((t<data.stunnedUntil or (data.spec.Role=="Grunt" and t<data.launchedUntil)) and t>=(data.armoredUntil or 0)) or (not data.attacking and not data.engaging) then state.tokens[model]=nil end
@@ -37,9 +38,16 @@ function Director.Sync(state,enemies,alive,t)
     table.clear(state.requests)
     return cancelled
 end
-function Director.Assign(state,model,target,origin,targetPosition)
+function Director.Assign(state,model,target,origin,targetPosition,arena,positionAllowed)
     local existing=state.slots[model]
-    if existing and existing.target==target then return existing end
+    local function feasible(offsetX,offsetZ)
+        if arena and (targetPosition.X+offsetX<arena.MinX+6 or targetPosition.X+offsetX>arena.MaxX-6)then return false end
+        return not positionAllowed or positionAllowed(Vector3.new(targetPosition.X+offsetX,origin.Y,math.clamp(targetPosition.Z+(offsetZ or 0),-11,11)))
+    end
+    if existing and existing.target==target and feasible(existing.offset.X,existing.offset.Z) then
+        existing.approachFeasible=feasible(existing.offset.X<0 and -4 or 4,0)
+        return existing
+    end
     state.slots[model]=nil
     local occupied,left,right={},0,0
     for _,slot in pairs(state.slots)do if slot.target==target then
@@ -47,7 +55,7 @@ function Director.Assign(state,model,target,origin,targetPosition)
         if slot.offset.X<0 then left+=1 else right+=1 end
     end end
     local best,bestScore
-    for i,offset in ipairs(offsets)do if not occupied[i] then
+    for i,offset in ipairs(offsets)do if not occupied[i] and feasible(offset[1],offset[2]) then
         local delta=Vector3.new(offset[1],0,offset[2])
         -- Favor filling the other side before minimizing walking distance.
         local crowd=offset[1]<0 and left or right
@@ -59,16 +67,20 @@ function Director.Assign(state,model,target,origin,targetPosition)
     if best then offset=Vector3.new(offsets[best][1],0,offsets[best][2])
     else
         best=6+state.serial
-        offset=Vector3.new(left<=right and -14 or 14,0,state.serial%2==0 and 10 or -10)
+        local side=left<=right and -1 or 1
+        if not feasible(side*14)then
+            if feasible(-side*14)then side=-side else side=origin.X<targetPosition.X and -1 or 1 end
+        end
+        offset=Vector3.new(side*14,0,state.serial%2==0 and 10 or -10)
     end
-    local slot={target=target,index=best,offset=offset,serial=state.serial}
+    local slot={target=target,index=best,offset=offset,serial=state.serial,approachFeasible=feasible(offset.X<0 and -4 or 4,0)}
     state.slots[model]=slot
     return slot
 end
 function Director.Request(state,model,target,behind,lastAttack,t)
     local slot=state.slots[model]
     table.insert(state.requests,{model=model,target=target,
-        priority=(behind and 20 or 0)+math.min(20,t-(lastAttack or 0)),serial=slot and slot.serial or 0})
+        priority=(behind and 4 or 0)+math.min(30,t-math.max(lastAttack or 0,state.lastGranted[model] or 0)),serial=slot and slot.serial or 0})
 end
 function Director.Trim(state,cap)
     local ordered={}
@@ -89,6 +101,7 @@ function Director.Grant(state,t,cap)
         if count>=cap then break end
         if not state.tokens[request.model] then
             state.tokens[request.model]={target=request.target,expires=t+3,serial=request.serial}
+            state.lastGranted[request.model]=t
             table.insert(granted,request.model);count+=1
         end
     end

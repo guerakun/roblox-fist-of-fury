@@ -23,7 +23,7 @@ return function()
     D.Request(state,models[2],p,true,9,10)
     D.Request(state,models[3],p,false,0,10)
     local granted=D.Grant(state,10,2)
-    assert(#granted==2 and granted[1]==models[2] and granted[2]==models[3],"rear priority, then least recent attacker")
+    assert(#granted==2 and granted[1]==models[3] and granted[2]==models[2],"long-waiting front outranks recent rear; rear wins equal-age tie")
     for _,m in ipairs(granted)do enemies[m].engaging=true end
     D.Request(state,models[4],p,true,0,10)
     assert(#D.Grant(state,10,2)==0,"reserved approach counts against cap")

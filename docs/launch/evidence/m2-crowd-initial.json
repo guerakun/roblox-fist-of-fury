@@ -1,0 +1,1092 @@
+{
+  "scope": "stationary four-client/12-enemy Studio CPU instrumentation; not phone FPS or HumanBot difficulty",
+  "populations": [
+    {
+      "elapsed": 0.000002100015990436077,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 0.5074614000041038,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 1.023848499986343,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 1.5398331999313086,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 2.0559495999477804,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 2.57282799994573,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 3.073491199989803,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 3.589098299969919,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 4.090017099981196,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 4.606445199926384,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 5.1224443999817595,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 5.62321210000664,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 6.138965099933557,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 6.655200899927877,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 7.172986299963668,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 7.68901219998952,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 8.205387499998324,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 8.705745299928822,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 9.206240299972706,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 9.72174469998572,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 10.222363599925302,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 10.739131200010888,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 11.254909600014798,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 11.755508999922313,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 12.272264000028372,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 12.788923699990846,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 13.289127300027758,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 13.80485580000095,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 14.305667400010861,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 14.822171599953435,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 15.322570199961774,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 15.822929700021632,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 16.339793600025587,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 16.855183999985456,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 17.372082700021565,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 17.888870999915525,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 18.40562009997666,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 18.922383000026457,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 19.439171799924225,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 19.939291000016965,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 20.43940179992933,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 20.955477399984375,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 21.47192159993574,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 21.9891344999196,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 22.504514000029303,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 23.39467439998407,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 23.90552199992817,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 24.4224208999658,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 24.922929599997588,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 25.438051200006157,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 25.939407199970447,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 26.455642099957913,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 26.971774699981324,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 27.472500399919227,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 27.98841759993229,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 28.50490759999957,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 29.00661299994681,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 29.521322599961422,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 30.021772300009616,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 30.521874199970625,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 31.03963080001995,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 31.555272599915043,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 32.05612129997462,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 32.571566900005564,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 33.07245300000068,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 33.58829089999199,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 34.104819700005464,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 34.62227839999832,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 35.12257479992695,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 35.63827270001639,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 36.15436259994749,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 36.65496670000721,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 37.17237169994041,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 37.68841820000671,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 38.20526989991777,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 38.72247299994342,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 39.238248999929056,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 39.7383696999168,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 40.25508529995568,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 40.77144179993775,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 41.28807779995259,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 41.7885175999254,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 42.30512059992179,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 42.82152429991402,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 43.321696599945426,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 43.8386033999268,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 44.338835099944845,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 44.854890599963255,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 45.37077399995178,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 45.8717552999733,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 46.38837549998425,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 46.90513299999293,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 47.42049299995415,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 47.92116819997318,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 48.43815760000143,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 48.955269799917005,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 49.47175519994926,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 49.988202999928035,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 50.50439319992438,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 51.005191699950956,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 51.521613399963826,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 52.0374702999834,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 52.55474849999882,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 53.054936299915425,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 53.570615399978124,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 54.088323800009675,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 54.603863599943,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 55.12106259993743,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 55.62161729997024,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 56.13755240000319,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 56.6376168000279,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 57.13863930001389,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 57.65436099993531,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 58.15480289992411,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 58.671244199969806,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 59.1883524999721,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 59.68851150001865,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 60.20368179993238,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 60.70400809997227,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 61.204841000027955,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 61.7208135999972,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 62.23678289994132,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 62.73789599991869,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 63.23827159998473,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 63.753664599964395,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 64.25467159994878,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 64.77122519991826,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 65.28694809996523,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 65.80371709994506,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 66.30478859995492,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 66.82051400002092,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 67.32182079995982,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 69.38973129994702,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 69.90365150000434,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 70.40425629995298,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 70.91979549999814,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 71.42091490002349,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 71.9366021999158,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 72.43878339999355,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 72.95329809992108,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 73.46948989992961,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 73.9703409000067,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 74.4709157999605,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 74.98681059991941,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 75.50368810002692,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 76.01992739993148,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 76.53606830001809,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 77.03668539994396,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 77.55282350000925,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 78.05404670001008,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 78.5696366999764,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 79.07032189995516,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 79.57069219998084,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 80.08591709996108,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 80.58696999994572,
+      "alive": 4,
+      "enemies": 12
+    },
+    {
+      "elapsed": 81.10357759997714,
+      "alive": 4,
+      "enemies": 12
+    }
+  ],
+  "passed": true,
+  "telemetry": {
+    "windupPeak": 4,
+    "elapsed": 81.62885403633118,
+    "aiPeakSeconds": 0.0008241001050919294,
+    "flankedWindows": 39,
+    "serverBoundsRejected": 3,
+    "flankWindows": 39,
+    "windups": 26,
+    "aiSeconds": 0.19485989992972463,
+    "started": 1790238304.157643,
+    "capViolations": 0,
+    "stage": 1,
+    "actions": {
+      "Warden": {
+        "WardenKick": 4
+      },
+      "Pitcher": {
+        "PitcherThrow": 1
+      },
+      "Leaper": {
+        "LeaperVaultKick": 1
+      },
+      "Strider": {
+        "StriderJab": 2,
+        "StriderSlide": 3
+      },
+      "Grappler": {
+        "GrapplerGrab": 5,
+        "GrapplerThrow": 5
+      },
+      "Husk": {
+        "HuskJumpKick": 2,
+        "HuskJab": 3
+      }
+    },
+    "aiMeanMs": 0.2676646977056657,
+    "stocks": [],
+    "aiPeakMs": 0.8241001050919294,
+    "idleRatio": 0.5458515283842795,
+    "cameraFrustum": "not measured",
+    "damage": {
+      "Player3": 38.18,
+      "Player2": 34.27,
+      "Player1": 117.20800000000004
+    },
+    "idleGruntTicks": 4500,
+    "encounters": {
+      "1:1": {
+        "stocks": 0,
+        "hits": 31,
+        "damage": 189.65799999999996
+      }
+    },
+    "aiSamples": 728,
+    "eligibleGruntTicks": 8244,
+    "wave": 1,
+    "minWindup": 0.45,
+    "flankRatio": 1,
+    "hits": {
+      "Player3": 5,
+      "Player2": 5,
+      "Player1": 21
+    },
+    "actionDiversity": {
+      "byKind": {
+        "Warden": {
+          "passed": 1,
+          "eligible": 4,
+          "minDistinct": 1
+        },
+        "Pitcher": {
+          "passed": 1,
+          "eligible": 4,
+          "minDistinct": 0
+        },
+        "Leaper": {
+          "passed": 0,
+          "eligible": 4,
+          "minDistinct": 0
+        },
+        "Strider": {
+          "passed": 1,
+          "eligible": 4,
+          "minDistinct": 0
+        },
+        "Grappler": {
+          "passed": 2,
+          "eligible": 4,
+          "minDistinct": 0
+        },
+        "Husk": {
+          "passed": 1,
+          "eligible": 4,
+          "minDistinct": 0
+        }
+      },
+      "pendingWindows": 12,
+      "windows": [
+        {
+          "passed": false,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [
+            "Block"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": true,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [
+            "Block",
+            "WardenKick"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": true,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [
+            "PitcherThrow",
+            "Retreat"
+          ],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": false,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [],
+          "kind": "Grappler"
+        },
+        {
+          "passed": true,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [
+            "HuskJab",
+            "HuskJumpKick"
+          ],
+          "kind": "Husk"
+        },
+        {
+          "passed": false,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": true,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [
+            "Grab",
+            "Throw"
+          ],
+          "kind": "Grappler"
+        },
+        {
+          "passed": false,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [],
+          "kind": "Leaper"
+        },
+        {
+          "passed": false,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [
+            "LeaperVaultKick"
+          ],
+          "kind": "Leaper"
+        },
+        {
+          "passed": false,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [],
+          "kind": "Husk"
+        },
+        {
+          "passed": true,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [
+            "Retreat",
+            "StriderJab",
+            "StriderSlide"
+          ],
+          "kind": "Strider"
+        },
+        {
+          "passed": false,
+          "start": 1790238304.221932,
+          "duration": 30,
+          "actions": [],
+          "kind": "Strider"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [
+            "Block"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [
+            "Block"
+          ],
+          "kind": "Warden"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [
+            "Retreat"
+          ],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Grappler"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Husk"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Pitcher"
+        },
+        {
+          "passed": true,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [
+            "Grab",
+            "Throw"
+          ],
+          "kind": "Grappler"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Leaper"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Leaper"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Husk"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Strider"
+        },
+        {
+          "passed": false,
+          "start": 1790238334.27092,
+          "duration": 30,
+          "actions": [],
+          "kind": "Strider"
+        }
+      ],
+      "policy": "10Hz sampled proximity within 28 studs; actual attacks/block/evade/retreat/grab/throw; partial windows ineligible",
+      "windowSeconds": 30,
+      "partialWindows": 0
+    },
+    "schema": 1,
+    "rank": "not implemented"
+  },
+  "recorded": "2026-09-24",
+  "source": "f94bd81",
+  "privacy": "Account identifiers replaced with run-local Player labels."
+}

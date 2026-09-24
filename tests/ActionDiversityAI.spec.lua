@@ -2,7 +2,7 @@ return function()
     local D=require(game.ServerScriptService.NightfallServer.ActionDiversity)
     local state=D.New();local actor={}
     D.Engage(state,actor,"Husk",0)
-    D.Action(state,actor,"Husk","Approach",1);D.Action(state,actor,"Husk","Hold",2)
+    D.Action(state,actor,"Husk","Approach",1);D.Action(state,actor,"Husk","Hold",2);D.Action(state,actor,"Husk","Reposition",3)
     D.Action(state,actor,"Husk","HuskJab",5);D.Action(state,actor,"Husk","HuskJab",6)
     D.Engage(state,actor,"Husk",30)
     assert(state.byKind.Husk.eligible==1 and state.byKind.Husk.passed==0,"Repeated jab/movement cannot fake diversity")

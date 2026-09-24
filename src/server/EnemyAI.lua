@@ -103,14 +103,25 @@ function EnemyAI.Step(t,c)
                 local d=(Vector3.new(pr.Position.X,0,pr.Position.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude
                 local focusPenalty=math.max(0,4-(t-(data.targetHistory[player] or 0)))*5
                 local assigned=director.slots[model]
-                local score=d+focusPenalty-(assigned and assigned.target==player and 8 or 0)
+                local approachHidden=c.VisiblePosition and not c.VisiblePosition(Vector3.new(pr.Position.X-4,r.Position.Y,pr.Position.Z))
+                    and not c.VisiblePosition(Vector3.new(pr.Position.X+4,r.Position.Y,pr.Position.Z))
+                local score=d+focusPenalty-(assigned and assigned.target==player and 8 or 0)+(approachHidden and 60 or 0)
                 if not bestScore or score<bestScore then target,distance,bestScore=player,d,score end
             end
         end
         if not target then state(model,data,"Enter");h:Move(Vector3.zero);Director.Release(director,model);continue end
         local pr=c.root(target.Character)
         data.facing=pr.Position.X>=r.Position.X and 1 or -1
-        local slot=Director.Assign(director,model,target,r.Position,pr.Position)
+        local slot=Director.Assign(director,model,target,r.Position,pr.Position,c.arena,c.VisiblePosition)
+        if c.CanAttack and not c.CanAttack(model)then
+            -- Offscreen actors must enter the shared view before reserving attack capacity.
+            Director.Release(director,model);data.engaging=false;state(model,data,"Reposition")
+            local desired=Vector3.new(pr.Position.X+slot.offset.X,r.Position.Y,math.clamp(pr.Position.Z+slot.offset.Z,-11,11))
+            local destination=c.SafePosition and c.SafePosition(desired)
+            destination=destination or Vector3.new(math.clamp(c.arena.CenterX or (c.arena.MinX+c.arena.MaxX)/2,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,0)
+            h.WalkSpeed=data.spec.Speed;h:MoveTo(destination)
+            continue
+        end
         local archetype=Archetypes.Id(data.kind,data.spec)
         local targetHumanoid=c.humanoid(target.Character)
         local observed=observe(data,target,c.records[target],t,profile.ReactionDelay,targetHumanoid and targetHumanoid.FloorMaterial==Enum.Material.Air)
@@ -134,7 +145,8 @@ function EnemyAI.Step(t,c)
             state(model,data,"Retreat");action(model,data,"Retreat");Director.Release(director,model);data.engaging=false
             local away=r.Position.X>=pr.Position.X and 1 or -1
             h.WalkSpeed=data.spec.Speed
-            h:MoveTo(Vector3.new(math.clamp(pr.Position.X+away*17,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(pr.Position.Z+(slot.serial%2==0 and 3 or -3),-11,11)))
+            local retreatGoal=Vector3.new(math.clamp(pr.Position.X+away*17,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(pr.Position.Z+(slot.serial%2==0 and 3 or -3),-11,11))
+            h:MoveTo(c.SafePosition and c.SafePosition(retreatGoal) or retreatGoal)
             if archetype~="Pitcher" or t<data.attackAt or distance>7 then continue end
             -- A cornered ranged enemy can shove rather than retreat forever against a bound.
         end
@@ -154,6 +166,7 @@ function EnemyAI.Step(t,c)
         local token=director.tokens[model]
         if token and token.target~=target then Director.Release(director,model);token=nil;data.engaging=false end
         local inRange=(not c.CanAttack or c.CanAttack(model)) and distance<=range and (elite or (math.abs(pr.Position.Z-r.Position.Z)<=3 and (r.Position.X-pr.Position.X)*slot.offset.X>0))
+        if token and not inRange and slot.approachFeasible==false then Director.Release(director,model);token=nil;data.engaging=false end
         if token and inRange and t>=data.attackAt then
             data.engaging=false;data.lastAttackAt=t;state(model,data,"Attack")
             c.beginEnemyAttack(model,data,target,moveName,alive)
@@ -166,6 +179,8 @@ function EnemyAI.Step(t,c)
                 data.engaging=false
                 local offset=archetype=="Pitcher" and Vector3.new(slot.offset.X<0 and -17 or 17,0,slot.offset.Z*.4) or slot.offset
                 local goal=pr.Position+offset
+                goal=Vector3.new(goal.X,r.Position.Y,goal.Z)
+                goal=c.SafePosition and c.SafePosition(goal) or goal
                 local nearSlot=(Vector3.new(goal.X,0,goal.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude<4
                 state(model,data,nearSlot and "Hold" or "Approach")
                 if nearSlot then
@@ -178,7 +193,7 @@ function EnemyAI.Step(t,c)
                     data.feintAt=data.feintAt or t+2+slot.serial%3
                 end
                 destination=Vector3.new(goal.X,r.Position.Y,goal.Z)
-                if t>=data.attackAt and distance<=(elite and range or 20) then
+                if t>=data.attackAt and distance<=(elite and range or 20) and (inRange or slot.approachFeasible~=false) then
                     local facing=c.records[target].facing or 1
                     local behind=(r.Position.X-pr.Position.X)*facing<0
                     Director.Request(director,model,target,behind,data.lastAttackAt,t)
@@ -190,6 +205,7 @@ function EnemyAI.Step(t,c)
                 destination=Vector3.new(destination.X,r.Position.Y,pr.Position.Z+(slot.serial%2==0 and 6 or -6))
             end
             destination=Vector3.new(math.clamp(destination.X,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(destination.Z,-11,11))
+            destination=c.SafePosition and c.SafePosition(destination) or destination
             h.WalkSpeed=data.spec.Speed;h:MoveTo(destination)
         end
     end

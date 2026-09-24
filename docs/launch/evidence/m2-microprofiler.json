@@ -1,0 +1,256 @@
+{
+  "maxMs": 0.5051171583161249,
+  "scope": "CurtainBreakEnemyAI",
+  "meanTargetPassed": true,
+  "measurement": "complete inclusive AI-step CPU scope durations from frozen MicroProfiler snapshot",
+  "targetMeanMs": 1.5,
+  "population": {
+    "elapsed": 67.32182079995982,
+    "alive": 4,
+    "enemies": 12
+  },
+  "limit": "Desktop Studio server CPU only; boundary-partial scopes excluded, no GPU/phone/frame-rate certification.",
+  "calls": [
+    {
+      "ms": 0.27708844115817044,
+      "frame": 2417,
+      "enterFrame": 2417,
+      "absoluteFrame": 4560
+    },
+    {
+      "ms": 0.363607954417418,
+      "frame": 2424,
+      "enterFrame": 2424,
+      "absoluteFrame": 4567
+    },
+    {
+      "ms": 0.31879820650772217,
+      "frame": 2430,
+      "enterFrame": 2430,
+      "absoluteFrame": 4573
+    },
+    {
+      "ms": 0.5051171583161249,
+      "frame": 2436,
+      "enterFrame": 2436,
+      "absoluteFrame": 4579
+    },
+    {
+      "ms": 0.4732373376653527,
+      "frame": 2443,
+      "enterFrame": 2443,
+      "absoluteFrame": 4586
+    },
+    {
+      "ms": 0.3231281821481815,
+      "frame": 2449,
+      "enterFrame": 2449,
+      "absoluteFrame": 4592
+    },
+    {
+      "ms": 0.28107841871138817,
+      "frame": 2456,
+      "enterFrame": 2456,
+      "absoluteFrame": 4599
+    },
+    {
+      "ms": 0.3232681813605751,
+      "frame": 2463,
+      "enterFrame": 2463,
+      "absoluteFrame": 4606
+    },
+    {
+      "ms": 0.47736731443096403,
+      "frame": 2470,
+      "enterFrame": 2470,
+      "absoluteFrame": 4613
+    },
+    {
+      "ms": 0.3197782009944774,
+      "frame": 2477,
+      "enterFrame": 2477,
+      "absoluteFrame": 4620
+    },
+    {
+      "ms": 0.2788684311443177,
+      "frame": 2483,
+      "enterFrame": 2483,
+      "absoluteFrame": 4626
+    },
+    {
+      "ms": 0.37768787520671765,
+      "frame": 2490,
+      "enterFrame": 2490,
+      "absoluteFrame": 4633
+    },
+    {
+      "ms": 0.31829820932060215,
+      "frame": 2497,
+      "enterFrame": 2497,
+      "absoluteFrame": 4640
+    },
+    {
+      "ms": 0.26225852458819077,
+      "frame": 2504,
+      "enterFrame": 2504,
+      "absoluteFrame": 4647
+    },
+    {
+      "ms": 0.24503862146377742,
+      "frame": 2510,
+      "enterFrame": 2510,
+      "absoluteFrame": 4653
+    },
+    {
+      "ms": 0.26242852363181157,
+      "frame": 2517,
+      "enterFrame": 2517,
+      "absoluteFrame": 4660
+    },
+    {
+      "ms": 0.2351386771588011,
+      "frame": 2524,
+      "enterFrame": 2524,
+      "absoluteFrame": 4667
+    },
+    {
+      "ms": 0.231888695442521,
+      "frame": 2531,
+      "enterFrame": 2531,
+      "absoluteFrame": 4674
+    },
+    {
+      "ms": 0.23437868143437868,
+      "frame": 2537,
+      "enterFrame": 2537,
+      "absoluteFrame": 4680
+    },
+    {
+      "ms": 0.22381874084240394,
+      "frame": 2544,
+      "enterFrame": 2544,
+      "absoluteFrame": 4687
+    },
+    {
+      "ms": 0.2417686398600125,
+      "frame": 2550,
+      "enterFrame": 2550,
+      "absoluteFrame": 4693
+    },
+    {
+      "ms": 0.2286187138387561,
+      "frame": 2557,
+      "enterFrame": 2557,
+      "absoluteFrame": 4700
+    },
+    {
+      "ms": 0.2472586089745903,
+      "frame": 2564,
+      "enterFrame": 2564,
+      "absoluteFrame": 4707
+    },
+    {
+      "ms": 0.2474186080744687,
+      "frame": 2571,
+      "enterFrame": 2571,
+      "absoluteFrame": 4714
+    },
+    {
+      "ms": 0.24378862849597738,
+      "frame": 2578,
+      "enterFrame": 2578,
+      "absoluteFrame": 4721
+    },
+    {
+      "ms": 0.23452868059051468,
+      "frame": 2584,
+      "enterFrame": 2584,
+      "absoluteFrame": 4727
+    },
+    {
+      "ms": 0.2578485493977922,
+      "frame": 2590,
+      "enterFrame": 2590,
+      "absoluteFrame": 4733
+    },
+    {
+      "ms": 0.24274863434676774,
+      "frame": 2596,
+      "enterFrame": 2596,
+      "absoluteFrame": 4739
+    },
+    {
+      "ms": 0.2502185923223408,
+      "frame": 2603,
+      "enterFrame": 2603,
+      "absoluteFrame": 4746
+    },
+    {
+      "ms": 0.2576485505229442,
+      "frame": 2610,
+      "enterFrame": 2610,
+      "absoluteFrame": 4753
+    },
+    {
+      "ms": 0.2547385668939057,
+      "frame": 2616,
+      "enterFrame": 2616,
+      "absoluteFrame": 4759
+    },
+    {
+      "ms": 0.24023864846742526,
+      "frame": 2622,
+      "enterFrame": 2622,
+      "absoluteFrame": 4765
+    },
+    {
+      "ms": 0.25506856503740494,
+      "frame": 2629,
+      "enterFrame": 2629,
+      "absoluteFrame": 4772
+    },
+    {
+      "ms": 0.24398862737082538,
+      "frame": 2635,
+      "enterFrame": 2635,
+      "absoluteFrame": 4778
+    },
+    {
+      "ms": 0.2628985209877044,
+      "frame": 2642,
+      "enterFrame": 2642,
+      "absoluteFrame": 4785
+    },
+    {
+      "ms": 0.275578449653068,
+      "frame": 2648,
+      "enterFrame": 2648,
+      "absoluteFrame": 4791
+    },
+    {
+      "ms": 0.27424845713532875,
+      "frame": 2655,
+      "enterFrame": 2655,
+      "absoluteFrame": 4798
+    },
+    {
+      "ms": 0.26147852897628354,
+      "frame": 2662,
+      "enterFrame": 2662,
+      "absoluteFrame": 4805
+    }
+  ],
+  "firstFrame": {
+    "id": 2411,
+    "absoluteId": 4554
+  },
+  "lastFrame": {
+    "id": 2666,
+    "absoluteId": 4809
+  },
+  "totalMs": 10.852358946890007,
+  "meanMs": 0.2855883933392107,
+  "source": "f94bd81",
+  "recorded": "2026-09-24",
+  "setup": "Initial immediate snapshot after enabling capture had no frame descriptor; waited for populated data, established absolute-frame barrier, then captured 38 complete AI calls."
+}

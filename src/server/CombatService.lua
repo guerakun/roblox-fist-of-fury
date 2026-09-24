@@ -37,11 +37,17 @@ local encounter = {wave = 0, waves = 4, enemiesRemaining = 0, status = "Waiting"
 local function now() return workspace:GetServerTimeNow() end
 local function root(model) return model and model:FindFirstChild("HumanoidRootPart") end
 local function humanoid(model) return model and model:FindFirstChildOfClass("Humanoid") end
+local function enemyPositionVisible(position)
+    return cameraGoalSpan~=nil and cameraGoalSpan<160
+        and CameraBounds.Visible(position,cameraEstimate,cameraSpan or 0)
+        and CameraBounds.Visible(position,cameraGoal,cameraGoalSpan)
+end
 local function enemyVisible(model)
     local r=root(model)
-    return r~=nil and cameraGoalSpan~=nil and cameraGoalSpan<160
-        and CameraBounds.Visible(r.Position,cameraEstimate,cameraSpan or 0)
-        and CameraBounds.Visible(r.Position,cameraGoal,cameraGoalSpan)
+    return r~=nil and enemyPositionVisible(r.Position)
+end
+local function enemySafePosition(position)
+    return CameraBounds.SafePosition(position,cameraEstimate,cameraSpan,cameraGoal,cameraGoalSpan,arena)
 end
 local function modelOf(actor) return typeof(actor) == "Instance" and actor:IsA("Player") and actor.Character or actor end
 local function recordOf(model)
@@ -200,6 +206,22 @@ function Combat.GetAlivePlayers()
 end
 function Combat.GetPlayerCount() local count = 0 for _ in pairs(records) do count += 1 end return count end
 function Combat.GetEnemies() return enemies end
+function Combat.GetAIDiagnostics()
+    if not RunService:IsStudio() then return nil end
+    local function vector(v) return v and {x=v.X,y=v.Y,z=v.Z} or false end
+    local t=now();local result={time=t,cameraGoal=vector(cameraGoal),cameraEstimate=vector(cameraEstimate),cameraSpan=cameraSpan,cameraGoalSpan=cameraGoalSpan,actors={},players={}}
+    for _,player in ipairs(Combat.GetAlivePlayers())do table.insert(result.players,{id=player.UserId,position=vector(root(player.Character).Position)})end
+    for model,data in pairs(enemies)do
+        local r,h=root(model),humanoid(model);local slot,token=aiDirector.slots[model],aiDirector.tokens[model]
+        local target=slot and root(slot.target.Character)
+        table.insert(result.actors,{kind=data.kind,state=data.aiState,position=r and vector(r.Position),velocity=r and vector(r.AssemblyLinearVelocity),
+            moveDirection=h and vector(h.MoveDirection),walkTo=h and vector(h.WalkToPoint),canAttack=enemyVisible(model),target=target and vector(target.Position),
+            targetId=slot and slot.target.UserId,slot=slot and vector(slot.offset),token=token~=nil,tokenRemaining=token and token.expires-t,
+            attackIn=data.attackAt-t,recoveryIn=data.recoveryUntil-t,resolveIn=(data.resolveAt or 0)-t,attacking=data.attacking,
+            lastMove=data.lastMove,lastAttackAgo=data.lastAttackAt and t-data.lastAttackAt,retreatIn=(data.retreatUntil or 0)-t})
+    end
+    return result
+end
 function Combat.AddCoinsEarned(player, amount)
     local data = records[player]
     if data then data.runStats.coinsEarned += math.max(0, amount) end
@@ -767,7 +789,7 @@ local function aiStep(t)
         cameraSpan=cameraSpan and cameraSpan+(cameraGoalSpan-cameraSpan)*alpha or cameraGoalSpan
     else cameraEstimate,cameraSpan=nil,nil end
     lastCameraSample=t
-    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, difficulty = difficultyProfile(), RecordAction = Telemetry.Action, CanAttack = enemyVisible, SummonPhase = Combat.SpawnPhaseAdds,
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, difficulty = difficultyProfile(), RecordAction = Telemetry.Action, CanAttack = enemyVisible, VisiblePosition = enemyPositionVisible, SafePosition = enemySafePosition, SummonPhase = Combat.SpawnPhaseAdds,
         root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
         Config = Config, arena = arena, encounter = encounter, attributes = attributes,
         fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})

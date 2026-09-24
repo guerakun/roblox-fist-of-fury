@@ -33,4 +33,25 @@ function Bounds.Visible(position,center,span)
     end
     return true
 end
+-- Return the nearest horizontal walking point accepted by BOTH existing camera envelopes.
+-- This guides movement only; Visible remains the independent authority for attacks and hits.
+function Bounds.SafePosition(position,center,span,goal,goalSpan,arena)
+    if not center or not goal then return nil end
+    local z=math.clamp(position.Z,-11,11)
+    local low,high=arena.MinX+6,arena.MaxX-6
+    for _,sample in ipairs({{center,span},{goal,goalSpan}})do
+        local focus,width=sample[1],sample[2] or 0
+        local crossover=(width+54)/(2*tanHalf*52)
+        for _,aspect in ipairs({Bounds.MinimumAspect,1,math.max(1,crossover),16/9})do
+            local distance=Bounds.Distance(width,aspect)
+            local projected=Bounds.Frame(focus,distance):PointToObjectSpace(Vector3.new(focus.X,position.Y,z))
+            local depth=-projected.Z;local halfY=depth*tanHalf
+            if depth<=0 or math.abs(projected.Y)+Bounds.Margin>halfY then return nil end
+            local halfX=halfY*aspect-Bounds.Margin-.5
+            low=math.max(low,focus.X-halfX);high=math.min(high,focus.X+halfX)
+        end
+    end
+    if low>high then return nil end
+    return Vector3.new(math.clamp(position.X,low,high),position.Y,z)
+end
 return Bounds
