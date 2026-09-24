@@ -129,9 +129,9 @@
     },
     "WO-4.1": {
       "owner": "combat",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "action contract reviewed; implementation waits for M3",
+      "evidence": "2026-09-24: M4_ACTION_CONTRACT.md proposed interface agreed by combat/presentation, final independent combat review PASS. Existing Light/Heavy contextual routing, no new mobile grab button, server life/attack/launch identity, final-durability reservation/cancellation, desperation/revive separation. No M4 runtime implementation or action tests.",
+      "next": "After M3 engineering/tuning checkpoint, implement server and client consumers atomically; choose and record starting combat values, run scoped two-client/lifecycle and input tests."
     },
     "WO-4.2": {
       "owner": "world + combat + root",
@@ -141,15 +141,15 @@
     },
     "WO-4.3": {
       "owner": "combat",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "action contract reviewed; implementation waits for M3",
+      "evidence": "2026-09-24: M4_ACTION_CONTRACT.md proposed interface agreed by combat/presentation, final independent combat review PASS. Existing Light/Heavy contextual routing, no new mobile grab button, server life/attack/launch identity, final-durability reservation/cancellation, desperation/revive separation. No M4 runtime implementation or action tests.",
+      "next": "After M3 engineering/tuning checkpoint, implement server and client consumers atomically; choose and record starting combat values, run scoped two-client/lifecycle and input tests."
     },
     "WO-4.4": {
       "owner": "combat",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "action contract reviewed; implementation waits for M3",
+      "evidence": "2026-09-24: M4_ACTION_CONTRACT.md proposed interface agreed by combat/presentation, final independent combat review PASS. Existing Light/Heavy contextual routing, no new mobile grab button, server life/attack/launch identity, final-durability reservation/cancellation, desperation/revive separation. No M4 runtime implementation or action tests.",
+      "next": "After M3 engineering/tuning checkpoint, implement server and client consumers atomically; choose and record starting combat values, run scoped two-client/lifecycle and input tests."
     },
     "WO-4.5": {
       "owner": "root",
@@ -225,9 +225,9 @@
     },
     "WO-6.5": {
       "owner": "world + presentation + combat + root",
-      "status": "input cleanup implemented and scoped Studio tests passed; other audits retained",
+      "status": "scoped cleanup evidence saved; active-input layout source in progress, unverified",
       "evidence": "focus-cleanup.json:8 deterministicreleasecallbacks/endCancel/modal/window/life/disconnect/returngatesPASS;actualClientTextBox+MenuOpen/SettingsOpen3callbacksPASS;combatindependentreviewPASS;camera mathunchanged FrozenM3 camera/movement source identical to testedM2; passive CameraMotionAudit actualclient startup1114validframes/1115dt/167bounds arithmeticfixturePASS, m3-camera-audit-smoke.json. Fullmotiondiagnostics startNormal1102;1101omitsobserver; no comfortclaim. Normal1102 full observer631.48s includes8243Defeatframes;37798validframes/5708hero samples,2offscreen root/core events unresolved (not transition-annotated). Pooled dt is not combat-only. World scope/proposal review PASS; M6_INPUT_READABILITY_PLAN preserves unimplemented active-input/short-height correction. SCENE_COMBAT_READABILITY.md: actual city1102wave3 and factory1103wave1 stills,775x356, world review plus presentation peer PASS. Factory warmth/dark floor helps local silhouette; HUD/status overlap remains. No motion/device/fairness verdict. Normal1105 stationwave3 still completes all3stage baseline; central dodge/grab warning overlaps upper character silhouettes. World review and presentation independent image/note review PASS; visible0.0s countdown makes no timing/fairness claim.",
-      "next": "After frozen M3 curve, implement shared active-input/short-height layout proposal with fixture/device gates; diagnose camera offscreen samples and co-op/lifecycle framing; no comfort claim."
+      "next": "Presentation owns disk-only InputMode/Main/CombatHUD/ReviveHUD correction; no sync/build into frozen dfb2ae3 campaign. Root tests after series, combat reviews. Existing installed camera math untouched; physical-device/comfort gates open."
     },
     "WO-6.6": {
       "owner": "world + root",
