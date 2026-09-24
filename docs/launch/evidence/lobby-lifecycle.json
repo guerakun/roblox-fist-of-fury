@@ -1,0 +1,8 @@
+{
+  "recorded":"2026-09-24",
+  "source":"66f5e10 campaign behavior, rebuilt entrance-marker world; before WO-2.5 combat integration",
+  "passed":true,
+  "assertions":["two clients initialized","one ready waits","first cancellation acknowledged","cancel swaps readiness without starting","second cancellation acknowledged","ready leader waits on unready member","unready departure starts remaining ready party","real encounter progression reaches district2","empty server resets lobby","fresh identity joins reset lobby"],
+  "scope":"Actual ordinary readiness requests, Studio client departures and replacement. Scripted server hits/traversal isolate lifecycle; not HumanBot or human challenge evidence.",
+  "fixtureCorrection":"Initial test sent readiness changes to different clients without waiting for cancellation acknowledgment and raced into a legitimate all-ready start. Corrected fixture awaits each cancellation, then passes."
+}

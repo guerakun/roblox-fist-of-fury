@@ -28,3 +28,8 @@ Lag setting was read as0 before testing, set to0.15/0.25seconds and restored to0
 Stock share: valid rescue accepted, donor+recipient total conserved3â†’3, recipient1stock/0percent/unanchored, duplicate/NaN/unknown recipient rejected. This is automated baseline behavior; M3's new revive/persistent-stakes rules require another pass.
 
 All reports use synthetic Studio names or anonymous Player keys. Root alone started/stopped sessions. Combat independently reviewed generalized client-count/convergence logic; world reviewed lifecycle fixtures. The work order is **partially verified**, not closed: the remaining lifecycle scenarios, visual desync inspection and actual account reconnects are recorded rather than implied passed.
+
+
+## Additional lobby lifecycle pass, 2026-09-24
+
+`LobbyLifecycle.server.lua` and its normal-input companion passed ten assertions on travel-integrated campaign behavior (66f5e10): ready/cancel ordering, an unready member leaving starts the remaining ready party, actual encounter progression to district two, every player leaving resets Waiting, and a verified new identity joins district one with fresh stocks/percent/statistics. Combat clearing and traversal were scripted; this is lifecycle evidence only. The first fixture raced cross-client readiness messages and legitimately started the campaign; waiting for cancellation acknowledgments fixed the fixture. See [anonymous report](evidence/lobby-lifecycle.json). Cases 1–4 requiring the same identity, complete checkpoint reward retry, and a fresh run after victory are still not certified.
