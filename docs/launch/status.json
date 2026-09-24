@@ -134,10 +134,10 @@
       "next": "follow launch phase dependencies"
     },
     "WO-4.2": {
-      "owner": "combat",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "owner": "world + combat + root",
+      "status": "proposal reviewed; implementation waits for M3",
+      "evidence": "2026-09-24: authored34-prop inventory (8/12/14),15 proposed emissions, fixed party budget150 max healing/75 earned coins/6 weapons; presentation and combat source review PASS. Root reward contract peer-reviewed by combat: campaign-wide winner binding, separate actual-paid pickupCoins, same-district10s lifetime, pending/capped payments and immutable rank receipts. Proposals only; no runtime loot enabled or tested.",
+      "next": "After M3 checkpoint, implement accepted-break IDs/emission and atomic reward registration; run physical two-client contention and budget/receipt cases."
     },
     "WO-4.3": {
       "owner": "combat",
