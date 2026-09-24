@@ -15,6 +15,20 @@ local report={difficulty=tier,heat={},sourceCommit=script:GetAttribute("SourceCo
 local Http=game:GetService("HttpService")
 workspace:SetAttribute("TierCampaignProvenance",Http:JSONEncode(report))
 while task.wait(.2)do
+    if not report.initialSettings then
+        local players=game.Players:GetPlayers()
+        local p=players[1]
+        if p then
+            local P=require(game.ServerScriptService.NightfallServer.ProgressionService)
+            local profile=P.GetSnapshot(p)
+            local actor=C.GetSnapshot(p)
+            if actor and profile.loading~=true then
+                report.initialSettings={hero=actor.hero,boon=profile.boon,xp=profile.xp,coins=profile.coins,
+                    difficulty=actor.difficulty,heat=actor.heat,players=#players,profileMode=P.GetTravelProfile(p).mode}
+                workspace:SetAttribute("TierCampaignProvenance",Http:JSONEncode(report))
+            end
+        end
+    end
     local options=C.GetRunOptions()
     if options.difficulty~=tier or #options.heat~=0 then
         report.configurationStable=false

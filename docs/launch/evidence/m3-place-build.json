@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-24",
+  "sourceCommit": "dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4",
+  "rojo": "7.7.0",
+  "artifacts": [
+    {
+      "file": "places/CurtainBreak.rbxl",
+      "bytes": 305219,
+      "sha256": "cc3ed52b91fab3c82aa6511785db878d83ad0679c1bbe4a34ba4854401ad4860",
+      "mappedSourceFiles": 73,
+      "testSourcesExcluded": true
+    },
+    {
+      "file": "places/CurtainBreakHub.rbxl",
+      "bytes": 102700,
+      "sha256": "c54517830c51d84285405e7e761c9702f065d250c50f139782ba2e75529b4d93",
+      "mappedSourceFiles": 27,
+      "testSourcesExcluded": true
+    }
+  ],
+  "scope": "Built from frozen M3 source. Scoped feature fixtures passed; fifteen-run tier/rank acceptance and final co-op regression remain in progress. This is not publication or full launch acceptance."
+}
