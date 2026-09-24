@@ -1,5 +1,11 @@
 return function(Heat)
     local n=0 local function check(v)assert(v)n+=1 end
+    check(Heat.SameSelection({'OneLife','Frenzy'},{'Frenzy','OneLife'}))
+    check(Heat.SameSelection(nil,{}))
+    check(not Heat.SameSelection({'Frenzy'},{}))
+    check(not Heat.SameSelection({'Frenzy'},{'IronHide'}))
+    check(not Heat.SameSelection({'Frenzy','Frenzy'},{'Frenzy'}))
+    check(not Heat.SameSelection('Frenzy','Frenzy'))
     local empty=Heat.Rules({})
     check(empty.points==0 and empty.stockCap==3 and empty.stockSharing)
     local all=Heat.Rules(Heat.Order)

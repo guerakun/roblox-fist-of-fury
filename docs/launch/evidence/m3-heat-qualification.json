@@ -1,0 +1,11 @@
+{
+  "date": "2026-09-24",
+  "scope": "Studio policy/fake adapter and actual one-client ephemeral ProgressionService integration. Heat combat effects remain disabled; no live badge calls.",
+  "pure": {"achievements": 85, "heat": 22, "matchmaking": 42, "passed": true},
+  "runtime": {
+    "passed": true,
+    "checks": ["Missed encounter excludes full-run unlock and Heat badge", "Mixed Heat cannot earn full-run threshold", "Mixed difficulty cannot unlock or qualify Heat", "Complete Normal unlocks Hard", "Equivalent reordered Heat earns thresholds", "Heat cosmetics earned locally without purchases", "District and explicit no-hit predicates integrate", "Complete Hard unlocks Nightmare", "Zero Heat does not award threshold cosmetic"]
+  },
+  "review": "World independently reviewed disabled queue/admission gates, full-run Heat comparison, and badge lifecycle guards.",
+  "remaining": ["All Heat combat effects and immutable run options", "Heat selection UI", "Actual campaign finalization hooks", "Live badge configuration and award verification", "Physical devices and full M3 balance suite"]
+}

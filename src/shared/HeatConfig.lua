@@ -1,5 +1,6 @@
 -- Earned risk/reward only. Shared metadata; all options are validated again on the server.
 local Heat = {}
+Heat.Enabled = false -- Enable only after all authoritative combat effects and admission tests pass.
 Heat.Order = {'Frenzy','ShortFuse','IronHide','NoSafetyNet','OneLife','MutatedElites'}
 Heat.Contracts = {
     Frenzy={Id='Frenzy',Name='FRENZY',Description='One extra attack token',Points=1,RewardPercent=10},
@@ -22,6 +23,12 @@ function Heat.Normalize(value)
     for i = 1,count do if value[i] == nil then return nil, 'Heat must be a dense list' end end
     for _,id in ipairs(Heat.Order) do if seen[id] then table.insert(result,id) end end
     return result
+end
+function Heat.SameSelection(a,b)
+    local first,second=Heat.Normalize(a),Heat.Normalize(b)
+    if not first or not second or #first~=#second then return false end
+    for i,id in ipairs(first) do if second[i]~=id then return false end end
+    return true
 end
 function Heat.Rules(value)
     local ids, reason = Heat.Normalize(value)

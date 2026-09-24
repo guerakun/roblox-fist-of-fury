@@ -82,6 +82,7 @@ function Service:Queue(leader,difficulty,heat,mode,expectedRevision)
     local allowed={Normal=true,Hard=true,Nightmare=true}
     assert(allowed[difficulty],'invalid difficulty')
     local normalized=assert(Heat.Normalize(heat),'invalid heat')
+    assert(#normalized==0 or Heat.Enabled==true,'Heat is not available yet')
     local p=assert(self:PartyFor(leader),'party missing')
     local queued=self.a:Update('Party:'..p.id,function(old)
         if not old or old.leader~=leader or old.status~='Idle' or #old.members<1 or #old.members>4 or (expectedRevision and old.revision~=expectedRevision)then return old end
@@ -212,7 +213,7 @@ function Service:ValidateJoin(userId,matchId,privateServerId)
     if not m or m.status~='Ready' or self.clock()-m.created>self.ttl or not contains(m.members,userId) then return nil,'not a member of an active match' end
     if privateServerId~=m.privateServerId then return nil,'wrong reserved server' end
     local rules=Heat.Rules(m.heat)
-    if not rules or not ({Normal=true,Hard=true,Nightmare=true})[m.difficulty]then return nil,'invalid match options' end
+    if not rules or (#rules.ids>0 and Heat.Enabled~=true) or not ({Normal=true,Hard=true,Nightmare=true})[m.difficulty]then return nil,'invalid match options' end
     m=copy(m);m.heat=rules.ids;m.heatPoints=rules.points;m.heatRewardPercent=rules.rewardPercent
     return m
 end

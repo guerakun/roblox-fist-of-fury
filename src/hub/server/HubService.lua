@@ -148,6 +148,7 @@ local function request(p,action,payload)
         elseif action=='Queue'then
             local difficulty=payload.difficulty or 'Normal'local heat=payload.heat or{}
             heat=assert(Heat.Normalize(heat),'Invalid contract selection.')
+            assert(#heat==0 or Heat.Enabled==true,'Heat contracts are not available yet.')
             local party=assert(service:PartyFor(p.UserId),'Party unavailable.')assert(party.leader==p.UserId,'Only the party leader can deploy.')
             for _,uid in ipairs(party.members)do local member=Players:GetPlayerByUserId(uid)assert(member and unlocked(member,difficulty),'Every member must be here and have this difficulty unlocked.')assert(store:CanMutate(profiles[member]),'Every member needs a loaded, writable save session before deployment.')end
             assert(service:Queue(p.UserId,difficulty,heat,payload.mode,party.revision),'Queue unavailable.')report(p,'Deployment queued.')

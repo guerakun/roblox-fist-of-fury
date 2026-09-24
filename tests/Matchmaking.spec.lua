@@ -61,5 +61,16 @@ return function()
         check(s:PartyFor(1).status=='Idle' and s:PartyFor(1).matchId==nil,'missing match released despite removed queue ticket')
         check(s:Queue(1,'Normal',{},'Solo'),'expired deployment can requeue')
     end
+    do local a,s=fixture()
+        local Heat=require(game.ReplicatedStorage.Nightfall.Shared.HeatConfig)
+        if not Heat.Enabled then
+            s:Create(1)
+            check(not pcall(function()s:Queue(1,'Normal',{'Frenzy'},'Solo')end),'unimplemented Heat rejected at queue authority')
+            check(s:PartyFor(1).status=='Idle','rejected Heat leaves party idle')
+            s:Queue(1,'Normal',{},'Solo');local m=s:Step('Normal')
+            a.records['Match:'..m.id].heat={'Frenzy'}
+            check(s:ValidateJoin(1,m.id,m.privateServerId)==nil,'unimplemented Heat match rejected at admission')
+        end
+    end
     return 'PASS: '..count..' party, lease, timeout, forgery, membership and injected-throttle assertions'
 end

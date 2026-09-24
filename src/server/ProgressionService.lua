@@ -182,7 +182,7 @@ local function earnedAchievements(player,ledger,result)
     local data=record.profile.data
     local full=ledger:FullParticipation()
     for _,item in pairs(ledger.stages) do
-        if item.result and item.result.difficulty~=result.difficulty then full=false end
+        if item.result and (item.result.difficulty~=result.difficulty or not Heat.SameSelection(item.result.heat,result.heat)) then full=false end
     end
     local rules=Heat.Rules(result.heat)
     if not rules then return end
@@ -196,7 +196,12 @@ local function earnedAchievements(player,ledger,result)
         if not data.achievements[key] then data.achievements[key]=true dirty=true end
         if (key=='Heat5' or key=='Heat10' or key=='Heat15') and not data.owned[key] then data.owned[key]=true dirty=true end
         if not RunService:IsStudio() and AchievementConfig.Badges[key].BadgeId>0 then
-            task.spawn(function()achievementService:Award(player.UserId,key)end)
+            task.spawn(function()
+                -- A queued task may begin after PlayerRemoving has already cleared its cache.
+                if records[player]~=record or player.Parent~=Players then return end
+                achievementService:Award(player.UserId,key)
+                if records[player]~=record or player.Parent~=Players then achievementService:Forget(player.UserId) end
+            end)
         end
     end
     if dirty then changed(player) end
