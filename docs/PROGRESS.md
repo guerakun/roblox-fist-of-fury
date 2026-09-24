@@ -1,14 +1,14 @@
 # Morning summary
 
-M0 started on launch-program. WO-0.1 closed: all four existing executable specs pass on the tagged baseline. HumanBot baseline not yet measured; no M1-M6 verification claimed. Published/live operations prohibited tonight. Owner names/art approval and human playtests remain pending. Exact next step: implement WO-0.3 telemetry and WO-0.2 HumanBot, then record five fresh seeded solo runs before releasing agents.
+WO-0.1 closed (ebd49d4), four existing specs pass. WO-0.3 instrumentation/spec reviewed and tested; five-run WO-0.2 baseline is in progress. No AI/gameplay changes yet. Next: finish seeds 1101–1105, save metrics, then release Phase B. Names/art approval, human playtests and prohibited published/live validations remain owner gates.
 
 ## Launch program status
 
 | WO | Owner | Status | Evidence | Next step |
 |---|---|---|---|---|
-| WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup | WO-0.3 telemetry before five WO-0.2 runs |
-| WO-0.2 | root | queued | not run | follow launch phase dependencies |
-| WO-0.3 | root | queued | not run | follow launch phase dependencies |
+| WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup; commit ebd49d4, tag pushed | WO-0.3 telemetry before five WO-0.2 runs |
+| WO-0.2 | root | running | HumanBot reviewed; fresh seeds 1101–1105; first run underway, actual reaction ~250 ms | save five per-run JSON reports; release Phase B only after baseline commit |
+| WO-0.3 | root (combat handoff after M0) | closed | 2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations | collect WO-0.2 five-run baseline; append telemetry results |
 | WO-1.1 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.2 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.3 | presentation | queued | not run | follow launch phase dependencies |

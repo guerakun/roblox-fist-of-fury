@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.Config)
 local CombatMath = require(ReplicatedStorage.Nightfall.Shared.CombatMath)
 local ToolboxHitbox = require(ReplicatedStorage.Nightfall.Shared.ToolboxHitbox)
+local Telemetry = require(script.Parent.CombatTelemetry)
 local Combat = {}
 local records, enemies = {}, {}
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
@@ -40,6 +41,7 @@ local function fx(kind, position, fields)
 end
 local function freshStats() return {kills = 0, damageDealt = 0, damageTaken = 0, coinsEarned = 0, duration = 0} end
 function Combat.BeginRun()
+    Telemetry.Reset()
     table.clear(disconnectedSurvival)
     for _, data in pairs(records) do data.runStats = freshStats() data.runStart = now() data.runFinished = nil end
 end
@@ -99,7 +101,9 @@ function Combat.SetEncounterState(state)
     Progression.SetRunState(encounter.status, stageIndex)
     if state.status == "Victory" or state.status == "Defeat" then
         for _, data in pairs(records) do data.runFinished = now() end
+        Telemetry.Finish(state.status)
     elseif state.status == "Combat" then
+        Telemetry.BeginEncounter(stageIndex, encounter.wave)
         for _, data in pairs(records) do data.runFinished = nil end
     end
     Combat.BroadcastState()
@@ -265,6 +269,7 @@ local function knockOut(model)
         model:Destroy()
         return
     end
+    Telemetry.StockLoss(player)
     data.stocks, data.blocking, data.respawning = math.max(0, data.stocks - 1), false, true
     data.lifeSerial += 1
     local lifeSerial = data.lifeSerial
@@ -311,6 +316,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
         data.invulnerableUntil = t + .38 -- Avoid simultaneous attackers trapping a co-op player.
         data.hitAt = t
         data.runStats.damageTaken += damage
+        Telemetry.Hit(victimPlayer, damage)
         data.contribution += damage + (blocked and 3 or 0)
     elseif elite then
         stun = armored and 0 or math.min(stun, .16)
@@ -507,6 +513,7 @@ local function beginEnemyAttack(model, data, target, moveName, alive)
     data.resolveAt, data.recoveryUntil = t + move.Windup, t + move.Windup + move.Recovery
     data.attackAt = math.max(t + data.spec.Cooldown, data.recoveryUntil + .15)
     data.targetHistory[target] = t
+    Telemetry.Windup(data.kind, moveName, move.Windup, attackCount(), math.min(3, math.max(2, #alive)))
     data.armoredUntil = move.Armored and data.resolveAt or 0
     humanoid(model):Move(Vector3.zero)
     r.CFrame = CFrame.lookAt(r.Position, r.Position + Vector3.new(direction, 0, 0))
@@ -688,7 +695,13 @@ function Combat.Init()
         end
         aiAccum += dt
         stateAccum += dt
-        if aiAccum >= .1 then aiAccum = 0 aiStep(t) end
+        if aiAccum >= .1 then
+            aiAccum = 0
+            local aiStart = os.clock()
+            aiStep(t)
+            if encounter.status == "Combat" and next(enemies) then Telemetry.AICost(os.clock() - aiStart) end
+            Telemetry.Sample(enemies, Combat.GetAlivePlayers(), t, encounter.status == "Combat")
+        end
         if stateAccum >= .2 then stateAccum = 0 Combat.BroadcastState() end
     end)
 end
