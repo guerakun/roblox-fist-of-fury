@@ -30,7 +30,7 @@ local facing = 1
 local humanoid: Humanoid? = nil
 local root: BasePart? = nil
 local cameraKick = 0
-local cameraPosition: Vector3? = nil
+local cameraCenter: Vector3? = nil
 local gamepadMove = Vector2.zero
 local touchMove = Vector2.zero
 local heldKeys: {[Enum.KeyCode]: boolean} = {}
@@ -293,7 +293,7 @@ end
 local function characterReady(character: Model)
     humanoid = character:WaitForChild("Humanoid") :: Humanoid
     root = character:WaitForChild("HumanoidRootPart") :: BasePart
-    shoulderDefaults = {}; rigJoints = {}; tracks = {}; cameraPosition = nil; poseAction = nil; localBlocking = false
+    shoulderDefaults = {}; rigJoints = {}; tracks = {}; cameraCenter = nil; poseAction = nil; localBlocking = false
     for _, item in ipairs(character:GetDescendants()) do
         if item:IsA("Motor6D") and item.Part1 then rigJoints[item] = item.C0 end
         if item:IsA("Motor6D") and (string.find(item.Name, "Shoulder") or item.Name == "Waist") then
@@ -932,9 +932,9 @@ local function sampleToolbox(dt: number)
     end
 end
 RunService.PreSimulation:Connect(sampleToolbox)
-RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.Value + 1, function(dt)
-    local camera = workspace.CurrentCamera
-    if not camera then return end
+-- Input is resolved after PlayerModule input, before physics/camera presentation.
+-- This callback never writes character CFrame or camera state.
+RunService:BindToRenderStep("NightfallMovement", Enum.RenderPriority.Input.Value + 1, function()
     if humanoid and root and humanoid.Health > 0 then
         local keyboard = Vector2.new((heldKeys[Enum.KeyCode.D] and 1 or 0) - (heldKeys[Enum.KeyCode.A] and 1 or 0),
             (heldKeys[Enum.KeyCode.S] and 1 or 0) - (heldKeys[Enum.KeyCode.W] and 1 or 0))
@@ -946,8 +946,21 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
             if nextFacing ~= facing and localBlocking then actionRemote:FireServer("Block", {held = true, direction = nextFacing}) end
             facing = nextFacing
         end
-        humanoid:Move(Vector3.new(movement.X, 0, movement.Y * 0.7), false)
+        -- Stop walking into the server's hard bounds before prediction/correction can oscillate.
+        -- Only outward input is filtered. Launch velocity and all root transforms remain untouched.
+        local stageMin = ((snapshot.stage or 1) - 1) * 180
+        local forwardLimit = type(snapshot.walkingMaxX) == "number" and snapshot.walkingMaxX or stageMin + 176
+        local x, z = movement.X, movement.Y
+        local position = root.Position
+        if (x < 0 and position.X <= stageMin + 4.4) or (x > 0 and position.X >= forwardLimit - .4) then x = 0 end
+        if (z < 0 and position.Z <= -13.6) or (z > 0 and position.Z >= 13.6) then z = 0 end
+        humanoid:Move(Vector3.new(x, 0, z * 0.7), false)
     end
+end)
+-- Single camera owner: a fixed viewing angle translated with one smoothed center.
+RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.Value + 1, function(dt)
+    local camera = workspace.CurrentCamera
+    if not camera then return end
     partyAccum += dt
     if partyAccum > 0.1 then
         partyAccum = 0
@@ -958,36 +971,47 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
         if enemiesFolder then
             for _, enemy in ipairs(enemiesFolder:GetChildren()) do if enemy:IsA("Model") then registerActor(enemy) end end
         end
-        local localX = root and root.Position.X or 60
-        if snapshot.downed then
-            for _, teammate in ipairs(Players:GetPlayers()) do
-                local character = teammate.Character
-                local teammateRoot = character and character:FindFirstChild("HumanoidRootPart")
-                if teammateRoot and teammateRoot:IsA("BasePart") and not character:GetAttribute("Downed") then localX = teammateRoot.Position.X; break end
-            end
-        end
-        local minX, maxX = localX, localX
+    end
+    -- Camera subjects are sampled every render, never on the 10 Hz HUD/discovery timer.
+    local localX = root and root.Position.X or 60
+    if snapshot.downed then
         for _, teammate in ipairs(Players:GetPlayers()) do
             local character = teammate.Character
             local teammateRoot = character and character:FindFirstChild("HumanoidRootPart")
-            local teammateHumanoid = character and character:FindFirstChildOfClass("Humanoid")
-            if teammateRoot and teammateRoot:IsA("BasePart") and teammateHumanoid and teammateHumanoid.Health > 0 and not character:GetAttribute("Downed")
-                and math.abs(teammateRoot.Position.X - localX) < 170 then
-                minX = math.min(minX, teammateRoot.Position.X); maxX = math.max(maxX, teammateRoot.Position.X)
-            end
+            if teammateRoot and teammateRoot:IsA("BasePart") and not character:GetAttribute("Downed") then localX = teammateRoot.Position.X; break end
         end
-        local stageStart = ((snapshot.stage or 1) - 1) * 180
-        local midpoint = math.clamp((minX + maxX) / 2, stageStart + 38, stageStart + 142)
-        cameraTarget = Vector3.new(midpoint, 5, 0)
-        local aspect = camera.ViewportSize.X / math.max(1, camera.ViewportSize.Y)
-        cameraDistance = math.clamp((maxX - minX + 54) / (2 * math.tan(math.rad(22)) * aspect), 52, 140)
     end
+    local minX, maxX = localX, localX
+    for _, teammate in ipairs(Players:GetPlayers()) do
+        local character = teammate.Character
+        local teammateRoot = character and character:FindFirstChild("HumanoidRootPart")
+        local teammateHumanoid = character and character:FindFirstChildOfClass("Humanoid")
+        if teammateRoot and teammateRoot:IsA("BasePart") and teammateHumanoid and teammateHumanoid.Health > 0 and not character:GetAttribute("Downed")
+            and math.abs(teammateRoot.Position.X - localX) < 170 then
+            minX = math.min(minX, teammateRoot.Position.X); maxX = math.max(maxX, teammateRoot.Position.X)
+        end
+    end
+    local stageStart = ((snapshot.stage or 1) - 1) * 180
+    local midpoint = math.clamp((minX + maxX) / 2, stageStart + 38, stageStart + 142)
+    cameraTarget = Vector3.new(midpoint, 5, 0)
+    local aspect = camera.ViewportSize.X / math.max(1, camera.ViewportSize.Y)
+    local desiredDistance = math.clamp((maxX - minX + 54) / (2 * math.tan(math.rad(22)) * aspect), 52, 140)
     camera.CameraType = Enum.CameraType.Scriptable; camera.FieldOfView = 44
-    local goalPosition = cameraTarget + Vector3.new(0, cameraDistance * 0.37, cameraDistance)
-    cameraPosition = cameraPosition and cameraPosition:Lerp(goalPosition, 1 - math.exp(-6 * dt)) or goalPosition
+    local alpha = 1 - math.exp(-6 * math.max(0, dt))
+    if cameraCenter then
+        cameraCenter = cameraCenter:Lerp(cameraTarget, alpha)
+        cameraDistance += (desiredDistance - cameraDistance) * alpha
+    else
+        cameraCenter = cameraTarget; cameraDistance = desiredDistance
+    end
     cameraKick = math.max(0, cameraKick - dt * 3)
-    local shake = Vector3.new(math.noise(os.clock() * 28, 0), math.noise(0, os.clock() * 28), 0) * cameraKick * preferences.shake
-    camera.CFrame = CFrame.lookAt(cameraPosition + shake, cameraTarget + shake)
+    local now = os.clock()
+    local shake = Vector3.new(math.noise(now * 28, 0), math.noise(0, now * 28), 0) * cameraKick * preferences.shake
+    local focus = cameraCenter + shake
+    local eye = focus + Vector3.new(0, cameraDistance * 0.37, cameraDistance)
+    -- Eye and focus share the same smoothed center: movement cannot introduce yaw snaps.
+    camera.CFrame = CFrame.lookAt(eye, focus)
+    camera.Focus = CFrame.new(focus)
     renderAccum += dt
     if renderAccum > 0.1 then
         renderAccum = 0

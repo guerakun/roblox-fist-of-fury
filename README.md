@@ -40,6 +40,9 @@ rojo serve default.project.json
 ```
 The committed place is built from the latest source and creates the world on simulation start; its Edit view starts empty. The earlier editable-world milestone is retained in Git history. Connect the Studio Rojo plugin for source editing. No runtime HTTP dependency is required. Toolbox animations are serialized R6 keyframes.
 
+## Latest focused review
+[Camera fix and measured regression results](docs/CAMERA_REGRESSION.md) · [Bare Knuckle III timestamped gameplay comparison](docs/research/BARE_KNUCKLE_3_VIDEO_REVIEW.md). Reference mechanics are proposals for user selection, not an approved feature backlog.
+
 ## Project memory
 [Design](docs/DESIGN.md) · [World bible](docs/WORLD_BIBLE.md) · [Story](docs/STORY.md) · [References](docs/REFERENCES.md) · [Assets](docs/ASSET_REGISTER.md) · [Combat](docs/COMBAT.md) · [Character art](docs/CHARACTER_ART.md) · [Economy](docs/MONETIZATION.md) · [Progression contract](docs/PROGRESSION_CONTRACT.md) · [Quality review](docs/QUALITY_REVIEW.md) · [Roadmap](docs/ROADMAP.md)
 

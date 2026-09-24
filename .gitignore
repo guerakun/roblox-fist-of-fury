@@ -5,3 +5,4 @@ build/
 node_modules/
 tools/bin/
 *.log
+tools/video-review/
