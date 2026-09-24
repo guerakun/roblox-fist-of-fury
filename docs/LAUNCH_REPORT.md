@@ -4,7 +4,7 @@ Prepared 2026-09-24 during the launch program. **This is not a release approval 
 
 No experience was published, no Creator Dashboard or live place setting was changed, no live player DataStore was exercised, and sales remain off during the authorized overnight work. Future owner actions below are a checklist, not completed actions or permission to perform them tonight.
 
-## Evidence already available
+## Earlier evidence checkpoints (historical)
 
 | Area | Recorded evidence | Limit |
 |---|---|---|
@@ -16,13 +16,35 @@ No experience was published, no Creator Dashboard or live place setting was chan
 | Matchmaking core | Fake-adapter party, lease, timeout, membership, forgery and injected-failure cases | No live MemoryStore, cross-server routing or teleport round-trip certification. |
 | Builds and scans | Source build and original-IP text checks are tracked per milestone in PROGRESS | A build is not runtime acceptance. Text scanning does not examine image likeness, published metadata or binary-place contents. |
 
-Later results must be appended with the tested commit and actual numbers; do not silently relabel these baseline observations as launch-candidate results.
+The table above preserves earlier checkpoints. Rendering subsequently recovered and M3 rules changed; use the newer evidence below for the current development build.
+
+## Current M3 checkpoint, 2026-09-24
+
+Production source is frozen at `dfb2ae3bbb04d1408613e3e28b1f37fcc3f2b6f4` for the final difficulty series. Both Rojo7.7.0 place artifacts were rebuilt from that source and saved in `ca54e6a`; [build hashes and source exclusions](launch/evidence/m3-place-build.json) identify them exactly. QA scripts are excluded. Later test/doc commits do not alter that production revision.
+
+| Area | Current evidence | Remaining gate |
+|---|---|---|
+| M2 AI | Five final Normal campaigns:5/5 clears, mean398.56s,2.8stocks,830.4damage; pooled idle9.58%,flank96.43%,cap breaches0;351 accepted hits all audited,0outside/invalid. Four-player crowd idle4.77%;39 AI CPU scopes mean0.46067ms. | Action diversity passed only21/31 eligible crowd windows, so that target fails. Desktop AI timing is not a minimum-phone performance result; human/archetype acceptance remains open. |
+| OriginalCast2 art | Current native geometry Gale36/Piston44/Tide40,each7queryable/6motors/0external meshes. Nine actual front/back/default-camera idle captures independently reviewed. [Evidence](launch/evidence/original-cast-v2.json) | Fine details are weak at the small default hero scale; scene contrast, combat/crowds/clipping/devices and owner name/art approval remain open. Close inspection used a local pose/camera override; normal views used the production camera. |
+| Persistent survival |39 policy checks,24 client controls and actual two-client revive/cancellation/expiry/retry/clear fixture; actual HUD size/rescue-spacing checks. [Evidence](launch/evidence/m3-survival.json) | Full latest-build campaign/lifecycle regressions and real reconnect/device sessions remain open. |
+| Style and rewards |73 style policy checks, server/client integration, rank HUD and reward reconciliation. One earlier diagnostic clear had A/A/A and897 actual coins. [Evidence](launch/evidence/m3-style.json) | The earlier diagnostic is not a final-curve sample. Final15-trial curve/ranks and tuning remain in progress; PROGRESS records each saved attempt. |
+| Risk actions |Desperation/perfect-block/bounty/physical-orb fixtures passed, plus actual two-client overlapping-volume/followup cancellation and contested one-winner orb pickup. [Risk](launch/evidence/m3-risk.json),[co-op](launch/evidence/m3-risk-coop.json) | Final enemy KOs do not spawn an orb; encounter transition clears leftover orbs. Human timing, physical input and projectile-flight parry acceptance are not established by those fixtures. |
+| Heat |All6effects and immutable admission enabled after policy/math, actual2client effects, revival and enabled hub selection checks. [Evidence](launch/evidence/m3-heat-runtime.json) | Real cross-place admission, live badge IDs and earned qualification across servers remain owner/test-universe gates. |
+| Earned trade-off boons |Glass Cannon/Berserker/Anchor enabled;71policy checks,42normalizer checks, client capabilities/widgets, actual combat physics and17real-profile/equip fixture checks. [Evidence](launch/evidence/m3-boon-runtime.json) | Practice/fake persistence only. Initial normalized-meter fixture failure and corrected assertion are preserved; live persistence/device acceptance remains open. |
+| Camera and input |Earlier forward-walking yaw fix remains unchanged. A passive current-camera observer and actual city still are saved. [Camera scope](CAMERA_REGRESSION.md),[input proposal](launch/M6_INPUT_READABILITY_PLAN.md) | Observer pools lifecycle/terminal frames and reports two unannotated offscreen hero samples in Normal1102; no comfort verdict. Shared active-input/short-height layout correction is documented but unimplemented during the freeze. |
+
+The final M3 series uses Normal/Hard/Nightmare seeds1101-1105, fresh Gale/Guardian Practice, no Heat, one unchanged bot action policy and no forced damage/kills. Save unfavorable and incomplete outcomes; do not pool different tuning revisions. The current completed count, exact next seed and individual evidence links are maintained in [PROGRESS](PROGRESS.md) and the [curve checklist](launch/M3_CURVE_CHECKLIST.md).
+
+**M4 has not begun implementation.** Contextual player grabs/throws, breakable food/coin pickups, three durable weapons, offensive air attack/juggle finisher, records and onboarding remain required. [Client readiness](launch/M4_CLIENT_READINESS.md) and [pickup/weapon design](launch/M4_PICKUP_WEAPON_PLAN.md) preserve scope and dependencies without claiming runtime completion.
+
+**Security remains open:** SEC-03 movement-origin authority has a reviewed proposal but no production enforcement or adversarial runtime proof. Server-owned attack parameters and distance checks do not validate every client-replicated position. See [security review](launch/SECURITY_REVIEW.md) and [movement plan](launch/MOVEMENT_AUTHORITY_PLAN.md). This blocks a launch-ready claim independently of bot clears.
+
 
 ## Owner decisions and art acceptance
 
 - [ ] Approve or rename the candidate display names: **Rook Calder (Gale)**, **Bo Marlowe (Piston)** and **Isla Veyra (Tide)**. Stable internal IDs should remain unchanged.
 - [ ] Inspect each original hero in silent gameplay at the real campaign camera, then front/side/back under all three chapter lighting setups. Approve silhouettes, faces, outfits, weapons and the three special pose/effect languages.
-- [ ] Capture three usable gameplay images, one per hero, without account identifiers or unrelated desktop content. A reviewer who did not author the art records one likeness-review line per hero. Blank captures and source descriptions do not substitute for this step.
+- [ ] Extend the saved nine OriginalCast2 inspection/idle views with silent combat images of all three heroes under representative chapter lighting and effects. Independent inspection notes already exist; ordinary action/crowd/clipping review and owner approval remain open. Keep images free of account identifiers and unrelated desktop content.
 - [ ] Review icon, thumbnails, experience title/description, search keywords and loading imagery for original identity. Re-run `python tools/check_ip.py` on the exact release source. Check rebuilt places for stale retired assets as well as source.
 - [ ] Select the minimum supported phone and record its model, OS, resolution and target graphics setting before accepting performance results.
 
@@ -75,5 +97,5 @@ Later results must be appended with the tested commit and actual numbers; do not
 | Closed versus implemented-only work | Use the current PROGRESS work-order table; do not infer completion from this checklist |
 | Exact next work order | Root's Morning summary at the top of PROGRESS |
 | Owner decisions | Candidate hero names/art, minimum device and later test-universe setup |
-| Blocked external evidence | Usable art captures, human/device sessions, live permissions/persistence, published round trips and Dashboard setup |
+| Blocked external evidence | Owner art approval and combat/device review, human sessions, live permissions/persistence, published round trips and Dashboard setup |
 | Publication and paid sales | Not performed overnight; remain disabled/unapproved until the corresponding gates are completed |

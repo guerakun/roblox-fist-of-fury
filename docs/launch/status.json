@@ -202,8 +202,8 @@
     "WO-6.1": {
       "owner": "world + root",
       "status": "owner checklist recorded; external gates open",
-      "evidence": "2026-09-24:LAUNCH_REPORT.md reviewed bypresentation; explicitdevice/human/published/persistence/permission/sales-off checklist; no external actions performed",
-      "next": "source analytics/badges/leaderboards where authorized;owner completesexternalgates"
+      "evidence": "2026-09-24:LAUNCH_REPORT.md reviewed bypresentation; explicitdevice/human/published/persistence/permission/sales-off checklist; no external actions performed Refreshed final-M3 artifact/evidence table and M4 dependencies; obsolete blank-render notes retained as history. World independent factual/scope review PASS after correcting survival stock-share attribution and final-KO orb wording. Local links verified; IP scan220filesPASS.",
+      "next": "Finish frozen M3 curve/current co-op regression, fix measured gates, then M4. LAUNCH_REPORT separates local evidence from owner/live/device actions; SEC03 remains open."
     },
     "WO-6.2": {
       "owner": "root",

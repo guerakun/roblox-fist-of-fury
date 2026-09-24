@@ -13,6 +13,8 @@ Start with [PROGRESS](../PROGRESS.md): its morning summary and work-order table 
 | Analytics and remote authority | [Analytics evidence](ANALYTICS_EVIDENCE.md), [security review](SECURITY_REVIEW.md) |
 | Assets, controls and scene lifetime | [Asset/input review](ASSET_INPUT_REVIEW.md), [scene review](SCENE_SOURCE_REVIEW.md), [asset register](../ASSET_REGISTER.md) |
 | Contracts and retained proposals; consult PROGRESS for actual status | [M3 UI contract](M3_UI_CONTRACT.md), [movement-authority plan](MOVEMENT_AUTHORITY_PLAN.md) |
+| Pending M4 launch features | [Client readiness](M4_CLIENT_READINESS.md), [pickup/weapon design](M4_PICKUP_WEAPON_PLAN.md) |
+| Camera and short-screen controls | [Camera measurements](../CAMERA_REGRESSION.md), [input readability proposal](M6_INPUT_READABILITY_PLAN.md) |
 | Promotional concept, pending owner approval | [Original icon concept](ICON_CONCEPT.md) |
 | Preserved experience direction | [World bible](../WORLD_BIBLE.md), [story](../STORY.md), [combat](../COMBAT.md), [economy](../MONETIZATION.md), [reference gameplay review](../research/BARE_KNUCKLE_3_VIDEO_REVIEW.md) |
 
