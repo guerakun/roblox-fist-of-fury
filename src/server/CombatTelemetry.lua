@@ -7,7 +7,7 @@ local state, windows
 local function time() return workspace:GetServerTimeNow() end
 function Telemetry.Reset()
     state = {schema=1, started=time(), eligibleGruntTicks=0, idleGruntTicks=0,
-        windupPeak=0, capViolations=0, minWindup=false, windups=0, actions={},
+        serverBoundsRejected=0, windupPeak=0, capViolations=0, minWindup=false, windups=0, actions={},
         flankWindows=0, flankedWindows=0, hits={}, stocks={}, damage={}, encounters={},
         aiSeconds=0, aiSamples=0, aiPeakSeconds=0, cameraFrustum="not measured", rank="not implemented"}
     windows = {}
@@ -36,6 +36,9 @@ function Telemetry.StockLoss(player)
     state.stocks[id][stage]=(state.stocks[id][stage] or 0)+1
     local entry=state.encounters[stage..":"..tostring(state.wave)]
     if entry then entry.stocks+=1 end
+end
+function Telemetry.BoundsRejected()
+    if enabled then state.serverBoundsRejected+=1 end
 end
 function Telemetry.Windup(kind, move, duration, simultaneous, cap)
     if not enabled then return end

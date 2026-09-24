@@ -19,7 +19,47 @@ function Moves.Build(name, context)
     local function safePoint(position)
         return Vector3.new(math.clamp(position.X, arena.MinX + 12, arena.MaxX - 12), 0, math.clamp(position.Z, -10, 10))
     end
-    if name == "Cleaver" then
+    if name == "HuskJab" or name == "StriderJab" or name == "LeaperJab" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.48,.55,false,"Light"
+        box(forward(3.5),7,6,false,.75)
+        if name=="HuskJab" then result.FollowUp=.46 end
+    elseif name == "HuskJumpKick" or name == "LeaperVaultKick" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.6,.85,false,"Jump"
+        result.Flight,result.Arc,result.TellStyle=.38,8,"Floor"
+        result.MoveTo=safePoint(target+Vector3.new(direction*(name=="LeaperVaultKick" and 5 or 0),0,0))
+        box(result.MoveTo,8,7,false,1.05)
+    elseif name == "StriderSlide" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.55,.75,false,"Slide"
+        result.Flight,result.Arc,result.TellStyle=.32,0,"Floor"
+        result.MoveTo=safePoint(origin+Vector3.new(direction*math.clamp(math.abs(target.X-origin.X)+4,12,18),0,0))
+        box((origin+result.MoveTo)/2,math.abs(result.MoveTo.X-origin.X)+3,5,true,1.0)
+        result.Retreat=1.2
+    elseif name == "GrapplerGrab" or name == "GrapplerThrow" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.65,1.25,false,"Grapple"
+        result.Grab=true;result.BackThrow=name=="GrapplerThrow"
+        box(forward(3),6,6,false,.2)
+    elseif name == "PitcherThrow" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.45,.8,false,"Heavy"
+        result.Projectile,result.Flight,result.TellStyle=true,.5,"Floor"
+        result.Endpoint=safePoint(origin+Vector3.new(direction*24,0,0))
+        box((origin+result.Endpoint)/2,math.abs(result.Endpoint.X-origin.X)+4,math.abs(result.Endpoint.Z-origin.Z)+4,false,1)
+    elseif name == "PitcherShove" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.4,.65,false,"Light"
+        result.Retreat=1.3;box(forward(3.5),7,7,false,.7)
+    elseif name == "WardenCounter" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.4,.7,false,"Light"
+        box(forward(4),8,7,false,1.1)
+    elseif name == "WardenKick" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.6,.7,false,"Heavy"
+        box(forward(4),8,8,false,1)
+    elseif name == "BruteFlop" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.9,1.15,true,"Jump"
+        result.Flight,result.Arc,result.TellStyle=.42,5,"Floor"
+        result.MoveTo=safePoint(target);circle(result.MoveTo,8,true,1.1)
+    elseif name == "BruteSwing" then
+        result.Windup,result.Recovery,result.Armored,result.Pose=.9,.95,true,"Heavy"
+        result.TellStyle="Floor";box(forward(5),10,11,true,1)
+    elseif name == "Cleaver" then
         result.Name, result.Windup, result.Recovery = "CROSSWALK CLEAVE", .9, 1.0
         box(forward(6), 12, 9, false)
     elseif name == "CrossingSweep" then

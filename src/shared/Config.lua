@@ -57,6 +57,18 @@ Config.Enemies = {
     FurnaceHound = {Name = "Furnace Hound", Role = "Miniboss", Color = Color3.fromRGB(247, 137, 52), Speed = 16, Weight = 1.8, Threshold = 220, Damage = 18, Reach = 12, Windup = 1.0, Cooldown = 2.4, Scale = 1.4, Poise = 42, Moves = {"Pounce", "CinderTrail", "Bite"}, PhaseMoves = {"Pounce", "CinderTrail", "Pounce", "Bite"}},
     KilnSovereign = {Name = "Kiln Sovereign", Role = "Boss", Color = Color3.fromRGB(255, 103, 49), Speed = 9, Weight = 2.4, Threshold = 340, Damage = 22, Reach = 14, Windup = 1.25, Cooldown = 3.0, Scale = 1.8, Poise = 60, Moves = {"ForgeCrush", "FurnaceVent", "SlagPunch"}, PhaseMoves = {"TwinVent", "ForgeCrush", "SlagPunch", "ForgeCrush"}},
 }
+-- Six original combat roles; old aliases remain for fixtures and encounter compatibility.
+local Archetypes = require(script.Parent.EnemyArchetypes)
+for id, spec in pairs(Archetypes.Specs) do Config.Enemies[id] = table.clone(spec) end
+Config.Enemies.Grunt.Archetype = "Husk"
+Config.Enemies.Runner.Archetype = "Strider"
+Config.Enemies.Brute.Archetype = "Brute"
+Config.Stages[1].Waves[1].Enemies = {Husk = 2, Warden = 1}
+Config.Stages[1].Waves[3].Enemies = {Strider = 2, Grappler = 1, Husk = 1}
+Config.Stages[2].Waves[1].Enemies = {Pitcher = 1, Leaper = 1, Husk = 2}
+Config.Stages[2].Waves[3].Enemies = {Warden = 1, Grappler = 1, Brute = 1}
+Config.Stages[3].Waves[1].Enemies = {Pitcher = 1, Leaper = 1, Brute = 1}
+Config.Stages[3].Waves[3].Enemies = {Strider = 1, Grappler = 1, Warden = 1, Brute = 1}
 -- One-way legacy-ID fingerprints support retired save records without retaining display labels.
 -- Exact compatibility fixtures and provenance live in docs/launch/HERO_MIGRATION.md.
 local legacyHeroFingerprints = {[261244702] = "Gale", [266550891] = "Piston", [3479830332] = "Tide"}

@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "result": {
+    "passed": true,
+    "result": {
+      "allyRescue": true,
+      "timedThrow": true,
+      "cancelledThrow": true
+    }
+  }
+}

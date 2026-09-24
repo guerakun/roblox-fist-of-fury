@@ -115,6 +115,71 @@ function Factory.Create(kind, spec)
             detail("HammerFace", host, Vector3.new(1.3, .45, 1.4), Vector3.new(0, -1.45, -.2), spec.Color, true)
             detail("Smokestack", torso, Vector3.new(.6, 2.0, .7), Vector3.new(side * 1.1, 1.5, .8), charcoal)
         end
+    elseif kind == "Husk" then
+        -- Worn cloth and asymmetric patches: the basic brawler stays visually light.
+        detail("HuskJerkin", torso, Vector3.new(2.08, 1.62, 1.08), Vector3.new(0, -.16, 0), Color3.fromRGB(66, 65, 82))
+        detail("HuskPatch", torso, Vector3.new(.62, .53, .09), Vector3.new(-.52, .1, -.62), bone, false, CFrame.Angles(0, 0, -.15))
+        for _, arm in ipairs({leftArm, rightArm}) do
+            for i = 0, 2 do
+                local wrap = detail("HuskWornWrap", arm, Vector3.new(1.055, .16, 1.055), Vector3.new(0, -.40 - i * .2, 0), bone:Lerp(charcoal, i * .14))
+                wrap.Material = Enum.Material.Fabric
+            end
+        end
+        for i = 1, 3 do detail("HuskHem", torso, Vector3.new(.34, .32 + i * .07, .09), Vector3.new(-.7 + i * .36, -.94, -.56), Color3.fromRGB(66, 65, 82), false, CFrame.Angles(0, 0, (i - 2) * .14)) end
+    elseif kind == "Strider" then
+        -- Long low shin fins and heel cylinders read as a fast lane-slider.
+        detail("StriderChestHarness", torso, Vector3.new(1.26, .68, .15), Vector3.new(0, .45, -.59), spec.Color)
+        for _, leg in ipairs({leftLeg, rightLeg}) do
+            detail("StriderShinPlate", leg, Vector3.new(.84, 1.30, .24), Vector3.new(0, -.12, -.58), spec.Color)
+            detail("StriderToeFin", leg, Vector3.new(.89, .2, 1.56), Vector3.new(0, -.83, -.34), metal)
+            local booster = detail("StriderHeelBooster", leg, Vector3.new(.7, .7, .8), Vector3.new(0, -.56, .7), charcoal)
+            booster.Shape = Enum.PartType.Cylinder
+            detail("StriderVent", leg, Vector3.new(.46, .12, .11), Vector3.new(0, -.56, 1.16), spec.Color)
+        end
+        detail("StriderSweptBrow", head, Vector3.new(1.83, .21, .24), Vector3.new(0, .33, -.6), spec.Color, false, CFrame.Angles(0, 0, -.08))
+    elseif kind == "Grappler" then
+        -- Squared grip gauntlets distinguish capture pressure from a weapon silhouette.
+        detail("GrapplerApron", torso, Vector3.new(2.22, 1.87, 1.14), Vector3.new(0, -.13, 0), Color3.fromRGB(78, 69, 59))
+        for _, arm in ipairs({leftArm, rightArm}) do
+            detail("GrapplerGripGauntlet", arm, Vector3.new(1.39, 1.17, 1.4), Vector3.new(0, -.42, -.08), metal)
+            detail("GrapplerCuff", arm, Vector3.new(1.43, .2, 1.43), Vector3.new(0, .24, -.08), spec.Color)
+            for i = -1, 1 do detail("GrapplerGripFinger", arm, Vector3.new(.22, .53, .24), Vector3.new(i * .35, -.85, -.82), bone) end
+        end
+        detail("GrapplerJawGuard", head, Vector3.new(1.72, .42, .38), Vector3.new(0, -.33, -.63), spec.Color)
+        detail("GrapplerBackLatch", torso, Vector3.new(.82, .87, .22), Vector3.new(0, .3, .67), metal)
+    elseif kind == "Pitcher" then
+        -- A visible rack of short throwing rods and shoulder canister identifies ranged pressure.
+        detail("PitcherBandolier", torso, Vector3.new(.3, 2.23, .14), Vector3.new(0, .06, -.59), Color3.fromRGB(96, 75, 64), false, CFrame.Angles(0, 0, -.48))
+        for i = -1, 2 do
+            detail("PitcherThrowingRod", torso, Vector3.new(.14, .64, .15), Vector3.new(i * .30, .32 - i * .33, -.77), bone, false, CFrame.Angles(0, 0, -.2))
+            detail("PitcherRodGrip", torso, Vector3.new(.2, .15, .2), Vector3.new(i * .30, .12 - i * .33, -.77), spec.Color)
+        end
+        detail("PitcherRangeSleeve", rightArm, Vector3.new(1.08, .58, 1.1), Vector3.new(0, -.45, 0), spec.Color)
+        local canister = detail("PitcherShoulderCanister", torso, Vector3.new(.67, 1.43, .7), Vector3.new(-1.1, .52, .59), metal)
+        canister.Shape = Enum.PartType.Cylinder
+        detail("PitcherHalfMask", head, Vector3.new(1.2, .32, .19), Vector3.new(0, -.33, -.64), spec.Color)
+    elseif kind == "Warden" then
+        -- Paired broad forearm shields advertise frontal defense, not an enlarged damage target.
+        detail("WardenChestPlate", torso, Vector3.new(2.21, 1.7, 1.19), Vector3.new(0, .08, 0), Color3.fromRGB(49, 76, 85))
+        for _, arm in ipairs({leftArm, rightArm}) do
+            detail("WardenForearmShield", arm, Vector3.new(1.38, 1.5, .31), Vector3.new(0, -.29, -.71), metal)
+            for _, x in ipairs({-.59, .59}) do detail("WardenShieldRail", arm, Vector3.new(.10, 1.57, .12), Vector3.new(x, -.29, -.94), spec.Color) end
+            detail("WardenShieldBar", arm, Vector3.new(1.28, .14, .12), Vector3.new(0, -.30, -.94), bone)
+        end
+        detail("WardenCrownGuard", head, Vector3.new(1.83, .28, 1.25), Vector3.new(0, .51, .02), metal)
+        detail("WardenJawPlate", head, Vector3.new(1.29, .23, .2), Vector3.new(0, -.36, -.64), spec.Color)
+    elseif kind == "Leaper" then
+        -- Arched crest and heel arcs emphasize a tall acrobat silhouette without glowing ground tells.
+        for i = 0, 2 do
+            detail("LeaperArchedCrest", head, Vector3.new(.22, .75, .30), Vector3.new(0, .69 + math.sin(i * 1.2) * .25, -.1 + i * .35), spec.Color, false, CFrame.Angles(-.28 + i * .25, 0, 0))
+        end
+        for _, leg in ipairs({leftLeg, rightLeg}) do
+            detail("LeaperHeelArc", leg, Vector3.new(.22, .83, .26), Vector3.new(0, -.42, .67), metal, false, CFrame.Angles(.5, 0, 0))
+            detail("LeaperHeelFoot", leg, Vector3.new(.58, .14, .86), Vector3.new(0, -.81, .66), spec.Color)
+            detail("LeaperAnkleWrap", leg, Vector3.new(1.04, .26, 1.04), Vector3.new(0, -.72, 0), bone)
+        end
+        detail("LeaperSplitHarness", torso, Vector3.new(.3, 1.98, .12), Vector3.new(.4, .0, -.59), spec.Color, false, CFrame.Angles(0, 0, .33))
+        detail("LeaperShoulderFin", leftArm, Vector3.new(1.18, .24, .64), Vector3.new(0, .83, -.12), spec.Color, false, CFrame.Angles(0, 0, -.2))
     elseif kind == "Brute" then
         detail("ConcreteArmor", torso, Vector3.new(2.5, 1.7, 1.35), Vector3.zero, metal)
     elseif kind == "Runner" then
@@ -264,7 +329,9 @@ function Factory.Create(kind, spec)
         detail("CrownCenterStone", head, Vector3.new(.28, .26, .1), Vector3.new(0, .57, -.75), Color3.fromRGB(104, 43, 36))
     end
     model:SetAttribute("CosmeticPartCount", cosmeticPartCount)
-    model:SetAttribute("VisualRevision", "EliteFaces-1")
+    local archetypeVisual = kind == "Husk" or kind == "Strider" or kind == "Grappler" or kind == "Pitcher" or kind == "Warden" or kind == "Leaper"
+    model:SetAttribute("VisualRevision", archetypeVisual and "Archetypes-1" or "EliteFaces-1")
+    if archetypeVisual then model:SetAttribute("ArchetypeVisual", kind) end
     local h = Instance.new("Humanoid")
     h.MaxHealth, h.Health = 100000, 100000
     h.HipHeight, h.BreakJointsOnDeath = 0, false

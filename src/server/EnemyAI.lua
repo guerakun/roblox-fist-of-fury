@@ -1,6 +1,19 @@
 -- Server-owned movement and engagement state; damage remains in CombatService.
 local Director=require(script.Parent.AttackDirector)
+local Archetypes=require(game.ReplicatedStorage.Nightfall.Shared.EnemyArchetypes)
 local EnemyAI={}
+local ranges={HuskJab=6,HuskJumpKick=16,StriderSlide=17,StriderJab=6,GrapplerGrab=6,GrapplerThrow=6,
+    PitcherThrow=21,PitcherShove=7,WardenCounter=7,WardenKick=7,LeaperVaultKick=18,LeaperJab=6,BruteFlop=13,BruteSwing=8}
+local function observe(data,target,record,t,delay)
+    local signature=tostring(record.lastAction)..":"..tostring(record.attackStartedAt)..":"..tostring(record.blocking)
+    if data.observedTarget~=target then data.observedTarget=target;data.observed={};data.pendingObservation=nil;data.observationSignature=nil end
+    if not data.pendingObservation and signature~=data.observationSignature then
+        data.observationSignature=signature
+        data.pendingObservation={at=t+delay,value={action=record.lastAction,attackAt=record.attackStartedAt,combo=record.combo,blocking=record.blocking}}
+    end
+    if data.pendingObservation and t>=data.pendingObservation.at then data.observed=data.pendingObservation.value;data.pendingObservation=nil end
+    return data.observed or {}
+end
 local closeMoves={Cleaver=true,CrossingSweep=true,AlarmRing=true,TicketCut=true,BellStrike=true,Bite=true,SlagPunch=true}
 local function state(model,data,value)
     if data.aiState~=value then data.aiState=value;model:SetAttribute("AIState",value) end
@@ -64,12 +77,39 @@ function EnemyAI.Step(t,c)
         local pr=c.root(target.Character)
         data.facing=pr.Position.X>=r.Position.X and 1 or -1
         local slot=Director.Assign(director,model,target,r.Position,pr.Position)
+        local archetype=Archetypes.Id(data.kind,data.spec)
+        local observed=observe(data,target,c.records[target],t,.35)
+        if archetype=="Warden" then
+            local wasBlocking=data.blocking
+            data.blocking=t>=(data.guardBrokenUntil or 0)
+            if wasBlocking~=data.blocking then c.attributes(model,data)end
+            if data.blocking then state(model,data,"Block") end
+        end
+        if archetype=="Leaper" and observed.action=="Heavy" and observed.attackAt~=data.lastObservedHeavy then
+            data.lastObservedHeavy=observed.attackAt;data.observedHeavies=(data.observedHeavies or 0)+1
+            if data.observedHeavies%3==0 then
+                data.evadeUntil=t+.5;data.invulnerableUntil=math.max(data.invulnerableUntil or 0,t+.35)
+                r.AssemblyLinearVelocity=Vector3.new(-data.facing*26,24,0)
+                Director.Release(director,model);data.engaging=false
+                c.fx("EnemyEvade",r.Position,{targetModel=model,duration=.5,direction=-data.facing,enemy=data.kind,moveId="LeaperEvade"})
+            end
+        end
+        if t<(data.evadeUntil or 0) then state(model,data,"Evade");h:Move(Vector3.zero);continue end
+        if (archetype=="Pitcher" and distance<12) or t<(data.retreatUntil or 0) then
+            state(model,data,"Retreat");Director.Release(director,model);data.engaging=false
+            local away=r.Position.X>=pr.Position.X and 1 or -1
+            h.WalkSpeed=data.spec.Speed
+            h:MoveTo(Vector3.new(math.clamp(pr.Position.X+away*17,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(pr.Position.Z+(slot.serial%2==0 and 3 or -3),-11,11)))
+            if archetype~="Pitcher" or t<data.attackAt or distance>7 then continue end
+            -- A cornered ranged enemy can shove rather than retreat forever against a bound.
+        end
         local pattern=data.phase==2 and data.spec.PhaseMoves or data.spec.Moves
         local moveName=pattern and pattern[data.moveIndex%#pattern+1] or "Melee"
-        local range=not elite and data.spec.Reach-1 or (closeMoves[moveName] and data.spec.Reach or 65)
+        if not elite then moveName=Archetypes.Select(archetype,distance,observed,data.moveIndex) end
+        local range=not elite and (ranges[moveName] or data.spec.Reach-1) or (closeMoves[moveName] and data.spec.Reach or 65)
         local token=director.tokens[model]
         if token and token.target~=target then Director.Release(director,model);token=nil;data.engaging=false end
-        local inRange=distance<=range and (elite or (math.abs(pr.Position.Z-r.Position.Z)<=3 and (r.Position.X-pr.Position.X)*slot.offset.X>0))
+        local inRange=(not c.CanAttack or c.CanAttack(model)) and distance<=range and (elite or (math.abs(pr.Position.Z-r.Position.Z)<=3 and (r.Position.X-pr.Position.X)*slot.offset.X>0))
         if token and inRange and t>=data.attackAt then
             data.engaging=false;data.lastAttackAt=t;state(model,data,"Attack")
             c.beginEnemyAttack(model,data,target,moveName,alive)
@@ -77,10 +117,11 @@ function EnemyAI.Step(t,c)
             local destination
             if token then
                 data.engaging=true;state(model,data,"Engage")
-                destination=Vector3.new(pr.Position.X+(slot.offset.X<0 and -4 or 4),r.Position.Y,pr.Position.Z)
+                destination=Vector3.new(pr.Position.X+(slot.offset.X<0 and -1 or 1)*(archetype=="Pitcher" and 17 or 4),r.Position.Y,pr.Position.Z)
             else
                 data.engaging=false
-                local goal=pr.Position+slot.offset
+                local offset=archetype=="Pitcher" and Vector3.new(slot.offset.X<0 and -17 or 17,0,slot.offset.Z*.4) or slot.offset
+                local goal=pr.Position+offset
                 local nearSlot=(Vector3.new(goal.X,0,goal.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude<4
                 state(model,data,nearSlot and "Hold" or "Approach")
                 if nearSlot then

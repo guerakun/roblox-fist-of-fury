@@ -23,6 +23,7 @@ local COLORS = {
 }
 local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
 local HeroSpecials = require(script.Parent:WaitForChild("HeroSpecials"))
+local EnemyPresentation = require(script.Parent:WaitForChild("EnemyPresentation"))
 local HEROES = Config.CharacterOrder
 local HERO_COLORS, HERO_MOVES = {}, {}
 for _, id in ipairs(HEROES) do
@@ -88,6 +89,7 @@ end)
 local effectsFolder = Instance.new("Folder")
 effectsFolder.Name = "NightfallLocalEffects"
 effectsFolder.Parent = workspace
+local enemyPresentation = EnemyPresentation.new(effectsFolder, preferences)
 
 local function make(class: string, properties: any, parent: Instance?): any
     local object = Instance.new(class)
@@ -590,7 +592,7 @@ local function bodyTell(event: any)
     clearBodyTell(model)
     local duration = math.clamp(tonumber(event.duration) or .35, .30, 5)
     local actor = registerActor(model)
-    if actor then actor.tellStart = os.clock(); actor.tellUntil = actor.tellStart + duration end
+    if actor then actor.tellStart = os.clock(); actor.tellUntil = actor.tellStart + duration; actor.moveId = event.moveId end
     local color = preferences.highContrast and COLORS.orange or (typeof(event.color) == "Color3" and event.color or COLORS.red)
     local flash = make("Highlight", {Name = "EnemyBodyTell", Adornee = model,
         DepthMode = Enum.HighlightDepthMode.Occluded, FillColor = color, FillTransparency = .36,
@@ -637,6 +639,11 @@ end
 fxRemote.OnClientEvent:Connect(function(event: any)
     if type(event) ~= "table" then return end
     local kind = event.kind
+    enemyPresentation.Emit(event)
+    if kind == "EnemyEvade" and typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
+        local actor = registerActor(event.targetModel)
+        if actor then actor.moveId = "LeaperEvade"; actor.start = os.clock(); actor.moveDuration = event.duration or .5; actor.tellUntil = nil end
+    end
     if kind == "Hit" then hitFeedback(event) end
     if kind == "Attack" or kind == "Dash" then
         local action = kind == "Dash" and "Dash" or event.action
@@ -649,6 +656,8 @@ fxRemote.OnClientEvent:Connect(function(event: any)
             if event.playerUserId then
                 local owner = Players:GetPlayerByUserId(event.playerUserId)
                 model = owner and owner.Character
+            elseif typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
+                model = event.targetModel
             elseif event.enemy and typeof(event.position) == "Vector3" then
                 local folder = workspace:FindFirstChild("Enemies")
                 local closest = 8
@@ -664,7 +673,7 @@ fxRemote.OnClientEvent:Connect(function(event: any)
             end
             if model then
                 local actor = registerActor(model)
-                if actor then actor.action = action; actor.start = os.clock() end
+                if actor then actor.action = action; actor.start = os.clock(); actor.moveId = event.moveId; actor.moveDuration = .45; actor.tellUntil = nil end
             end
         end
     end
@@ -702,13 +711,21 @@ fxRemote.OnClientEvent:Connect(function(event: any)
         burst(position, COLORS.orange, true, 1)
     elseif kind == "Telegraph" then
         if event.tellStyle == "Body" then bodyTell(event)
-        else hazardFootprint(event, false) end
+        else
+            hazardFootprint(event, false)
+            if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
+                local actor = registerActor(event.targetModel)
+                if actor then actor.tellStart = os.clock(); actor.tellUntil = actor.tellStart + math.max(.30, event.duration or .35); actor.moveId = event.moveId end
+            end
+        end
         presentation.telegraph(event)
     elseif kind == "EnemyFeint" then
         bodyTell(event)
     elseif kind == "EnemyCancel" then
         if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
             clearBodyTell(event.targetModel)
+            local actor = actorPoses[event.targetModel]
+            if actor then actor.moveId = nil; actor.action = nil end
             presentation.cancelWarnings(event.targetModel)
         end
     elseif kind == "EnemyImpact" then
@@ -827,8 +844,14 @@ local function sampleToolbox(dt: number)
         elseif actor.tellUntil and now < actor.tellUntil and toolboxData.Heavy then
             -- Hold the imported heavy anticipation, never play its strike during the warning.
             local progress = math.clamp((now - actor.tellStart) / math.max(.30, actor.tellUntil - actor.tellStart), 0, 1)
-            applyToolboxPose(actor.joints, toolboxData.Heavy, toolboxData.Heavy.duration * (.08 + progress * .12), dt)
+            local tellPose = EnemyPresentation.Pose(actor.moveId, progress, true)
+            if tellPose then applyHeroPose(actor.joints, tellPose, dt)
+            else applyToolboxPose(actor.joints, toolboxData.Heavy, toolboxData.Heavy.duration * (.08 + progress * .12), dt) end
+        elseif actor.moveId and now - actor.start <= (actor.moveDuration or .45) then
+            local attackPose = EnemyPresentation.Pose(actor.moveId, (now - actor.start) / (actor.moveDuration or .45), false)
+            if attackPose then applyHeroPose(actor.joints, attackPose, dt) end
         else
+            actor.moveId = nil
             local specialPose = actor.action == "Special" and HeroSpecials.Pose(model:GetAttribute("Hero"), now - actor.start)
             if actor.action == "Special" and not specialPose then actor.action = nil end
             if specialPose then applyHeroPose(actor.joints, specialPose, dt)
@@ -839,7 +862,7 @@ local function sampleToolbox(dt: number)
             if not data then
                 local actorRoot = model:FindFirstChild("HumanoidRootPart")
                 local moving = actorRoot and actorRoot:IsA("BasePart") and Vector3.new(actorRoot.AssemblyLinearVelocity.X, 0, actorRoot.AssemblyLinearVelocity.Z).Magnitude > 2
-                data = toolboxData[moving and "Walk" or "Idle"]
+                data = toolboxData[model:GetAttribute("Blocking") and "Block" or moving and "Walk" or "Idle"]
             end
             if data then
                 local duration = math.max(0.05, data.duration)

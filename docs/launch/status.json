@@ -1,5 +1,5 @@
 {
-  "summary": "M0 closed: 5/5 baseline clears, mean278.27s,0.80stocks,543damage (be91f0f). M1 original IDs/art/specials/story and IP scan implemented; rig/FX specs pass and committed campaign rebuilt. Names/art approval and three visible gameplay screenshots remain open: capture renders UI but no3D despite loaded world. WO-2.1 extraction passed deterministic equivalence; WO-2.2 director/body tells passed scheduler regressions, aggregate M2 telemetry pending; WO-2.3 archetypes underway. M5 hub source built and matchmaking core passed37fake-adapter assertions. Actual fixed2/3/4 and late2-to-4 campaigns passed;150/250ms passed;14lifecycle checks passed, same-identity reconnect blocked by Studio freshIDs and other scenarios itemized in MULTIPLAYER_EVIDENCE.md. No publication/liveDataStore/settings/sales changes. Lag restored0. Next: combat WO-2.3, presentation enemyFX thenWO-5.3 hubUI, rootWO-5.4 controller/join/return andM2telemetry. M3/M4 notstarted; ownerhumanplay/liveuniverse gates remain.",
+  "summary": "M0 closed: 5/5 baseline clears, mean278.27s,0.80stocks,543damage (be91f0f). M1 original IDs/art/specials/story and IP scan implemented; rig/FX specs pass and committed campaign rebuilt. Names/art approval and three visible gameplay screenshots remain open: capture renders UI but no3D despite loaded world. WO-2.1 extraction passed deterministic equivalence; WO-2.2 director/body tells passed scheduler regressions, aggregate M2 telemetry pending; WO-2.3 six archetypes/fourteenmoves implemented; move/rig/pose specs and actual two-client grab/rescue passed. Director seed1101:292.37s,0stocks,430damage,idle10.58%,flank90.91%,cap0; aggregate suite pending. M5 hub source built and matchmaking core passed37fake-adapter assertions. Actual fixed2/3/4 and late2-to-4 campaigns passed;150/250ms passed;14lifecycle checks passed, same-identity reconnect blocked by Studio freshIDs and other scenarios itemized in MULTIPLAYER_EVIDENCE.md. No publication/liveDataStore/settings/sales changes. Lag restored0. Next: combat WO-2.4, presentation enemyFX thenWO-5.3 hubUI, rootWO-5.4 controller/join/return andM2telemetry. M3/M4 notstarted; ownerhumanplay/liveuniverse gates remain.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -46,7 +46,7 @@
     "WO-1.5": {
       "owner": "root",
       "status": "source gate passed; owner/visual gates open",
-      "evidence": "2026-09-24: check_ip.py PASS79files/zero names or8retiredIDs; worldreviewPASS; campaign rebuiltfromcommittedb8f3d76; three3Dhero capturesblocked(UIrenders/worldblank)",
+      "evidence": "2026-09-24: check_ip.py PASS79files/zero names or8retiredIDs; worldreviewPASS; campaign rebuiltfromcommittedb8f3d76; three3Dhero capturesblocked(UIrenders/worldblank); commit5674dc9",
       "next": "owner names/art approval andnon-authorvisualreview; retryrendercapture; sourceM1complete butmilestoneacceptanceopen"
     },
     "WO-2.1": {
@@ -58,14 +58,14 @@
     "WO-2.2": {
       "owner": "combat",
       "status": "implemented; aggregate telemetry pending",
-      "evidence": "2026-09-24: fresh Studio AttackDirectorAI+EnemyAISlots PASS; world finalreview PASS; front/back slots, nonidleHold,2-5tokens, renewal/capshrink/targetdeparture invalidation, bodytell client contract; commit3bbc5cc",
+      "evidence": "2026-09-24: fresh Studio AttackDirectorAI+EnemyAISlots PASS; world finalreview PASS; front/back slots, nonidleHold,2-5tokens, renewal/capshrink/targetdeparture invalidation, bodytell client contract; commit3bbc5cc; seed1101Victory292.37s/0stocks/430damage/idle10.58%/flank90.91%/cap0; notfive-runacceptance",
       "next": "WO-2.3 archetypes; five-run aggregate M2 telemetry/frustum/human gates remain open"
     },
     "WO-2.3": {
       "owner": "combat",
-      "status": "queued",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "implemented; aggregate campaign gate pending",
+      "evidence": "2026-09-24:14moves/7policies+boundarygeometryPASS;6rigs19-22parts7queryable6motors;30clientposes/cancel/cleanupPASS; actual2-clientgrabfixturePASSallyrescue/cancelledthrow/timedthrow; worldfinalsourcePASS",
+      "next": "WO-2.4 elites;M2fivebot/frustum/human/MicroProfiler remain;Huskweaponhook completesM4"
     },
     "WO-2.4": {
       "owner": "combat",

@@ -8,6 +8,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.Config)
 local CombatMath = require(ReplicatedStorage.Nightfall.Shared.CombatMath)
+local Archetypes = require(ReplicatedStorage.Nightfall.Shared.EnemyArchetypes)
+local CameraBounds = require(ReplicatedStorage.Nightfall.Shared.CameraBounds)
 local ToolboxHitbox = require(ReplicatedStorage.Nightfall.Shared.ToolboxHitbox)
 local Telemetry = require(script.Parent.CombatTelemetry)
 local EnemyAI = require(script.Parent.EnemyAI)
@@ -15,6 +17,8 @@ local AttackDirector = require(script.Parent.AttackDirector)
 local Combat = {}
 local records, enemies = {}, {}
 local aiDirector = AttackDirector.New()
+local cameraEstimate, cameraSpan, cameraGoal, cameraGoalSpan
+local lastCameraSample
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
 local disconnectedSurvival = {}
 local MAX_DISCONNECTED_SURVIVORS = 256
@@ -27,6 +31,12 @@ local encounter = {wave = 0, waves = 4, enemiesRemaining = 0, status = "Waiting"
 local function now() return workspace:GetServerTimeNow() end
 local function root(model) return model and model:FindFirstChild("HumanoidRootPart") end
 local function humanoid(model) return model and model:FindFirstChildOfClass("Humanoid") end
+local function enemyVisible(model)
+    local r=root(model)
+    return r~=nil and cameraGoalSpan~=nil and cameraGoalSpan<160
+        and CameraBounds.Visible(r.Position,cameraEstimate,cameraSpan or 0)
+        and CameraBounds.Visible(r.Position,cameraGoal,cameraGoalSpan)
+end
 local function modelOf(actor) return typeof(actor) == "Instance" and actor:IsA("Player") and actor.Character or actor end
 local function recordOf(model)
     if typeof(model) ~= "Instance" or not model:IsA("Model") then return nil end
@@ -41,6 +51,18 @@ local function fx(kind, position, fields)
     local packet = fields or {}
     packet.kind, packet.position = kind, position
     if remotes then remotes.FX:FireAllClients(packet) end
+end
+local function releaseGrab(enemy, rescued)
+    local enemyData=enemies[enemy]
+    local player=enemyData and enemyData.grabbedPlayer
+    local data=player and records[player]
+    if enemyData then enemyData.grabbedPlayer=nil end
+    if data and data.grabbedBy==enemy then
+        data.grabbedBy=nil
+        if data.stunnedUntil==data.grabStunUntil then data.stunnedUntil=now() end
+        data.grabStunUntil=nil
+        fx("EnemyGrabRelease",root(enemy) and root(enemy).Position or Vector3.zero,{targetModel=enemy,targetUserId=player.UserId,rescued=rescued==true})
+    end
 end
 local function freshStats() return {kills = 0, damageDealt = 0, damageTaken = 0, coinsEarned = 0, duration = 0} end
 function Combat.BeginRun()
@@ -88,7 +110,7 @@ function Combat.GetSnapshot(player)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves,
         enemiesRemaining = encounter.enemiesRemaining, status = encounter.status, blocking = data.blocking,
-        downed = data.downed, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0},
+        downed = data.downed, grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0},
         ready = data.ready, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
         rescueTarget = ally and {name = ally.DisplayName, userId = ally.UserId} or false,
         canShareStock = ally ~= nil and shareCooldown <= 0, shareStockCooldown = shareCooldown,
@@ -259,6 +281,9 @@ function Combat.ResetPlayers(position)
     Combat.BroadcastState()
 end
 local function knockOut(model)
+    local knockedData, knockedPlayer=recordOf(model)
+    if knockedData and knockedData.grabbedBy then releaseGrab(knockedData.grabbedBy,true) end
+    if not knockedPlayer then releaseGrab(model,true) end
     local data, player = recordOf(model)
     if not data or data.downed or data.respawning then return end
     local r = root(model)
@@ -301,7 +326,14 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     local r, t = root(targetModel), now()
     if not data or not sourceData or not r or data.downed or data.respawning or sourceData.downed or t < data.invulnerableUntil then return false end
     if (victimPlayer ~= nil) == (sourcePlayer ~= nil) then return false end
-    local blocked = data.blocking and data.facing == -direction
+    if victimPlayer and not enemyVisible(sourceModel) then Telemetry.BoundsRejected();return false end
+    local enemyId=data.spec and Archetypes.Id(data.kind,data.spec)
+    if not victimPlayer and data.grabbedPlayer and sourcePlayer then releaseGrab(targetModel,true) end
+    if victimPlayer and data.grabbedBy and data.grabbedBy~=sourceModel then releaseGrab(data.grabbedBy,true) end
+    local light=sourcePlayer and sourceData.lastAction=="Light"
+    local blocked = not attack.Unblockable and data.blocking and data.facing == -direction
+        and (victimPlayer~=nil or (enemyId=="Warden" and light))
+    if enemyId=="Warden" and sourcePlayer and sourceData.lastAction=="Heavy" then data.guardBrokenUntil=t+1.1;data.blocking=false end
     local damage = attack.Damage * (blocked and .2 or 1)
     local knockbackMultiplier = 1
     if sourcePlayer then
@@ -311,7 +343,8 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     end
     if victimPlayer then damage *= 1 - modifiers(victimPlayer).damageReduction end
     local elite = data.spec and data.spec.Role ~= "Grunt"
-    local armored = elite and t < data.armoredUntil
+    local lightArmor=enemyId=="Grappler" and light
+    local armored = (elite or enemyId=="Brute") and t < data.armoredUntil or lightArmor
     if armored then damage *= .9 end
     data.percent = math.min(999, data.percent + damage)
     local stun = blocked and .08 or attack.Stun
@@ -321,6 +354,8 @@ function Combat.ApplyHit(attacker, target, attack, direction)
         data.runStats.damageTaken += damage
         Telemetry.Hit(victimPlayer, damage)
         data.contribution += damage + (blocked and 3 or 0)
+    elseif lightArmor or (enemyId=="Brute" and armored) then
+        stun=0
     elseif elite then
         stun = armored and 0 or math.min(stun, .16)
         if armored then
@@ -335,7 +370,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
         end
     end
     data.stunnedUntil = math.max(data.stunnedUntil, t + stun)
-    data.launchedUntil = t + (elite and .12 or blocked and .1 or .55)
+    data.launchedUntil = t + (lightArmor and 0 or elite and .12 or blocked and .1 or .55)
     if blocked then
         data.guard += attack.Damage
         if data.guard >= 55 then
@@ -354,7 +389,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     end
     attributes(targetModel, data)
     fx("Hit", r.Position, {direction = direction, damage = damage, heavy = attack.Damage >= 18, hero = sourceData.hero,
-        playerUserId = sourcePlayer and sourcePlayer.UserId, targetUserId = victimPlayer and victimPlayer.UserId, targetModel = targetModel, armored = armored})
+        playerUserId = sourcePlayer and sourcePlayer.UserId, targetUserId = victimPlayer and victimPlayer.UserId, targetModel = targetModel, armored = armored, enemyHit = victimPlayer ~= nil, sourcePosition = root(sourceModel) and root(sourceModel).Position, serverTime = t})
     if data.percent >= (victimPlayer and Config.PlayerPercentLimit or data.threshold) then knockOut(targetModel) end
     return true
 end
@@ -385,6 +420,7 @@ local function performAttack(player, action, data)
         data.lastLight = now()
         if data.combo == 3 then attack.Damage *= 1.5 attack.Knockback += 18 attack.Lift = 18 end
     end
+    data.lastAction, data.attackStartedAt = action, now()
     data.cooldowns[action], data.busyUntil, data.blocking = now() + attack.Cooldown, now() + attack.Windup + .13, false
     local direction, epoch, lifeSerial = data.facing, battleEpoch, data.lifeSerial
     r.CFrame = CFrame.lookAt(r.Position, r.Position + Vector3.new(direction, 0, 0))
@@ -430,7 +466,7 @@ local function actionReceived(player, action, payload)
         return
     end
     if action == "Block" and payload.held == false then data.blocking = false attributes(player.Character, data) return end
-    if data.downed or data.respawning then return end
+    if data.downed or data.respawning or data.grabbedBy then return end
     local movementAction = action == "Dash" or action == "Recovery" or action == "Jump"
     if encounter.status ~= "Combat" and not (movementAction and (encounter.status == "Intermission" or encounter.status == "Advance" or encounter.status == "Traverse" or encounter.status == "Waiting")) then return end
     if t < data.stunnedUntil and not (action == "Dash" and t - data.hitAt >= .16) then return end
@@ -493,69 +529,142 @@ end
 function Combat.ClearEnemies()
     AttackDirector.Reset(aiDirector)
     battleEpoch += 1
-    for model in pairs(enemies) do model:Destroy() end
+    for model in pairs(enemies) do releaseGrab(model,true); model:Destroy() end
     table.clear(enemies)
 end
 local function attackCount()
     return AttackDirector.CountActive(enemies, now)
 end
-local function beginEnemyAttack(model, data, target, moveName, alive)
-    local r, targetRoot = root(model), root(target.Character)
-    if not r or not targetRoot then return end
-    local t, positions = now(), {}
-    for _, player in ipairs(alive) do
-        local pr = root(player.Character)
-        if pr and not records[player].respawning then table.insert(positions, pr.Position) end
-    end
-    local direction = data.facing
-    local move = EnemyMoves.Build(moveName, {origin = r.Position, target = targetRoot.Position, direction = direction, arena = arena, partyPositions = positions, spec = data.spec, phase = data.phase})
-    move.Windup = math.max(.30, move.Windup)
-    data.attacking, data.attackSerial, data.moveIndex = true, data.attackSerial + 1, data.moveIndex + 1
-    local serial, epoch = data.attackSerial, battleEpoch
-    data.resolveAt, data.recoveryUntil = t + move.Windup, t + move.Windup + move.Recovery
-    AttackDirector.BeginAttack(aiDirector, model, t, data.recoveryUntil)
-    data.attackAt = math.max(t + data.spec.Cooldown, data.recoveryUntil + .15)
-    data.targetHistory[target] = t
-    Telemetry.Windup(data.kind, moveName, move.Windup, attackCount(), AttackDirector.Cap(#alive))
-    data.armoredUntil = move.Armored and data.resolveAt or 0
+local function beginEnemyAttack(model,data,target,moveName,alive)
+    local r,targetRoot=root(model),root(target.Character)
+    if not r or not targetRoot or not enemyVisible(model) then AttackDirector.Release(aiDirector,model);return end
+    local t,positions=now(),{}
+    for _,player in ipairs(alive)do local pr=root(player.Character);if pr and not records[player].respawning then table.insert(positions,pr.Position)end end
+    local direction=data.facing
+    local attackOrigin=r.Position
+    local move=EnemyMoves.Build(moveName,{origin=attackOrigin,target=targetRoot.Position,direction=direction,arena=arena,partyPositions=positions,spec=data.spec,phase=data.phase})
+    move.Windup=math.max(.30,move.Windup)
+    local tellStyle=move.TellStyle or (data.spec.Role=="Grunt" and "Body" or "Floor")
+    data.attacking,data.attackSerial,data.moveIndex=true,data.attackSerial+1,data.moveIndex+1
+    local serial,epoch=data.attackSerial,battleEpoch
+    data.resolveAt=t+move.Windup+(move.Flight or 0)+(move.FollowUp or 0)+(move.Grab and 1 or 0)
+    data.recoveryUntil=data.resolveAt+move.Recovery
+    data.attackAt=math.max(t+data.spec.Cooldown,data.recoveryUntil+.15)
+    AttackDirector.BeginAttack(aiDirector,model,t,data.recoveryUntil)
+    data.targetHistory[target]=t
+    Telemetry.Windup(data.kind,moveName,move.Windup,attackCount(),AttackDirector.Cap(#alive))
+    data.armoredUntil=move.Armored and data.resolveAt or 0
     humanoid(model):Move(Vector3.zero)
-    r.CFrame = CFrame.lookAt(r.Position, r.Position + Vector3.new(direction, 0, 0))
-    attributes(model, data)
-    for _, volume in ipairs(move.Volumes) do
-        fx("Telegraph", volume.position, {shape = volume.shape, size = volume.size, radius = volume.radius, height = volume.height,
-            jumpable = volume.jumpable, direction = direction, duration = move.Windup, enemy = data.kind, enemyName = data.spec.Name,
-            mechanic = move.Name, color = volume.color, heavy = data.spec.Role ~= "Grunt", targetModel = model,
-            tellStyle = data.spec.Role == "Grunt" and "Body" or "Floor", pose = "Windup"})
+    r.CFrame=CFrame.lookAt(r.Position,r.Position+Vector3.new(direction,0,0))
+    attributes(model,data)
+    local function valid()
+        return enemies[model]==data and data.attackSerial==serial and battleEpoch==epoch and encounter.status=="Combat" and root(model)~=nil
     end
-    task.delay(move.Windup, function()
-        if enemies[model] ~= data or data.attackSerial ~= serial or battleEpoch ~= epoch or encounter.status ~= "Combat" then return end
-        data.armoredUntil = 0
-        if data.spec.Role == "Grunt" and now() < data.stunnedUntil then data.attacking = false return end
-        if move.MoveTo then
-            -- The damage area was fixed before this reposition, so target tracking never shifts the warning.
-            model:PivotTo(CFrame.new(move.MoveTo + Vector3.new(0, data.spec.Scale * 3, 0)) * CFrame.Angles(0, -direction * math.pi / 2, 0))
-            root(model).AssemblyLinearVelocity = Vector3.zero
+    local function warn(duration,volumes)
+        for _,volume in ipairs(volumes)do
+            fx("Telegraph",volume.position,{shape=volume.shape,size=volume.size,radius=volume.radius,height=volume.height,
+                jumpable=volume.jumpable,direction=direction,duration=duration,enemy=data.kind,enemyName=data.spec.Name,
+                mechanic=move.Name,color=volume.color,heavy=data.spec.Role~="Grunt",targetModel=model,
+                tellStyle=tellStyle,pose=move.Pose or "Heavy",moveId=moveName})
         end
-        fx("Attack", root(model).Position, {direction = direction, enemy = data.kind, action = "Heavy", targetModel = model})
-        local hit = {}
-        for _, volume in ipairs(move.Volumes) do
-            fx("EnemyImpact", volume.position, {shape = volume.shape, size = volume.size, radius = volume.radius, height = volume.height, color = volume.color, mechanic = move.Name, enemy = data.kind, targetModel = model,
-                tellStyle = data.spec.Role == "Grunt" and "Body" or "Floor"})
-            for _, player in ipairs(Combat.GetAlivePlayers()) do
-                local pr = root(player.Character)
-                if pr and not hit[player] and EnemyMoves.Contains(volume, pr.Position) then
-                    hit[player] = true
-                    local heading = volume.shape == "Box" and direction or (pr.Position.X >= volume.position.X and 1 or -1)
-                    Combat.ApplyHit(model, player, {Damage = data.spec.Damage * volume.multiplier, Knockback = 27, Growth = .40, Lift = volume.jumpable and 24 or 15, Stun = .32}, heading)
+    end
+    warn(move.Windup+(not move.Projectile and move.Flight or 0),move.Volumes)
+    local function impact(volumes,alreadyHit)
+        local hit=alreadyHit or {}
+        for _,volume in ipairs(volumes)do
+            for _,player in ipairs(Combat.GetAlivePlayers())do
+                local pr=root(player.Character)
+                if pr and not hit[player] and EnemyMoves.Contains(volume,pr.Position)then
+                    hit[player]=true
+                    local heading=volume.shape=="Box" and direction or (pr.Position.X>=volume.position.X and 1 or -1)
+                    local accepted=Combat.ApplyHit(model,player,{Damage=data.spec.Damage*volume.multiplier,Knockback=27,Growth=.40,Lift=volume.jumpable and 24 or 15,Stun=.32,Unblockable=move.Grab==true},heading)
+                    if move.Grab and accepted and not data.grabbedPlayer then
+                        local victim=records[player]
+                        if victim and not victim.downed and not victim.respawning then
+                            data.grabbedPlayer=player;victim.grabbedBy=model;victim.blocking=false
+                            victim.grabStunUntil=now()+1;victim.stunnedUntil=victim.grabStunUntil
+                            pr.AssemblyLinearVelocity=Vector3.zero
+                            fx("EnemyGrab",pr.Position,{targetModel=model,targetUserId=player.UserId,duration=1,moveId=moveName})
+                            local life=victim.lifeSerial
+                            task.delay(1,function()
+                                if not valid() or records[player]~=victim or victim.lifeSerial~=life or victim.grabbedBy~=model then releaseGrab(model,true);return end
+                                releaseGrab(model,false)
+                                Combat.ApplyHit(model,player,{Damage=data.spec.Damage*.8,Knockback=65,Growth=.5,Lift=24,Stun=.45,Unblockable=true},move.BackThrow and -direction or direction)
+                                fx("Attack",root(model).Position,{direction=direction,enemy=data.kind,action="Heavy",targetModel=model,moveId="GrapplerThrow"})
+                            end)
+                        end
+                    end
                 end
             end
         end
-        attributes(model, data)
-        task.delay(move.Recovery, function() if enemies[model] == data and data.attackSerial == serial then data.attacking = false; AttackDirector.Release(aiDirector, model) end end)
+        return hit
+    end
+    local function impactVisual()
+        for _,volume in ipairs(move.Volumes)do
+            fx("EnemyImpact",volume.position,{shape=volume.shape,size=volume.size,radius=volume.radius,height=volume.height,color=volume.color,
+                mechanic=move.Name,enemy=data.kind,targetModel=model,tellStyle=tellStyle,moveId=moveName})
+        end
+    end
+    task.delay(move.Windup,function()
+        if not valid() then return end
+        fx("Attack",root(model).Position,{direction=direction,enemy=data.kind,action=move.Pose or "Heavy",targetModel=model,moveId=moveName})
+        if move.Flight then
+            local start=move.Projectile and attackOrigin or root(model).Position
+            local endpoint=(move.Projectile and move.Endpoint or move.MoveTo)+Vector3.new(0,data.spec.Scale*3,0)
+            if move.Projectile then fx("EnemyProjectile",start,{origin=start,endpoint=endpoint,duration=move.Flight,targetModel=model,moveId=moveName}) end
+            local began=now();local hit={};local previous=start
+            repeat
+                if not valid() then return end
+                local alpha=math.clamp((now()-began)/move.Flight,0,1)
+                local point=start:Lerp(endpoint,alpha)
+                if move.Projectile then
+                    local midpoint=(previous+point)/2
+                    impact({{position=Vector3.new(midpoint.X,0,midpoint.Z),size=Vector3.new(math.abs(point.X-previous.X)+4,12,math.abs(point.Z-previous.Z)+4),height=12,shape="Box",multiplier=1}},hit)
+                    previous=point
+                else
+                    model:PivotTo(CFrame.new(point+Vector3.new(0,math.sin(alpha*math.pi)*(move.Arc or 0),0))*CFrame.Angles(0,-direction*math.pi/2,0))
+                    root(model).AssemblyLinearVelocity=Vector3.zero
+                end
+                if alpha>=1 then break end
+                RunService.Heartbeat:Wait()
+            until false
+        elseif move.MoveTo then
+            model:PivotTo(CFrame.new(move.MoveTo+Vector3.new(0,data.spec.Scale*3,0))*CFrame.Angles(0,-direction*math.pi/2,0))
+            root(model).AssemblyLinearVelocity=Vector3.zero
+        end
+        if not valid() then return end
+        if moveName=="LeaperVaultKick" then
+            local slot=aiDirector.slots[model]
+            if slot then slot.offset=Vector3.new(-slot.offset.X,0,slot.offset.Z)end
+        end
+        if not move.Projectile then impact(move.Volumes)end
+        impactVisual()
+        if move.FollowUp then
+            warn(move.FollowUp,move.Volumes)
+            task.wait(move.FollowUp)
+            if not valid() then return end
+            fx("Attack",root(model).Position,{direction=direction,enemy=data.kind,action="Light",targetModel=model,moveId=moveName})
+            impact(move.Volumes);impactVisual()
+        end
+        data.armoredUntil=0
+        if move.Retreat then data.retreatUntil=data.recoveryUntil+move.Retreat end
+        attributes(model,data)
+        task.delay(math.max(0,data.recoveryUntil-now()),function()
+            if valid() then data.attacking=false;releaseGrab(model,true);AttackDirector.Release(aiDirector,model)end
+        end)
     end)
 end
 local function aiStep(t)
-    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector,
+    local positions={}
+    for _,player in ipairs(Combat.GetAlivePlayers())do local r=root(player.Character);if r then table.insert(positions,r.Position)end end
+    cameraGoal,cameraGoalSpan=CameraBounds.Party(positions,arena.MinX)
+    if cameraGoal then
+        local alpha=1-math.exp(-6*math.max(0,t-(lastCameraSample or t-.1)))
+        cameraEstimate=cameraEstimate and cameraEstimate:Lerp(cameraGoal,alpha) or cameraGoal
+        cameraSpan=cameraSpan and cameraSpan+(cameraGoalSpan-cameraSpan)*alpha or cameraGoalSpan
+    else cameraEstimate,cameraSpan=nil,nil end
+    lastCameraSample=t
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, CanAttack = enemyVisible,
         root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
         Config = Config, arena = arena, encounter = encounter, attributes = attributes,
         fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})
