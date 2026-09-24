@@ -29,7 +29,7 @@ Final frozen crowd: idle 4.77%, cap0, 21/31 complete diversity windows passed (t
 | WO-3.1 | combat | implemented; policy and actual client runtime passed; curve pending | m3-pressure.json:33pressureboundaries/48wavecasesPASS;actualBurstcost8/lock4s/freeordinaryDash/costKO/.8comboBreaker/preservedbreakerPASS;initialfixturefailurepreserved;worldreviewPASS | WO3.2persistentstocks/percent/revive; finalM3HumanBotNormal/Hard/Nightmare curve stillpending |
 | WO-3.2 | combat | queued | not run | follow launch phase dependencies |
 | WO-3.3 | combat | queued | not run | follow launch phase dependencies |
-| WO-3.4 | root | reward policies and Progression integration implemented; review/runtime in progress | not run | follow launch phase dependencies |
+| WO-3.4 | root | server reward path implemented and Studio validated; campaign hook awaits3.3 | m3-rewards.json:1053arithmetic/59ledger/Bookrotationcapacity+16HeatpurePASS;actual1client9assertionsPASSincludingforgery/retrycoinsXP/readOnly/deferred/rotation/releaseguard;worldreviewPASS;releaseprofilemode simulatednotlive | WO3.3finalization+receiptHUD+rewardobserveratomicwire;Heat/unlocks3.6 andboons3.7;finalM3botcurvepending |
 | WO-3.5 | combat | queued | not run | follow launch phase dependencies |
 | WO-3.6 | root | queued | not run | follow launch phase dependencies |
 | WO-3.7 | root | queued | not run | follow launch phase dependencies |

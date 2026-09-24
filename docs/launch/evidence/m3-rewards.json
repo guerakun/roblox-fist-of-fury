@@ -1,0 +1,47 @@
+{
+  "runtime": {
+    "ok": true,
+    "result": {
+      "scope": "Studio ephemeral profile, actual client forgery, server reward integration; not live persistence or real reconnect",
+      "assertions": [
+        "late-join nominal base and actual S bonus",
+        "retry/new-grade cannot pay coins or XP twice",
+        "actual client forged reward actions ignored",
+        "stale result rejected after new campaign",
+        "stale encounter rejected after new campaign",
+        "read-only receipt survives repeated getter without grant",
+        "same-campaign deferred base and bonus settle once",
+        "observer rotation cannot relabel old pending grants into new run",
+        "profile release during base callback prevents bonus mutation"
+      ],
+      "passed": true
+    }
+  },
+  "pure": {
+    "RewardPolicy": {
+      "scope": "pure arithmetic and key deduplication; not Progression runtime",
+      "passed": true,
+      "checks": 1053
+    },
+    "DistrictLedger": {
+      "scope": "pure player/run ledger; not ProfileStore persistence, campaign rotation or Studio integration",
+      "passed": true,
+      "checks": 59
+    },
+    "HeatConfig": {
+      "scope": "pure selection/rules; not combat enforcement or badge service",
+      "passed": true,
+      "checks": 16
+    },
+    "CampaignRewardBook": {
+      "passed": true,
+      "scope": "campaign rotation, same-run journal identity, stale lookup rejection, 256-user bound, new-run reward eligibility; Progression must revalidate captured callbacks"
+    }
+  },
+  "review": "world independent source and fixture review passed",
+  "limits": [
+    "Profile released/unavailable states are simulated on an ephemeral Studio profile, not live save/release.",
+    "Same-campaign reconnect journal identity is pure-tested; real same-account reconnect remains unverified.",
+    "Campaign style/rank hooks arrive in WO-3.3; current fixture invokes the server-only reward API."
+  ]
+}

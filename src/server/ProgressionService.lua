@@ -6,27 +6,17 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.ProgressionConfig)
 local ProfileStore = require(script.Parent.ProfileStore)
 local Analytics = require(script.Parent.LaunchAnalytics)
+local Heat = require(ReplicatedStorage.Nightfall.Shared.HeatConfig)
+local RewardPolicy = require(script.Parent.RewardPolicy)
+local DistrictLedger = require(script.Parent.DistrictLedger)
+local RewardBook = require(script.Parent.CampaignRewardBook).new(DistrictLedger, RewardPolicy)
+local rewardObserver
+local flushPending
 local campaignSessions = {}
 local currentCampaign
 local Progression = {}
 local records = {}
-local rewardHistories = {}
 local inFlightLifecycle = 0
-local function historyFor(userId)
-    local history = rewardHistories[userId]
-    if history then history.touched = os.clock(); return history end
-    local count, oldestId, oldestTime = 0, nil, math.huge
-    local activeIds = {}
-    for player in pairs(records) do activeIds[player.UserId] = true end
-    for id, item in pairs(rewardHistories) do
-        count += 1
-        if not activeIds[id] and item.touched < oldestTime then oldestId, oldestTime = id, item.touched end
-    end
-    if count >= 256 and oldestId then rewardHistories[oldestId] = nil end
-    history = {keys = {}, order = {}, touched = os.clock()}
-    rewardHistories[userId] = history
-    return history
-end
 local store, remote
 local initialized, shuttingDown = false, false
 local runStatus, stageIndex = "Waiting", 1
@@ -110,34 +100,115 @@ function Progression.SetRunState(status, stage)
         for player in pairs(records) do publish(player) end
     end
 end
-local function grantReward(player, kind, rewardKey)
-    local record = records[player]
-    local reward = Config.Rewards[kind]
-    if not record or not reward or type(rewardKey) ~= "string" or #rewardKey > 160 or record.rewardKeys[rewardKey] then return end
-    if not record.profile then
-        if #record.pending < 16 then table.insert(record.pending, {kind, rewardKey}) end
-        return
-    end
-    if not store:CanMutate(record.profile) then return end
-    record.rewardKeys[rewardKey] = true
-    table.insert(record.rewardOrder, rewardKey)
-    if #record.rewardOrder > 128 then record.rewardKeys[table.remove(record.rewardOrder, 1)] = nil end
-    local data = record.profile.data
-    local beforeCoins=data.coins
-    data.coins = math.min(100000000, data.coins + reward.Coins)
-    data.xp = math.min(100000000, data.xp + reward.XP)
-    if kind == "Boss" then data.clears += 1 end
+local function ledgerFor(player, campaign)
+    if campaign ~= currentCampaign or campaignSessions[player] ~= campaign or not records[player] then return nil end
+    return RewardBook:Get(player.UserId, campaign)
+end
+local function paymentState(record)
+    if not record or not record.profile then return 'pending' end
+    if not store:CanMutate(record.profile) then return 'readOnly' end
+    return nil
+end
+local function paid(player, receipt, label)
     changed(player)
-    Analytics.Economy(player,rewardKey,"Source",data.coins-beforeCoins,data.coins,"Encounter_"..kind)
-    notice(player, "+" .. reward.Coins .. " coins  /  +" .. reward.XP .. " chapter XP")
+    local data = records[player].profile.data
+    Analytics.Economy(player, receipt.paymentKey, 'Source', receipt.paymentCoins, data.coins, label)
+    if rewardObserver then
+        local ok, err = pcall(rewardObserver, player, receipt.paymentCoins)
+        if not ok then warn('[Progression] Reward observer: '..tostring(err)) end
+    end
+    if receipt.paymentCoins > 0 or receipt.paymentXP > 0 then
+        notice(player, '+'..receipt.paymentCoins..' coins / +'..receipt.paymentXP..' chapter XP')
+    end
+end
+local function grantReward(player, kind, rewardKey)
+    local record, reward = records[player], Config.Rewards[kind]
+    if not record or not reward or type(rewardKey) ~= 'string' or #rewardKey > 160 then return end
+    local campaign, stageText, waveText = rewardKey:match('^(.*):(%d+):(%d+)$')
+    local ledger = ledgerFor(player, campaign)
+    if not ledger then return end -- A stale delayed callback cannot reopen an old run.
+    local stage, wave = tonumber(stageText), tonumber(waveText)
+    if not ledger:Record(stage, wave, reward.Coins, reward.XP) then return end
+    ledger.kinds = ledger.kinds or {}
+    ledger.kinds[stage..':'..wave] = kind
+    if paymentState(record) then return nil,false,true end
+    local receipt, newlyPaid = ledger:PayEncounter(record.profile.data, stage, wave)
+    if newlyPaid then
+        if kind == 'Boss' then record.profile.data.clears += 1 end
+        paid(player, receipt, 'Encounter_'..kind)
+    end
+    return receipt, newlyPaid, true
+end
+function Progression.SetRewardObserver(callback)
+    assert(callback==nil or type(callback)=='function')
+    rewardObserver=callback
 end
 function Progression.BeginCampaign(players,campaignId)
+    if not RewardBook:Begin(campaignId) then return false end
     currentCampaign=campaignId
-    for _,player in ipairs(players)do campaignSessions[player]=campaignId Analytics.CampaignStart(player,campaignId)end
+    for _,player in ipairs(players) do
+        campaignSessions[player]=campaignId
+        Analytics.CampaignStart(player,campaignId)
+    end
+    return true
 end
-function Progression.AwardEncounterClear(participants, _stage, kind, rewardKey)
-    if type(participants) ~= "table" then return end
-    for _, player in ipairs(participants) do if typeof(player) == "Instance" and player:IsA("Player") then grantReward(player, kind, rewardKey)if kind=="Boss" and campaignSessions[player]then Analytics.District(player,campaignSessions[player],_stage)end end end
+function Progression.AwardEncounterClear(participants, stage, kind, rewardKey)
+    if type(participants) ~= 'table' then return end
+    for _,player in ipairs(participants) do
+        if typeof(player)=='Instance' and player:IsA('Player') then
+            local campaign=type(rewardKey)=='string' and rewardKey:match('^(.*):%d+:%d+$')
+            local _,_,accepted=grantReward(player,kind,rewardKey)
+            if kind=='Boss' and accepted and currentCampaign==campaign and campaignSessions[player]==campaign then
+                Analytics.District(player,campaign,stage)
+            end
+        end
+    end
+end
+function Progression.AwardDistrict(player,result)
+    if type(result)~='table' then return false end
+    local ledger=ledgerFor(player,result.campaignId)
+    local rules=Heat.Rules(result.heat)
+    if not ledger or not rules then return false end
+    local frozen=ledger:Complete(result,rules.rewardPercent)
+    if not frozen then return false end
+    local record=records[player]
+    local state=paymentState(record)
+    if state then return ledger:Receipt(result.stage,state) end
+    -- Resolve eligible base payments before the bonus, including delayed profile loads.
+    for wave in pairs(ledger.stages[result.stage].waves) do
+        grantReward(player,ledger.kinds[result.stage..':'..wave],result.campaignId..':'..result.stage..':'..wave)
+    end
+    -- Re-fetch the current journal immediately before mutation; no captured old journal pays.
+    if ledgerFor(player,result.campaignId)~=ledger then return false end
+    record=records[player]
+    local currentState=paymentState(record)
+    if currentState then return ledger:Receipt(result.stage,currentState) end
+    local receipt,newlyPaid=ledger:PayDistrict(record.profile.data,result.stage)
+    if newlyPaid then paid(player,receipt,'DistrictRank') end
+    return ledger:Receipt(result.stage,paymentState(record))
+end
+function Progression.GetDistrictReceipt(player,resultId)
+    if type(resultId)~='string' then return false end
+    local campaign,stageText=resultId:match('^(.*):(%d+)$')
+    local ledger=ledgerFor(player,campaign)
+    local stage=tonumber(stageText)
+    if not ledger or not stage or not ledger.stages[stage] or not ledger.stages[stage].result then return false end
+    return ledger:Receipt(stage,paymentState(records[player]))
+end
+flushPending=function(player)
+    local campaign=currentCampaign
+    local ledger=ledgerFor(player,campaign)
+    if not ledger or paymentState(records[player]) then return end
+    for stage,item in pairs(ledger.stages) do
+        for wave in pairs(item.waves) do
+            if ledgerFor(player,campaign)~=ledger then return end
+            grantReward(player,ledger.kinds[stage..':'..wave],campaign..':'..stage..':'..wave)
+        end
+    end
+    for _,item in pairs(ledger.stages) do
+        if ledgerFor(player,campaign)~=ledger then return end
+        if item.result then Progression.AwardDistrict(player,item.result) end
+    end
 end
 function Progression.AwardEnemyDefeat() end -- Encounter participation rewards support play equally.
 local function checkPass(player)
@@ -213,8 +284,7 @@ local function action(player, actionName, value)
 end
 local function addPlayer(player)
     if records[player] or shuttingDown then return end
-    local history = historyFor(player.UserId)
-    local record = {profile = nil, premium = false, rewardKeys = history.keys, rewardOrder = history.order, pending = {}, rateStart = 0, rateCount = 0, promptAt = 0}
+    local record = {profile = nil, premium = false, rateStart = 0, rateCount = 0, promptAt = 0}
     records[player] = record
     if currentCampaign and runStatus~="Waiting"then campaignSessions[player]=currentCampaign Analytics.CampaignStart(player,currentCampaign)end
     player.CharacterAdded:Connect(function(model)
@@ -234,8 +304,7 @@ local function addPlayer(player)
             end
             if records[player] ~= record or not player.Parent or shuttingDown then store:Release(profile); return end
             record.profile = profile
-            local pending = record.pending; record.pending = {}
-            for _, reward in ipairs(pending) do grantReward(player, reward[1], reward[2]) end
+            flushPending(player)
             applyAppearance(player); publish(player)
             task.spawn(checkPass, player)
         end)
@@ -259,14 +328,14 @@ function Progression.ReleaseTravelProfile(profile)return store:Release(profile)e
 function Progression.ResumeAfterTravelFailure(player)
     local record=records[player]if not record then return false end
     local old=record.profile
-    if old and store:CanMutate(old)then return true end
+    if old and store:CanMutate(old)then flushPending(player)return true end
     if old and old.mode~="Released" then
         if old.mode=="Unavailable" then notice(player,"Save session unavailable. Progress is read-only; rejoin to restore it.")return false end
         if not store:Release(old)then return false end
     end
     local loaded=store:Load(player.UserId)
     if records[player]~=record or player.Parent~=Players or shuttingDown then store:Release(loaded)return false end
-    record.profile=loaded;publish(player)
+    record.profile=loaded;flushPending(player);publish(player)
     return store:CanMutate(loaded)
 end
 function Progression.Init()

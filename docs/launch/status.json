@@ -105,9 +105,9 @@
     },
     "WO-3.4": {
       "owner": "root",
-      "status": "reward policies and Progression integration implemented; review/runtime in progress",
-      "evidence": "not run",
-      "next": "follow launch phase dependencies"
+      "status": "server reward path implemented and Studio validated; campaign hook awaits3.3",
+      "evidence": "m3-rewards.json:1053arithmetic/59ledger/Bookrotationcapacity+16HeatpurePASS;actual1client9assertionsPASSincludingforgery/retrycoinsXP/readOnly/deferred/rotation/releaseguard;worldreviewPASS;releaseprofilemode simulatednotlive",
+      "next": "WO3.3finalization+receiptHUD+rewardobserveratomicwire;Heat/unlocks3.6 andboons3.7;finalM3botcurvepending"
     },
     "WO-3.5": {
       "owner": "combat",
