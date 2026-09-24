@@ -1,14 +1,14 @@
 # Morning summary
 
-WO-0.1 closed (ebd49d4), four existing specs pass. WO-0.3 instrumentation/spec reviewed and tested; five-run WO-0.2 baseline is in progress. No AI/gameplay changes yet. Next: finish seeds 1101–1105, save metrics, then release Phase B. Names/art approval, human playtests and prohibited published/live validations remain owner gates.
+M0 baseline collection ongoing: first three fresh HumanBot runs cleared in 273.32/275.36/273.95 s, losing 1/0/1 stocks (all factory). WO-0.1 specs and WO-0.3 telemetry are closed; no later milestone implemented yet. Exact resume: collect remaining seeds 1104–1105, then close WO-0.2 and release Phase B. Human tests, candidate names/art and published/live validation remain owner gates. Native screenshot helper fails initialization after reset; Studio capture fallback not yet attempted.
 
 ## Launch program status
 
 | WO | Owner | Status | Evidence | Next step |
 |---|---|---|---|---|
 | WO-0.1 | root | closed | 2026-09-24: ca00266 tagged v0-overnight; EnemyMoves 38 patterns, ProfileStore 11 adapter calls, ProfileConcurrency 16.224 s and StudioSmoke PASS; 4/4 specs, clean startup; commit ebd49d4, tag pushed | WO-0.3 telemetry before five WO-0.2 runs |
-| WO-0.2 | root | running | HumanBot reviewed; fresh seeds 1101–1105; first run underway, actual reaction ~250 ms | save five per-run JSON reports; release Phase B only after baseline commit |
-| WO-0.3 | root (combat handoff after M0) | closed | 2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations | collect WO-0.2 five-run baseline; append telemetry results |
+| WO-0.2 | root | running | 2026-09-24: harness b21b807 reviewed; 3/5 fresh runs saved in docs/launch/evidence; first three clears, 0/0/2 combined district losses | finish seeds 1104–1105, verify all reports, commit complete baseline and release Phase B |
+| WO-0.3 | root (combat handoff after M0) | closed | 2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations; commit c1a037d; commit c1a037d | collect WO-0.2 five-run baseline; append telemetry results |
 | WO-1.1 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.2 | presentation | queued | not run | follow launch phase dependencies |
 | WO-1.3 | presentation | queued | not run | follow launch phase dependencies |

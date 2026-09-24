@@ -23,6 +23,23 @@ At a terminal state the server prints `COMBAT_TELEMETRY` JSON and writes a Studi
 
 Independent combat review caught an extra perception think-delay, an early wave-attribution hook, timing samples outside active combat, and multi-volume defensive duplication. Root corrected these before the first recorded run. The telemetry spec checks hit/damage counters, stock attribution, caps/action diversity, active idle counts, five-second flank qualification, stunned/recovery exclusions and unavailable metrics. It passed in Studio.
 
+## Additional measurement limits
+
+Independent world review confirmed these limits before the series completed: snapshot damage is floored, whereas server damage counters retain fractions. Reaction mean measures scheduling of all recognized tells, including tells that are no longer threatening; it is not the latency of successful defense. Target selection sees all replicated enemy roots and does not model a human camera visibility limit. Terminal duration includes a 0.3-second report delay. Windup action counts do not measure every AI state or a per-30-second diversity window. Timeout can lack terminal telemetry because only Victory/Defeat invokes the server finish hook; such a result must retain unavailable fields rather than zeros. None of these were changed mid-series.
+
+Public evidence replaces numeric account keys with run-local Player labels. Unredacted originals stay under ignored build/private-qa; all measured values are preserved.
+
 ## Results
 
-Pending five-run collection. Raw reports will be stored under `docs/launch/evidence/` and summarized here and in PROGRESS.md. The earlier perfect-response Autoplay clear is not this baseline.
+Provisional collection: 3/5 fresh runs saved; remaining seeds are still running. No M0 completion claim yet.
+
+| Seed | Outcome | Seconds | Stocks lost D1/D2/D3 | Damage (snapshot) | Eligible idle | Flank windows | Peak windups |
+|---|---|---:|---|---:|---|---|---:|
+| 1101 | Victory | 273.32 | 0/0/1 | 497 | 106/624 (17.0%) | 3/5 (60.0%) | 2 |
+| 1102 | Victory | 275.36 | 0/0/0 | 495 | 159/913 (17.4%) | 5/9 (55.6%) | 2 |
+| 1103 | Victory | 273.95 | 0/0/1 | 487 | 100/654 (15.3%) | 3/5 (60.0%) | 2 |
+
+Clear rate: 3/3. Mean stocks lost: 0.67. Mean duration: 274.21 s. Mean snapshot damage: 493.00.
+Pooled eligible idle: 365/2191 = 16.66%.
+Pooled qualified flank windows: 11/19 = 57.89%.
+Rank and frustum unsupported in baseline. Five runs are a coarse engineering comparison, not human certification.

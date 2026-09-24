@@ -1,5 +1,5 @@
 {
-  "summary": "WO-0.1 closed (ebd49d4), four existing specs pass. WO-0.3 instrumentation/spec reviewed and tested; five-run WO-0.2 baseline is in progress. No AI/gameplay changes yet. Next: finish seeds 1101\u20131105, save metrics, then release Phase B. Names/art approval, human playtests and prohibited published/live validations remain owner gates.",
+  "summary": "M0 baseline collection ongoing: first three fresh HumanBot runs cleared in 273.32/275.36/273.95 s, losing 1/0/1 stocks (all factory). WO-0.1 specs and WO-0.3 telemetry are closed; no later milestone implemented yet. Exact resume: collect remaining seeds 1104\u20131105, then close WO-0.2 and release Phase B. Human tests, candidate names/art and published/live validation remain owner gates. Native screenshot helper fails initialization after reset; Studio capture fallback not yet attempted.",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -10,13 +10,13 @@
     "WO-0.2": {
       "owner": "root",
       "status": "running",
-      "evidence": "HumanBot reviewed; fresh seeds 1101\u20131105; first run underway, actual reaction ~250 ms",
-      "next": "save five per-run JSON reports; release Phase B only after baseline commit"
+      "evidence": "2026-09-24: harness b21b807 reviewed; 3/5 fresh runs saved in docs/launch/evidence; first three clears, 0/0/2 combined district losses",
+      "next": "finish seeds 1104\u20131105, verify all reports, commit complete baseline and release Phase B"
     },
     "WO-0.3": {
       "owner": "root (combat handoff after M0)",
       "status": "closed",
-      "evidence": "2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations",
+      "evidence": "2026-09-24: observer/spec PASS including idle/flank fixtures; combat independent review PASS; no gameplay mutations; commit c1a037d; commit c1a037d",
       "next": "collect WO-0.2 five-run baseline; append telemetry results"
     },
     "WO-1.1": {

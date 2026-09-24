@@ -1,0 +1,321 @@
+{
+  "telemetry": {
+    "windupPeak": 2,
+    "windups": 103,
+    "aiPeakSeconds": 0.0002327000256627798,
+    "flankedWindows": 3,
+    "flankWindows": 5,
+    "idleGruntTicks": 106,
+    "outcome": "Victory",
+    "schema": 1,
+    "capViolations": 0,
+    "damage": {
+      "Player1": 497.75680000000006
+    },
+    "actions": {
+      "Grunt": {
+        "Melee": 19
+      },
+      "Brute": {
+        "Melee": 12
+      },
+      "SirenMarshal": {
+        "AlarmRing": 3,
+        "SirenLine": 4,
+        "Cleaver": 1,
+        "SplitAlarm": 2
+      },
+      "Executioner": {
+        "Cleaver": 4,
+        "CrossingSweep": 3
+      },
+      "FurnaceHound": {
+        "Pounce": 4,
+        "CinderTrail": 3,
+        "Bite": 2
+      },
+      "PlatformWidow": {
+        "TicketCut": 2,
+        "RailLunge": 4,
+        "PlatformMark": 1
+      },
+      "KilnSovereign": {
+        "FurnaceVent": 2,
+        "SlagPunch": 3,
+        "ForgeCrush": 5,
+        "TwinVent": 2
+      },
+      "Runner": {
+        "Melee": 18
+      },
+      "LastConductor": {
+        "GhostTrain": 5,
+        "DepartureCross": 1,
+        "BellStrike": 3
+      }
+    },
+    "aiMeanMs": 0.02031479627460804,
+    "stocks": {
+      "Player1": {
+        "3": 1
+      }
+    },
+    "aiPeakMs": 0.2327000256627798,
+    "encounters": {
+      "3:2": {
+        "stocks": 0,
+        "hits": 4,
+        "damage": 67.89600000000002
+      },
+      "2:2": {
+        "stocks": 0,
+        "hits": 3,
+        "damage": 35.03360000000001
+      },
+      "1:4": {
+        "stocks": 0,
+        "hits": 3,
+        "damage": 52.44
+      },
+      "2:4": {
+        "stocks": 0,
+        "hits": 3,
+        "damage": 58.88
+      },
+      "3:4": {
+        "stocks": 1,
+        "hits": 7,
+        "damage": 132.1672
+      },
+      "1:1": {
+        "stocks": 0,
+        "hits": 0,
+        "damage": 0
+      },
+      "2:1": {
+        "stocks": 0,
+        "hits": 0,
+        "damage": 0
+      },
+      "1:3": {
+        "stocks": 0,
+        "hits": 5,
+        "damage": 32.752
+      },
+      "2:3": {
+        "stocks": 0,
+        "hits": 3,
+        "damage": 23.552
+      },
+      "1:2": {
+        "stocks": 0,
+        "hits": 5,
+        "damage": 57.867999999999995
+      },
+      "3:1": {
+        "stocks": 0,
+        "hits": 2,
+        "damage": 16.560000000000002
+      },
+      "3:3": {
+        "stocks": 0,
+        "hits": 3,
+        "damage": 20.608
+      }
+    },
+    "started": 1790229211.28075,
+    "eligibleGruntTicks": 624,
+    "cameraFrustum": "not measured",
+    "aiSeconds": 0.03872000169940293,
+    "aiSamples": 1906,
+    "hits": {
+      "Player1": 38
+    },
+    "wave": 4,
+    "minWindup": 0.55,
+    "flankRatio": 0.6,
+    "elapsed": 277.03805899620056,
+    "idleRatio": 0.16987179487179488,
+    "stage": 3,
+    "rank": "not implemented"
+  },
+  "damageTaken": 497,
+  "outcome": "Victory",
+  "runStats": {
+    "kills": 27,
+    "duration": 277,
+    "damageDealt": 2987,
+    "damageTaken": 497,
+    "coinsEarned": 690
+  },
+  "stocksLostByDistrict": {
+    "1": 0,
+    "2": 0,
+    "3": 1
+  },
+  "clear": true,
+  "seconds": 273.32251339999493,
+  "done": true,
+  "transitions": [
+    {
+      "state": "1:0:Waiting",
+      "seconds": 0.0007597999647259712
+    },
+    {
+      "state": "1:0:Intermission",
+      "seconds": 0.06773000000976026
+    },
+    {
+      "state": "1:1:Combat",
+      "seconds": 4.101088399998844
+    },
+    {
+      "state": "1:1:Intermission",
+      "seconds": 10.38356909994036
+    },
+    {
+      "state": "1:1:Traverse",
+      "seconds": 14.4668079999974
+    },
+    {
+      "state": "1:2:Combat",
+      "seconds": 15.134252700023353
+    },
+    {
+      "state": "1:2:Intermission",
+      "seconds": 33.099130899994634
+    },
+    {
+      "state": "1:2:Traverse",
+      "seconds": 38.13211380003486
+    },
+    {
+      "state": "1:3:Combat",
+      "seconds": 40.134223800036125
+    },
+    {
+      "state": "1:3:Intermission",
+      "seconds": 49.41523769998457
+    },
+    {
+      "state": "1:3:Traverse",
+      "seconds": 53.43040019995533
+    },
+    {
+      "state": "1:4:Combat",
+      "seconds": 54.116689599934034
+    },
+    {
+      "state": "1:4:Advance",
+      "seconds": 81.74695830000564
+    },
+    {
+      "state": "2:0:Intermission",
+      "seconds": 84.38051839999389
+    },
+    {
+      "state": "2:1:Combat",
+      "seconds": 88.49866089993156
+    },
+    {
+      "state": "2:1:Intermission",
+      "seconds": 97.0799480000278
+    },
+    {
+      "state": "2:2:Combat",
+      "seconds": 101.14831560000312
+    },
+    {
+      "state": "2:2:Intermission",
+      "seconds": 120.41170249995776
+    },
+    {
+      "state": "2:2:Traverse",
+      "seconds": 125.52817289996892
+    },
+    {
+      "state": "2:3:Combat",
+      "seconds": 126.86419270001352
+    },
+    {
+      "state": "2:3:Intermission",
+      "seconds": 137.21211119997315
+    },
+    {
+      "state": "2:3:Traverse",
+      "seconds": 141.29432560002897
+    },
+    {
+      "state": "2:4:Combat",
+      "seconds": 142.846969599952
+    },
+    {
+      "state": "2:4:Advance",
+      "seconds": 169.75981459999457
+    },
+    {
+      "state": "3:0:Intermission",
+      "seconds": 172.22820220002905
+    },
+    {
+      "state": "3:1:Combat",
+      "seconds": 176.26298010000028
+    },
+    {
+      "state": "3:1:Intermission",
+      "seconds": 187.26020639995113
+    },
+    {
+      "state": "3:1:Traverse",
+      "seconds": 191.32653700001538
+    },
+    {
+      "state": "3:2:Combat",
+      "seconds": 192.19494800001848
+    },
+    {
+      "state": "3:2:Intermission",
+      "seconds": 215.20791689993348
+    },
+    {
+      "state": "3:2:Traverse",
+      "seconds": 220.32444619992748
+    },
+    {
+      "state": "3:3:Combat",
+      "seconds": 222.79349489999004
+    },
+    {
+      "state": "3:3:Intermission",
+      "seconds": 234.2410842999816
+    },
+    {
+      "state": "3:4:Combat",
+      "seconds": 238.36046210001223
+    },
+    {
+      "state": "3:4:Victory",
+      "seconds": 277.10621789994184
+    }
+  ],
+  "stage": 3,
+  "wave": 4,
+  "wallSeconds": 277.4220631000353,
+  "choices": {
+    "Mistake": 38,
+    "Jump": 3,
+    "Special": 21,
+    "Heavy": 58,
+    "telegraphs": 103,
+    "Dash": 4,
+    "Block": 18,
+    "recognized": 74,
+    "Light": 140
+  },
+  "seed": 1101,
+  "scheduledReactionMean": 0.24818141820314965,
+  "reactionMean": 0.2566898743247588,
+  "schema": 1,
+  "rank": "not implemented",
+  "privacy": "Account identifiers replaced with run-local Player labels; raw originals remain ignored locally."
+}
