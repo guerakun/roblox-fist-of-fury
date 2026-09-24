@@ -7,6 +7,7 @@ local HUD={}
 function HUD.new(options)
     local player=options.player
     local actionName=options.actionName or "NightfallChannelRevive"
+    local reserveAttribute=options.reserveAttribute or "RescuePanelVisible"
     local connections={}
     local function connect(signal,callback)table.insert(connections,signal:Connect(callback))end
     local function make(class,properties,parent)
@@ -84,6 +85,8 @@ function HUD.new(options)
         downed.Visible=snapshot.downed==true and snapshot.status~="Defeat" and snapshot.status~="Victory" and not guard:Blocked()
         local bottom=touch and -18 or -104
         local shareVisible=shareButton.Visible
+        local reserve=touch and (visible or shareVisible or downed.Visible)
+        if player:GetAttribute(reserveAttribute)~=reserve then player:SetAttribute(reserveAttribute,reserve)end
         local cell=math.min(174,math.max(120,(width-36)/2))
         button.Size=UDim2.fromOffset(cell,50)
         shareButton.Size=UDim2.fromOffset(visible and cell or 204,50)
@@ -105,6 +108,7 @@ function HUD.new(options)
     end
     function api.Destroy()
         guard:Destroy()
+        player:SetAttribute(reserveAttribute,false)
         for _,connection in ipairs(connections)do connection:Disconnect()end
         if deathConnection then deathConnection:Disconnect()end
         if childConnection then childConnection:Disconnect()end

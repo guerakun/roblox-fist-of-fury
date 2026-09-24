@@ -1,5 +1,6 @@
 --!strict
 -- Nightfall client: input, presentation, and camera only. Damage stays on the server.
+local RescueTouchLayout = require(script.Parent:WaitForChild("RescueTouchLayout"))
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -307,6 +308,15 @@ local function resize()
             abilityButtons[action].Position = UDim2.fromOffset((index - 1) * 79, 0)
             abilityButtons[action].Size = UDim2.fromOffset(73, 74); abilityLabels[action].Position = UDim2.fromOffset(3, 33)
         end
+    end
+    local rescueFooter = touch and player:GetAttribute("RescuePanelVisible") == true
+    RescueTouchLayout.Apply(rescueFooter, {abilities=abilities, pad=touchPad, jump=touchJump, health=playerPanel})
+    heroLabel.Visible = true
+    if rescueFooter and height < 450 then
+        -- Keep percent/stocks readable above the raised joystick in short landscape.
+        playerPanel.Position = UDim2.fromOffset(16, 64); playerPanel.Size = UDim2.fromOffset(178, 44)
+        heroLabel.Visible = false
+        percentLabel.Position = UDim2.fromOffset(10, 2); stocksLabel.Position = UDim2.fromOffset(99, 8)
     end
     moveLabel.Visible = width > 830 and not touch; moveName.Visible = width > 830 and not touch
     toastLabel.Position = UDim2.new(0.5, -math.min(280, width * .46), 0, touch and 119 or (width < 650 and 217 or 201))
@@ -992,6 +1002,7 @@ workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
 end)
 canvas:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize)
 player:GetAttributeChangedSignal("TravelPanelVisible"):Connect(resize)
+player:GetAttributeChangedSignal("RescuePanelVisible"):Connect(resize)
 UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(function() resize(); inputLabels() end)
 resize()
 toast("STAY TOGETHER. BREAK THE CURTAIN.", COLORS.cyan)

@@ -9,7 +9,7 @@ function Control:Available()
     local revive=state.revive
     return type(revive)=="table" and type(revive.targetUserId)=="number"
         and (revive.canStart==true or revive.channeling==true) and (tonumber(revive.remaining) or 0)>0
-        and state.downed~=true and state.status~="Waiting" and state.status~="Victory" and state.status~="Defeat"
+        and state.downed~=true and state.travelLocked~=true and state.status~="Waiting" and state.status~="Victory" and state.status~="Defeat"
 end
 function Control:Cancel()
     if self.heldTarget==nil then return false end

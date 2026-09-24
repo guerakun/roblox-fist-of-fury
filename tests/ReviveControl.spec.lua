@@ -22,7 +22,7 @@ return function()
     assert(control:Begin())blocked=true control:Update(state(43))
     assert(not control.heldTarget and not control:Begin(),"Blocked UI cannot start or retain hold")
     blocked=false assert(control:Begin())control:Cancel()assert(not control.heldTarget)
-    for _,clear in ipairs({{status="Combat",revive=false},{status="Combat",downed=true,revive=state(43).revive},
+    for _,clear in ipairs({{status="Combat",travelLocked=true,revive=state(43).revive},{status="Combat",revive=false},{status="Combat",downed=true,revive=state(43).revive},
         {status="Victory",revive=state(43).revive},{status="Waiting",revive=state(43).revive},
         {status="Defeat",revive=state(43).revive},state(43,false,false)})do
         control:Update(state(43))assert(control:Begin())control:Update(clear)assert(not control.heldTarget and not control:Begin())

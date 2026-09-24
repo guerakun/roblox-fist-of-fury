@@ -21,6 +21,7 @@ local function runRules()return HeatConfig.Rules(runHeat)end
 local PressurePolicy = require(script.Parent.PressurePolicy)
 local SurvivalPolicy = require(script.Parent.SurvivalPolicy)
 local completedDistricts={}
+local activeCampaign=nil
 local reviveSnapshot=function()return false end
 local Combat = {}
 local records, enemies = {}, {}
@@ -85,6 +86,7 @@ local function releaseGrab(enemy, rescued)
 end
 local function freshStats() return {kills = 0, damageDealt = 0, damageTaken = 0, coinsEarned = 0, duration = 0} end
 function Combat.BeginRun(campaignId)
+    activeCampaign=type(campaignId)=="string"and campaignId~=""and campaignId or nil
     table.clear(completedDistricts)
     enemySequence=0
     Telemetry.Reset()
@@ -344,11 +346,23 @@ local function relocatePlayers(position,mode)
         data.stocks,data.percent=SurvivalPolicy.Reset(mode,data.stocks,data.percent,Config.Survival,runRules().stockCap)
         data.cooldowns,data.downed,data.respawning,data.revive={},data.stocks<=0,false,nil
         data.spawnPosition,data.spawnPercent = position,data.percent
+        local downedUntil=data.downedUntil
+        if data.stocks<=0 then
+            data.resumeSurvival={stocks=0,percent=data.percent,downed=true,downedUntil=downedUntil,downedPosition=position}
+        end
         index += 1
         if humanoid(player.Character) and humanoid(player.Character).Health > 0 then
             data.spawnPosition = nil
             resetPosition(player, position + Vector3.new(0, 0, (index - 1) * 3 - 4),data.percent)
             data.spawnPercent=nil
+            if data.stocks<=0 then
+                data.downed,data.downedUntil,data.downedPosition=true,downedUntil,position
+                data.resumeSurvival=nil
+                local r,h=root(player.Character),humanoid(player.Character)
+                if r then r.Anchored=true end
+                if h then h.WalkSpeed,h.JumpPower=0,0 end
+                attributes(player.Character,data)
+            end
         else task.spawn(spawnPlayer, player) end
     end
     Combat.BroadcastState()
@@ -357,6 +371,8 @@ function Combat.ResetPlayers(position)relocatePlayers(position,"Campaign")end
 function Combat.EnterDistrict(position)relocatePlayers(position,"Travel")end
 function Combat.RetryCheckpoint(position)relocatePlayers(position,"Retry")end
 function Combat.CompleteDistrict(campaignId,stage)
+    if not activeCampaign or campaignId~=activeCampaign or type(stage)~="number"or stage%1~=0
+        or stage<1 or stage>#Config.Stages or stage~=stageIndex then return false end
     local key=tostring(campaignId)..":"..stage
     if completedDistricts[key]then return false end
     completedDistricts[key]=true
@@ -1017,6 +1033,7 @@ local function removePlayer(player)
     records[player] = nil
 end
 function Combat.ResetLobby()
+    activeCampaign=nil
     difficulty="Normal"
     table.clear(disconnectedSurvival)
     Combat.SetArena(Config.Stages[1], 1)

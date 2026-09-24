@@ -1,0 +1,10 @@
+{
+  "date": "2026-09-24",
+  "scope": "Fresh Studio two-client SurvivalQA and isolated actual-client widget fixture; no physical input or published persistence claim",
+  "priorFailure": "First two-client fixture failed Registered enemy KO. Corrected test uses checkpoint 90 and bounded visibility wait; failure retained in progress history.",
+  "pure": {"survivalCases": 39, "reviveControlRequests": 24, "passed": true},
+  "runtime": {"passed": true, "actualReviveRemote": true, "channel": true, "hitCancel": true, "movementCancel": true, "throttledRelease": true, "expiry": true, "zeroStockTravel": true, "retryTwo": true, "clearIdempotent": true, "staleClearRejected": true, "travelPersists": true, "physicalInputs": false},
+  "client": {"passed": true, "downedExpiry": true, "serverProgress": true, "existingControlBounds": true, "modalCancel": true, "widthCases": 4, "inputLayouts": 2, "minimumTouchTarget": 44, "physicalInputVerified": false},
+  "review": "World independent source review passed server guards and rescue footer; root executed all listed Studio checks. Fixture checks rescue row versus existing controls, not every legacy control intersection.",
+  "remaining": ["Physical touch and gamepad play", "Full post-M3 multiplayer regression", "M3 difficulty and rank HumanBot comparisons"]
+}
