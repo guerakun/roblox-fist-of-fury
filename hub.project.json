@@ -3,12 +3,58 @@
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
-      "Nightfall": {"$className":"Folder", "Shared":{"$path":"src/shared"}},
-      "HubRemotes":{"$className":"Folder", "Request":{"$className":"RemoteEvent"}, "State":{"$className":"RemoteEvent"}}
+      "Nightfall": {
+        "$className": "Folder",
+        "Shared": {
+          "$path": "src/shared"
+        }
+      },
+      "HubRemotes": {
+        "$className": "Folder",
+        "Request": {
+          "$className": "RemoteEvent"
+        },
+        "State": {
+          "$className": "RemoteEvent"
+        }
+      }
     },
-    "ServerScriptService":{"HubServer":{"$path":"src/hub/server"}},
-    "StarterPlayer":{"StarterPlayerScripts":{"HubClient":{"$path":"src/hub/client"}}},
-    "Workspace":{"$properties":{"StreamingEnabled":false}},
-    "StarterGui":{"$properties":{"ScreenOrientation":"LandscapeSensor"}}
+    "ServerScriptService": {
+      "HubServer": {
+        "$path": "src/hub/server",
+        "MatchmakingService": {
+          "$path": "src/server/MatchmakingService.lua"
+        },
+        "MatchmakingAdapter": {
+          "$path": "src/server/MatchmakingAdapter.lua"
+        },
+        "TeleportCoordinator": {
+          "$path": "src/server/TeleportCoordinator.lua"
+        },
+        "DeparturePreparation": {
+          "$path": "src/server/DeparturePreparation.lua"
+        },
+        "ProfileStore": {
+          "$path": "src/server/ProfileStore.lua"
+        }
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "HubClient": {
+          "$path": "src/hub/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": false
+      }
+    },
+    "StarterGui": {
+      "$properties": {
+        "ScreenOrientation": "LandscapeSensor"
+      }
+    }
   }
 }

@@ -1,0 +1,17 @@
+{
+  "recorded": "2026-09-24",
+  "environment": "StudioTestService, two clients, normal HubRemotes requests, local matchmaking adapter",
+  "elapsed": 8.151805800036528,
+  "passed": true,
+  "assertions": [
+    "two initialized hub clients",
+    "invite appears to recipient",
+    "both clients share two-member party",
+    "nonleader deployment rejected",
+    "both clients observe queued party",
+    "leader cancels queue for whole party",
+    "member hero selection accepted",
+    "private party simulation finishes together"
+  ],
+  "limits": "No published teleport, cross-server MemoryStore, or physical-device claim."
+}
