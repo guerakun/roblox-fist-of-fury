@@ -1,33 +1,67 @@
-"""Summarize stored Studio reports without manufacturing missing metrics."""
+"""Summarize saved HumanBot evidence without changing its measurements."""
 import argparse
 import json
 from pathlib import Path
+from statistics import mean
 
 parser = argparse.ArgumentParser()
 parser.add_argument('reports', nargs='+', type=Path)
+parser.add_argument('--source', default='unspecified')
+parser.add_argument('--output', type=Path)
 args = parser.parse_args()
-reports = [json.loads(path.read_text(encoding='utf-8-sig')) for path in args.reports]
-print('| Seed | Outcome | Seconds | Stocks lost D1/D2/D3 | Damage (snapshot) | Eligible idle | Flank windows | Peak windups |')
-print('|---|---|---:|---|---:|---|---|---:|')
-total_stocks = total_idle = total_eligible = total_flanks = total_windows = 0
-for report in reports:
-    telemetry = report.get('telemetry') or {}
-    losses = report.get('stocksLostByDistrict', {})
-    stocks = [losses.get(str(stage), 0) for stage in (1, 2, 3)]
-    total_stocks += sum(stocks)
-    idle, eligible = telemetry.get('idleGruntTicks', 0), telemetry.get('eligibleGruntTicks', 0)
-    flanks, windows = telemetry.get('flankedWindows', 0), telemetry.get('flankWindows', 0)
-    total_idle += idle
-    total_eligible += eligible
-    total_flanks += flanks
-    total_windows += windows
-    idle_label = f'{idle}/{eligible} ({idle/eligible:.1%})' if eligible else 'unavailable'
-    flank_label = f'{flanks}/{windows} ({flanks/windows:.1%})' if windows else 'unavailable'
-    print(f"| {report['seed']} | {report['outcome']} | {report['seconds']:.2f} | {'/'.join(map(str, stocks))} | {report['damageTaken']} | {idle_label} | {flank_label} | {telemetry.get('windupPeak', 'unavailable')} |")
-count = len(reports)
-print(f'\nClear rate: {sum(bool(r.get("clear")) for r in reports)}/{count}. Mean stocks lost: {total_stocks/count:.2f}. Mean duration: {sum(r["seconds"] for r in reports)/count:.2f} s. Mean snapshot damage: {sum(r["damageTaken"] for r in reports)/count:.2f}.')
-if total_eligible:
-    print(f'Pooled eligible idle: {total_idle}/{total_eligible} = {total_idle/total_eligible:.2%}.')
-if total_windows:
-    print(f'Pooled qualified flank windows: {total_flanks}/{total_windows} = {total_flanks/total_windows:.2%}.')
-print('Rank and frustum unsupported in baseline. Five runs are a coarse engineering comparison, not human certification.')
+rows = []
+for path in args.reports:
+    raw = json.loads(path.read_text(encoding='utf-8-sig'))
+    bot = raw.get('bot', raw)
+    if not bot.get('done'):
+        raise ValueError(f'{path}: incomplete run cannot enter the aggregate')
+    telemetry = bot.get('telemetry') or {}
+    audit = raw.get('frustum') or {}
+    rows.append({
+        'file': path.name, 'seed': bot['seed'], 'clear': bot.get('clear', False), 'outcome': bot.get('outcome'),
+        'seconds': bot['seconds'], 'stocksLost': sum(bot['stocksLostByDistrict'].values()) if isinstance(bot.get('stocksLostByDistrict'), dict) else None,
+        'stocksLostByDistrict': bot.get('stocksLostByDistrict'), 'damageTaken': bot['damageTaken'],
+        'idleTicks': telemetry.get('idleGruntTicks'), 'eligibleTicks': telemetry.get('eligibleGruntTicks'),
+        'flankedWindows': telemetry.get('flankedWindows'), 'flankWindows': telemetry.get('flankWindows'),
+        'capViolations': telemetry.get('capViolations'), 'minWindup': telemetry.get('minWindup'),
+        'frustumFixture': audit.get('fixture'), 'frustumAuditedHits': audit.get('hits'), 'frustumOutside': audit.get('outside'),
+        'frustumInvalidViewportHits': audit.get('invalidViewportHits'),
+        'diversityByKind': telemetry.get('actionDiversity', {}).get('byKind', {}),
+    })
+if len({r['seed'] for r in rows}) != len(rows):
+    raise ValueError('Duplicate seed in comparison set')
+def total(key):
+    return sum(r[key] for r in rows) if all(r[key] is not None for r in rows) else None
+def average(key):
+    return mean(r[key] for r in rows) if all(r[key] is not None for r in rows) else None
+def ratio(numerator, denominator):
+    n, d = total(numerator), total(denominator)
+    return n / d if n is not None and d else None
+diversity = {}
+for row in rows:
+    for kind, values in row['diversityByKind'].items():
+        out = diversity.setdefault(kind, {'eligible': 0, 'passed': 0, 'minDistinct': None})
+        out['eligible'] += values.get('eligible', 0)
+        out['passed'] += values.get('passed', 0)
+        value = values.get('minDistinct')
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            out['minDistinct'] = value if out['minDistinct'] is None else min(out['minDistinct'], value)
+result = {
+    'sourceCommit': args.source, 'runs': len(rows), 'clears': sum(r['clear'] for r in rows),
+    'meanSeconds': average('seconds'), 'meanStocksLost': average('stocksLost'),
+    'meanDamageTaken': average('damageTaken'),
+    'pooledIdleTicks': total('idleTicks'), 'pooledEligibleTicks': total('eligibleTicks'),
+    'pooledIdleRatio': ratio('idleTicks', 'eligibleTicks'),
+    'pooledFlankedWindows': total('flankedWindows'), 'pooledFlankWindows': total('flankWindows'),
+    'pooledFlankRatio': ratio('flankedWindows', 'flankWindows'),
+    'capViolations': total('capViolations'), 'actionDiversityByKind': diversity,
+    'frustum': {key: sum(r[key] for r in rows) if all(r[key] is not None for r in rows) else None
+                for key in ('frustumAuditedHits', 'frustumOutside', 'frustumInvalidViewportHits')},
+    'completeMetrics': {key: all(r[key] is not None for r in rows) for key in ('stocksLost', 'idleTicks', 'eligibleTicks', 'flankedWindows', 'flankWindows', 'capViolations', 'frustumAuditedHits', 'frustumOutside', 'frustumInvalidViewportHits')},
+    'frustumFixturesValid': all(isinstance(r['frustumFixture'], dict) and r['frustumFixture'].get('passed') is True and r['frustumFixture'].get('width', 0)>1 and r['frustumFixture'].get('height', 0)>1 for r in rows),
+    'rows': rows,
+    'limit': 'Bot campaigns only. Missing/zero eligible archetype windows are inconclusive; no human/device acceptance implied.',
+}
+if args.output:
+    args.output.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
+print(json.dumps({k: v for k, v in result.items() if k not in ('rows', 'actionDiversityByKind')}, indent=2))

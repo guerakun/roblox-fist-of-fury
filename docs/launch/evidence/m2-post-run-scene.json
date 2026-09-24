@@ -1,0 +1,591 @@
+{
+  "GetTriangleCompositionAsync": {
+    "Children": [
+      {
+        "Name": "Opaque",
+        "Sizes": {
+          "Drawcalls": 1,
+          "Triangles": 12
+        }
+      }
+    ],
+    "Name": "TriangleComposition",
+    "Sizes": {
+      "Drawcalls": 1,
+      "Triangles": 12
+    }
+  },
+  "GetAnimationMemoryAsync": {
+    "Children": [],
+    "Name": "AnimationMemory",
+    "Size": 0
+  },
+  "GetAudioMemoryAsync": {
+    "Children": [
+      {
+        "AssetId": "rbxassetid://10066921516",
+        "Name": "CoreGui.RobloxGui.ShutterSound",
+        "Size": 101868
+      },
+      {
+        "Children": [
+          {
+            "AssetId": "rbxassetid://132504023010884",
+            "Name": "ReplicatedStorage.Nightfall.Assets.Audio.Punch Impact 1",
+            "Size": 109356
+          },
+          {
+            "AssetId": "rbxassetid://135315310485417",
+            "Name": "ReplicatedStorage.Nightfall.Assets.Audio.sword-swing-whoosh-sound-effect-1-full-pack",
+            "Size": 115200
+          }
+        ],
+        "Name": "ReplicatedStorage.Nightfall.Assets.Audio",
+        "Size": 224556
+      },
+      {
+        "Children": [
+          {
+            "AssetId": "rbxassetid://1844978927",
+            "Name": "SoundService.NightfallStageAudio.BattleActionScore",
+            "Size": 120968
+          },
+          {
+            "AssetId": "rbxassetid://9112772977",
+            "Name": "SoundService.NightfallStageAudio.AbandonedStation",
+            "Size": 128768
+          },
+          {
+            "AssetId": "rbxassetid://9112890492",
+            "Name": "SoundService.NightfallStageAudio.FactoryConveyors",
+            "Size": 128768
+          }
+        ],
+        "Name": "SoundService.NightfallStageAudio",
+        "Size": 378504
+      },
+      {
+        "Children": [
+          {
+            "AssetId": "rbxasset://sounds/action_falling.ogg",
+            "Name": "Workspace.Player1.HumanoidRootPart.FreeFalling",
+            "Size": 1764000
+          },
+          {
+            "AssetId": "rbxasset://sounds/action_footsteps_plastic.mp3",
+            "Name": "Workspace.Player1.HumanoidRootPart.Climbing",
+            "Size": 218880
+          },
+          {
+            "AssetId": "rbxasset://sounds/action_get_up.mp3",
+            "Name": "Workspace.Player1.HumanoidRootPart.GettingUp",
+            "Size": 50688
+          },
+          {
+            "AssetId": "rbxasset://sounds/action_jump.mp3",
+            "Name": "Workspace.Player1.HumanoidRootPart.Jumping",
+            "Size": 29952
+          },
+          {
+            "AssetId": "rbxasset://sounds/action_jump_land.mp3",
+            "Name": "Workspace.Player1.HumanoidRootPart.Landing",
+            "Size": 23040
+          },
+          {
+            "AssetId": "rbxasset://sounds/action_swim.mp3",
+            "Name": "Workspace.Player1.HumanoidRootPart.Swimming",
+            "Size": 430848
+          },
+          {
+            "AssetId": "rbxasset://sounds/impact_water.mp3",
+            "Name": "Workspace.Player1.HumanoidRootPart.Splash",
+            "Size": 209664
+          }
+        ],
+        "Name": "Workspace.Player1.HumanoidRootPart",
+        "Size": 2727072
+      },
+      {
+        "Owners": [
+          {
+            "Name": "CoreGui.RobloxGui.Sounds.VolumeChangeSound",
+            "ClassName": "Sound"
+          },
+          {
+            "Name": "Workspace.Player1.HumanoidRootPart.Died",
+            "ClassName": "Sound"
+          }
+        ],
+        "AssetId": "rbxasset://sounds/uuhhh.mp3",
+        "Name": "rbxasset://sounds/uuhhh.mp3",
+        "Size": 14654
+      },
+      {
+        "Owners": [
+          {
+            "Name": "ReplicatedStorage.Nightfall.Assets.Audio.City Night Ambience 3 (SFX)",
+            "ClassName": "Sound"
+          },
+          {
+            "Name": "SoundService.NightfallStageAudio.CityNight",
+            "ClassName": "Sound"
+          }
+        ],
+        "AssetId": "rbxassetid://9112759731",
+        "Name": "rbxassetid://9112759731",
+        "Size": 128768
+      }
+    ],
+    "Name": "AudioMemory",
+    "Size": 3575422
+  },
+  "GetUnparentedInstancesAsync": {
+    "Children": [
+      {
+        "Children": [
+          {
+            "Name": "Model",
+            "Size": 39
+          }
+        ],
+        "Name": "Players.Player1.PlayerScripts.HumanBot",
+        "Size": 39
+      },
+      {
+        "Children": [
+          {
+            "Name": "Tween",
+            "Size": 2
+          }
+        ],
+        "Name": "Players.Player1.PlayerScripts.NightfallClient.CombatHUD",
+        "Size": 2
+      },
+      {
+        "Children": [
+          {
+            "Name": "Tween",
+            "Size": 1
+          }
+        ],
+        "Name": "Players.Player1.PlayerScripts.NightfallClient.Main",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "BindableEvent",
+            "Size": 2
+          }
+        ],
+        "Name": "StarterPlayer.PlayerModule",
+        "Size": 2
+      },
+      {
+        "Children": [
+          {
+            "Name": "BindableEvent",
+            "Size": 1
+          }
+        ],
+        "Name": "StarterPlayer.PlayerModule.CameraModule.MouseLockController",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "UserGameSettings",
+            "Size": 1
+          }
+        ],
+        "Name": "StarterPlayer.PlayerModule.CameraModule.VRBaseCamera",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "BindableEvent",
+            "Size": 1
+          }
+        ],
+        "Name": "StarterPlayer.PlayerModule.CommonUtils.CharacterUtil",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "BindableEvent",
+            "Size": 1
+          }
+        ],
+        "Name": "StarterPlayer.PlayerModule.ControlModule.AvatarAbilitiesInterface",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "Animation",
+            "Size": 1
+          },
+          {
+            "Name": "Part",
+            "Size": 3
+          }
+        ],
+        "Name": "StarterPlayer.PlayerModule.ControlModule.ClickToMoveDisplay",
+        "Size": 4
+      }
+    ],
+    "Name": "UnparentedInstances",
+    "Size": 52
+  },
+  "GetInstanceCompositionAsync": {
+    "Children": [
+      {
+        "Children": [
+          {
+            "Name": "Camera",
+            "Size": 1
+          },
+          {
+            "Name": "Model",
+            "Size": 60
+          },
+          {
+            "Name": "Part",
+            "Size": 2570
+          },
+          {
+            "Name": "SpawnLocation",
+            "Size": 1
+          },
+          {
+            "Name": "Terrain",
+            "Size": 1
+          }
+        ],
+        "Name": "3D Objects",
+        "Size": 2633
+      },
+      {
+        "Children": [
+          {
+            "Name": "Attachment",
+            "Size": 4
+          },
+          {
+            "Name": "WeldConstraint",
+            "Size": 28
+          },
+          {
+            "Name": "Motor6D",
+            "Size": 6
+          }
+        ],
+        "Name": "Physics",
+        "Size": 38
+      },
+      {
+        "Children": [
+          {
+            "Name": "SurfaceGui",
+            "Size": 24
+          },
+          {
+            "Name": "TextLabel",
+            "Size": 127
+          },
+          {
+            "Name": "BillboardGui",
+            "Size": 1
+          },
+          {
+            "Name": "Frame",
+            "Size": 57
+          },
+          {
+            "Name": "UICorner",
+            "Size": 87
+          },
+          {
+            "Name": "PlayerGui",
+            "Size": 1
+          },
+          {
+            "Name": "ScreenGui",
+            "Size": 5
+          },
+          {
+            "Name": "UIStroke",
+            "Size": 27
+          },
+          {
+            "Name": "UIScale",
+            "Size": 8
+          },
+          {
+            "Name": "TextButton",
+            "Size": 41
+          },
+          {
+            "Name": "ScrollingFrame",
+            "Size": 3
+          },
+          {
+            "Name": "UIListLayout",
+            "Size": 1
+          },
+          {
+            "Name": "UIPadding",
+            "Size": 2
+          },
+          {
+            "Name": "UISizeConstraint",
+            "Size": 1
+          },
+          {
+            "Name": "BubbleChatConfiguration",
+            "Size": 1
+          },
+          {
+            "Name": "ImageLabel",
+            "Size": 1
+          },
+          {
+            "Name": "UIGradient",
+            "Size": 1
+          },
+          {
+            "Name": "ChatInputBarConfiguration",
+            "Size": 1
+          },
+          {
+            "Name": "ChannelTabsConfiguration",
+            "Size": 1
+          },
+          {
+            "Name": "ChatWindowConfiguration",
+            "Size": 1
+          },
+          {
+            "Name": "TextChannel",
+            "Size": 2
+          },
+          {
+            "Name": "TextSource",
+            "Size": 2
+          },
+          {
+            "Name": "TextChatCommand",
+            "Size": 9
+          }
+        ],
+        "Name": "UI",
+        "Size": 404
+      },
+      {
+        "Children": [
+          {
+            "Name": "PointLight",
+            "Size": 21
+          }
+        ],
+        "Name": "Lights",
+        "Size": 21
+      },
+      {
+        "Children": [
+          {
+            "Name": "Highlight",
+            "Size": 1
+          },
+          {
+            "Name": "DepthOfFieldEffect",
+            "Size": 1
+          },
+          {
+            "Name": "Atmosphere",
+            "Size": 2
+          },
+          {
+            "Name": "BloomEffect",
+            "Size": 2
+          },
+          {
+            "Name": "Sky",
+            "Size": 1
+          },
+          {
+            "Name": "ColorCorrectionEffect",
+            "Size": 1
+          },
+          {
+            "Name": "SunRaysEffect",
+            "Size": 1
+          }
+        ],
+        "Name": "PostProcessing",
+        "Size": 9
+      },
+      {
+        "Children": [
+          {
+            "Name": "LocalScript",
+            "Size": 17
+          },
+          {
+            "Name": "ModuleScript",
+            "Size": 69
+          },
+          {
+            "Name": "Script",
+            "Size": 4
+          },
+          {
+            "Name": "RemoteEvent",
+            "Size": 5
+          }
+        ],
+        "Name": "Scripts",
+        "Size": 95
+      },
+      {
+        "Children": [
+          {
+            "Name": "AudioListener",
+            "Size": 1
+          },
+          {
+            "Name": "Wire",
+            "Size": 1
+          },
+          {
+            "Name": "Sound",
+            "Size": 16
+          },
+          {
+            "Name": "AudioDeviceOutput",
+            "Size": 1
+          }
+        ],
+        "Name": "Audio",
+        "Size": 19
+      },
+      {
+        "Children": [
+          {
+            "Name": "Animator",
+            "Size": 1
+          }
+        ],
+        "Name": "Animation",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "Humanoid",
+            "Size": 1
+          }
+        ],
+        "Name": "Character",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "MaterialVariant",
+            "Size": 1
+          }
+        ],
+        "Name": "Textures",
+        "Size": 1
+      },
+      {
+        "Children": [
+          {
+            "Name": "SpecialMesh",
+            "Size": 13
+          }
+        ],
+        "Name": "Meshes",
+        "Size": 13
+      },
+      {
+        "Children": [
+          {
+            "Name": "ParticleEmitter",
+            "Size": 6
+          }
+        ],
+        "Name": "Particles",
+        "Size": 6
+      },
+      {
+        "Children": [
+          {
+            "Name": "Folder",
+            "Size": 39
+          },
+          {
+            "Name": "Player",
+            "Size": 1
+          }
+        ],
+        "Name": "Services & Storage",
+        "Size": 40
+      },
+      {
+        "Children": [
+          {
+            "Name": "PlayerScripts",
+            "Size": 1
+          },
+          {
+            "Name": "StarterGear",
+            "Size": 1
+          },
+          {
+            "Name": "Backpack",
+            "Size": 1
+          },
+          {
+            "Name": "StarterPlayerScripts",
+            "Size": 1
+          },
+          {
+            "Name": "StarterCharacterScripts",
+            "Size": 1
+          }
+        ],
+        "Name": "Misc",
+        "Size": 5
+      },
+      {
+        "Children": [
+          {
+            "Name": "InputContext",
+            "Size": 6
+          },
+          {
+            "Name": "InputAction",
+            "Size": 40
+          },
+          {
+            "Name": "InputBinding",
+            "Size": 95
+          }
+        ],
+        "Name": "Unclassified",
+        "Size": 141
+      }
+    ],
+    "Name": "InstanceComposition",
+    "Size": 3427
+  },
+  "GetScriptMemoryAsync": {
+    "error": "ScriptMemory requires STUDIOPLAT37936 flag"
+  },
+  "scope": "Client post-Victory snapshot, HumanBot seed1101, source9f29012; includes test-only scripts and Studio/core instances. Single snapshot cannot establish growth or minimum-phone performance.",
+  "limit": "Script memory query unavailable without STUDIOPLAT37936 flag. Rendering returned only one opaque cube despite thousands of world instances; not representative rendering evidence. No flags/settings changed."
+}
