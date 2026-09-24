@@ -24,6 +24,7 @@ local COLORS = {
 local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
 local HeroSpecials = require(script.Parent:WaitForChild("HeroSpecials"))
 local EnemyPresentation = require(script.Parent:WaitForChild("EnemyPresentation"))
+local FocusGuard = require(script.Parent:WaitForChild("FocusGuard"))
 local HEROES = Config.CharacterOrder
 local HERO_COLORS, HERO_MOVES = {}, {}
 for _, id in ipairs(HEROES) do
@@ -48,6 +49,9 @@ local toolboxData: any = nil
 local poseAction: string? = nil
 local poseStart = 0
 local localBlocking = false
+local touchInput: InputObject? = nil
+local blockInput: InputObject? = nil
+local touchKnob: Frame? = nil
 local locomotionStart = os.clock()
 local tracks: {[string]: AnimationTrack} = {}
 local activeEffects = 0
@@ -61,6 +65,16 @@ local touchPad: Frame? = nil
 local touchJump: TextButton? = nil
 local stageAudio = require(script.Parent:WaitForChild("StageAudio")).new(preferences)
 stageAudio.Update(snapshot)
+local function releaseBlock()
+    localBlocking = false
+    blockInput = nil
+    actionRemote:FireServer("Block", {held = false})
+end
+local focusGuard = FocusGuard.new({input = UserInputService, player = player, releaseBlock = releaseBlock,
+    clearHeld = function()
+        heldKeys = {}; gamepadMove = Vector2.zero; touchMove = Vector2.zero; touchInput = nil
+        if touchKnob then touchKnob.Position = UDim2.fromScale(.5, .5) end
+    end})
 local function combatSound(kind: string, position: Vector3)
     local now = os.clock()
     if preferences.volume <= 0 or activeSounds >= 8 or (kind == "Hit" and now - lastHitSound < 0.07) then return end
@@ -300,8 +314,10 @@ local function resize()
     presentation.resize()
 end
 local function characterReady(character: Model)
+    focusGuard:Reset("character-ready")
     humanoid = character:WaitForChild("Humanoid") :: Humanoid
     root = character:WaitForChild("HumanoidRootPart") :: BasePart
+    humanoid.Died:Connect(function() if player.Character == character then focusGuard:Reset("death") end end)
     shoulderDefaults = {}; rigJoints = {}; tracks = {}; cameraCenter = nil; poseAction = nil; localBlocking = false
     for _, item in ipairs(character:GetDescendants()) do
         if item:IsA("Motor6D") and item.Part1 then rigJoints[item] = item.C0 end
@@ -371,11 +387,8 @@ local function animate(action: string)
 end
 
 local function send(action: string, held: boolean?)
-    if UserInputService:GetFocusedTextBox() then return end
-    if player:GetAttribute("MenuOpen") or player:GetAttribute("SettingsOpen") then
-        localBlocking = false
-        if action ~= "Block" or held ~= false then return end
-    end
+    if action == "Block" and held == false then releaseBlock(); return end
+    if focusGuard:Blocked() then return end
     if action == "Jump" then
         if snapshot.downed or snapshot.blocking or localBlocking or ending.Visible then return end
         if humanoid and humanoid.Health > 0 then
@@ -404,24 +417,24 @@ local bindings: any = {
 }
 for action, keys in pairs(bindings) do
     ContextActionService:BindAction("Nightfall_" .. action, function(_, inputState)
-        if UserInputService:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
-        if inputState == Enum.UserInputState.Begin then send(action, action == "Block" and true or nil)
-        elseif (inputState == Enum.UserInputState.End or inputState == Enum.UserInputState.Cancel) and action == "Block" then send("Block", false) end
+        if focusGuard:ReleaseInput(action, inputState) then return Enum.ContextActionResult.Sink end
+        if focusGuard:Blocked() then return Enum.ContextActionResult.Pass end
+        if inputState == Enum.UserInputState.Begin then send(action, action == "Block" and true or nil) end
         return Enum.ContextActionResult.Sink
     end, false, table.unpack(keys))
 end
 for action, button in pairs(abilityButtons) do
     if action == "Block" then
         button.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then send("Block", true) end
+            if not focusGuard:Blocked() and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then blockInput = input; send("Block", true) end
         end)
         button.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then send("Block", false) end
+            if input == blockInput then send("Block", false) end
         end)
     else button.Activated:Connect(function() send(action) end) end
 end
 UserInputService.InputBegan:Connect(function(input, processed)
-    if processed or player:GetAttribute("MenuOpen") or player:GetAttribute("SettingsOpen") then return end
+    if processed or focusGuard:Blocked() then return end
     heldKeys[input.KeyCode] = true
     if input.KeyCode == Enum.KeyCode.One then actionRemote:FireServer("SelectCharacter", {hero = HEROES[1]})
     elseif input.KeyCode == Enum.KeyCode.Two then actionRemote:FireServer("SelectCharacter", {hero = HEROES[2]})
@@ -433,22 +446,20 @@ UserInputService.InputBegan:Connect(function(input, processed)
         actionRemote:FireServer("SelectCharacter", {hero = HEROES[(current - 1 + offset) % #HEROES + 1]})
     elseif input.KeyCode == Enum.KeyCode.ButtonStart and ending.Visible then actionRemote:FireServer("Restart", {}) end
 end)
-UserInputService.InputEnded:Connect(function(input) heldKeys[input.KeyCode] = nil end)
-UserInputService.InputChanged:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Thumbstick1 then gamepadMove = Vector2.new(input.Position.X, -input.Position.Y) end
+UserInputService.InputEnded:Connect(function(input)
+    heldKeys[input.KeyCode] = nil
+    if input == blockInput then releaseBlock() end
 end)
-UserInputService.WindowFocusReleased:Connect(function()
-    heldKeys = {}; gamepadMove = Vector2.zero; touchMove = Vector2.zero; localBlocking = false
-    actionRemote:FireServer("Block", {held = false})
+UserInputService.InputChanged:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Thumbstick1 then gamepadMove = not focusGuard:Blocked() and Vector2.new(input.Position.X, -input.Position.Y) or Vector2.zero end
 end)
 
 touchPad = make("Frame", {Visible = UserInputService.TouchEnabled, Active = true,
     BackgroundColor3 = COLORS.panel, BackgroundTransparency = 0.3, Position = UDim2.new(0, 25, 1, -280), Size = UDim2.fromOffset(116, 116)}, canvas)
 round(touchPad, 58); outline(touchPad, COLORS.cyan)
-local touchKnob = make("Frame", {BackgroundColor3 = COLORS.cyan, BackgroundTransparency = 0.28,
+touchKnob = make("Frame", {BackgroundColor3 = COLORS.cyan, BackgroundTransparency = 0.28,
     AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(42, 42)}, touchPad)
 round(touchKnob, 21)
-local touchInput: InputObject? = nil
 local function updateTouch(input: InputObject)
     local point = Vector2.new(input.Position.X, input.Position.Y)
     local delta = (point - (touchPad.AbsolutePosition + touchPad.AbsoluteSize / 2)) / 42
@@ -456,9 +467,9 @@ local function updateTouch(input: InputObject)
     touchMove = delta; touchKnob.Position = UDim2.new(0.5, delta.X * 34, 0.5, delta.Y * 34)
 end
 touchPad.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then touchInput = input; updateTouch(input) end
+    if not focusGuard:Blocked() and input.UserInputType == Enum.UserInputType.Touch then touchInput = input; updateTouch(input) end
 end)
-UserInputService.InputChanged:Connect(function(input) if input == touchInput then updateTouch(input) end end)
+UserInputService.InputChanged:Connect(function(input) if input == touchInput and not focusGuard:Blocked() then updateTouch(input) end end)
 UserInputService.InputEnded:Connect(function(input)
     if input == touchInput then touchInput = nil; touchMove = Vector2.zero; touchKnob.Position = UDim2.fromScale(0.5, 0.5) end
 end)
@@ -748,7 +759,9 @@ local previousStatus = ""
 stateRemote.OnClientEvent:Connect(function(state: any)
     if type(state) ~= "table" then return end
     if state.kind == "Toast" or state.kind == "Message" then toast(state.text or state.message or ""); return end
+    local wasDowned = snapshot.downed
     for key, value in pairs(state) do snapshot[key] = value end
+    if snapshot.downed and not wasDowned then focusGuard:Reset("downed") end
     local hero = snapshot.hero
     local color = HERO_COLORS[hero] or COLORS.cyan
     heroLabel.Text = string.upper((Config.Characters[hero] or Config.Characters[HEROES[1]]).Name); heroLabel.TextColor3 = color

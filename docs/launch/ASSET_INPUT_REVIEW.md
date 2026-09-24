@@ -65,3 +65,15 @@ After the freeze: add a shared modal/text-focus guard to both button activation 
 ## Evidence required before closing
 
 Root should run the deterministic focus/modal fixtures after implementation and rerun the camera regression plus affected UI bounds/input fixtures. Capture readable UI evidence when Studio rendering permits. Physical keyboard/chat, controller and touch checks remain owner/device gates; synthesized callback tests do not close them. Published asset/audio permissions require the configured test universe and a non-owner account, which this overnight review does not access. M2 five-bot source must stay unchanged until root releases it.
+
+
+## M6 focus correction implementation checkpoint
+
+After root released the M2 comparison freeze, presentation implemented INPUT-01/02/03 in the owned client files. New FocusGuard connects window/text/modal/character interruptions to held-input reset, handles Block End/Cancel before focus gates, and supplies the common return eligibility predicate. Main clears local guarding, keyboard/gamepad/touch vectors, touch ownership and knob position; death/downed/character transitions also reset state. CombatHUD clears slider drag on focus interruptions. CampaignTravel uses the same text/menu guard for both button and shortcut. Camera smoothing, framing and movement math were not changed.
+
+`tests/FocusGuard.spec.lua` exercises event-order policy with deterministic signals; `tests/FocusGuardClient.spec.lua` exercises actual local TextBox focus and player-attribute signals. Presentation ran source diff/whitespace checks only; root's Studio results and independent source review are pending at this writing. These fixtures cannot certify physical controller/touch handling. The original frozen five-bot reports remain tied to their prior source revision.
+
+
+### Recorded M6 source review and actual Studio results
+
+Combat independently reviewed FocusGuard/Main/CombatHUD/CampaignTravel and the fixtures: source PASS. Root ran the deterministic FocusGuard spec in Studio: PASS for text-focus release, End/Cancel, modal/window/life cleanup, connection disposal and return gating, with eight release callbacks. Root also ran the isolated actual-client TextBox plus MenuOpen/SettingsOpen signal fixture: PASS with three release callbacks. Both results explicitly report physicalInputVerified=false. These exercise helper policy and real local focus/attribute signals; they do not certify physical controller/touch sequences or a new visible camera regression. The patch changes no camera calculations. Root owns the saved runtime artifacts and commit evidence in PROGRESS.

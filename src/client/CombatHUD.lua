@@ -311,6 +311,8 @@ function HUD.new(options: any): any
     UserInputService.InputEnded:Connect(function(input)
         if sliderDrag and (input == sliderDrag.input or input.UserInputType == Enum.UserInputType.MouseButton1) then sliderDrag = nil end
     end)
+    UserInputService.WindowFocusReleased:Connect(function() sliderDrag = nil end)
+    UserInputService.TextBoxFocused:Connect(function() sliderDrag = nil end)
     player:GetAttributeChangedSignal("MenuOpen"):Connect(function() if player:GetAttribute("MenuOpen") then setSettingsOpen(false) end end)
     changed()
 

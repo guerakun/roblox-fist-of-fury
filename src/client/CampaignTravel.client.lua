@@ -6,6 +6,7 @@ local ContextActionService=game:GetService("ContextActionService")
 local UserInputService=game:GetService("UserInputService")
 local GuiService=game:GetService("GuiService")
 local player=Players.LocalPlayer
+local focusGuard=require(script.Parent:WaitForChild("FocusGuard")).new({input=UserInputService,player=player})
 local travel=ReplicatedStorage:WaitForChild("Nightfall"):WaitForChild("Remotes"):WaitForChild("Travel") :: RemoteEvent
 local gui=Instance.new("ScreenGui")
 gui.Name="CampaignTravel"; gui.ResetOnSpawn=false; gui.IgnoreGuiInset=false; gui.DisplayOrder=25
@@ -30,7 +31,7 @@ local buttonCorner=Instance.new("UICorner"); buttonCorner.CornerRadius=UDim.new(
 local canReturn,busy=false,false
 local lastRequest=0
 local function returnToRefuge()
-    if not canReturn or busy or not panel.Visible or os.clock()-lastRequest<.8 then return end
+    if not focusGuard:CanReturn(canReturn,busy,panel.Visible) or os.clock()-lastRequest<.8 then return end
     lastRequest=os.clock()
     travel:FireServer("Return")
 end
@@ -39,7 +40,7 @@ local function labelButton()
 end
 button.Activated:Connect(returnToRefuge)
 ContextActionService:BindActionAtPriority("CampaignReturnToRefuge",function(_,input)
-    if not canReturn or busy or not panel.Visible or UserInputService:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
+    if not focusGuard:CanReturn(canReturn,busy,panel.Visible) then return Enum.ContextActionResult.Pass end
     if input==Enum.UserInputState.Begin then returnToRefuge() end
     return Enum.ContextActionResult.Sink
 end,false,3200,Enum.KeyCode.T,Enum.KeyCode.ButtonY)

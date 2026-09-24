@@ -1,0 +1,22 @@
+{
+  "pure": {
+    "passed": true,
+    "releases": 8,
+    "endCancel": true,
+    "textRelease": true,
+    "modalReset": true,
+    "windowReset": true,
+    "characterReset": true,
+    "disconnect": true,
+    "returnGates": true
+  },
+  "client": {
+    "releaseCallbacks": 3,
+    "physicalInputVerified": false,
+    "actualModalSignals": true,
+    "actualTextFocus": true,
+    "passed": true
+  },
+  "review": "combat independent source review passed",
+  "scope": "Actual Studio local TextBox and modal signals plus deterministic helper checks; physical input unverified; camera calculations unchanged"
+}

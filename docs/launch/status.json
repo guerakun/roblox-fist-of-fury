@@ -1,5 +1,5 @@
 {
-  "summary": "The launch program is in progress on `launch-program`. M0 baseline is closed. M1 original heroes/story/IP source checks are implemented; rendered art and owner approval of Rook Calder, Bo Marlowe and Isla Veyra remain open. M5 hub/party/admission/return source has policy and Studio multiplayer evidence; published travel, live persistence and same-account reconnect remain unverified or blocked by the overnight restrictions.\n\nM2 source is frozen at `9f29012`, and both place artifacts were rebuilt from it. **All five final HumanBot seeds cleared.** Before/after means: **278.27 -> 398.56 seconds**, **0.80 -> 2.80 stocks lost**, **543 -> 830.4 damage**. Pooled idle **16.10% -> 9.58%**; qualified solo flank coverage **45.45% -> 96.43%**; token-cap breaches **0 -> 0**. Final hits: **351 server accepted / 351 audited / 0 outside / 0 invalid viewport**. This is automated campaign evidence, not human acceptance; ordinary-archetype action-diversity coverage is inconclusive. Historical crowd failures remain saved.\n\nM6 has owner checklists, analytics, original icon concept, hub resource fixes and source audits. WorldLifetime actual structural/lifetime fixture passed34props/30debriscap/stablerebuild; focus/modal cleanup is queued. M3/M4 remain outstanding; M3 contracts and isolated reward/Heat drafts are prepared but not connected to gameplay. Money never buys power; sales remain disabled.\n\nFinal frozen crowd: idle 4.77%, cap0, 21/31 complete diversity windows passed (target still FAIL); four stationary clients were spread by knockback, and later camera suppression limits attack opportunities. CPU: 39 complete scopes, mean0.46067ms, valid4players/12enemies with2273checks and0mismatches. Exact next: release M3 source implementation, while root runs the isolated WorldLifetime fixture. Full M2 human/device/diversity acceptance stays explicit while unblocked engineering progresses. No publication, Creator Dashboard, sales, live DataStores or place settings were changed. All notes are indexed in [launch/README](launch/README.md).",
+  "summary": "The launch program is in progress on `launch-program`. M0 baseline is closed. M1 original heroes/story/IP source checks are implemented; rendered art and owner approval of Rook Calder, Bo Marlowe and Isla Veyra remain open. M5 hub/party/admission/return source has policy and Studio multiplayer evidence; published travel, live persistence and same-account reconnect remain unverified or blocked by the overnight restrictions.\n\nM2 source is frozen at `9f29012`, and both place artifacts were rebuilt from it. **All five final HumanBot seeds cleared.** Before/after means: **278.27 -> 398.56 seconds**, **0.80 -> 2.80 stocks lost**, **543 -> 830.4 damage**. Pooled idle **16.10% -> 9.58%**; qualified solo flank coverage **45.45% -> 96.43%**; token-cap breaches **0 -> 0**. Final hits: **351 server accepted / 351 audited / 0 outside / 0 invalid viewport**. This is automated campaign evidence, not human acceptance; ordinary-archetype action-diversity coverage is inconclusive. Historical crowd failures remain saved.\n\nM6 has owner checklists, analytics, original icon concept, hub resource fixes and source audits. WorldLifetime actual structural/lifetime fixture passed34props/30debriscap/stablerebuild; focus/modal cleanup passed scoped Studio tests. M3 pressure and reward integration are in validation; remaining M3 and all M4 work orders are outstanding. Money never buys power; sales remain disabled.\n\nFinal frozen crowd: idle 4.77%, cap0, 21/31 complete diversity windows passed (target still FAIL); four stationary clients were spread by knockback, and later camera suppression limits attack opportunities. CPU: 39 complete scopes, mean0.46067ms, valid4players/12enemies with2273checks and0mismatches. Exact next: release M3 source implementation, while root runs the isolated WorldLifetime fixture. Full M2 human/device/diversity acceptance stays explicit while unblocked engineering progresses. No publication, Creator Dashboard, sales, live DataStores or place settings were changed. All notes are indexed in [launch/README](launch/README.md).",
   "orders": {
     "WO-0.1": {
       "owner": "root",
@@ -87,7 +87,7 @@
     },
     "WO-3.1": {
       "owner": "combat",
-      "status": "queued",
+      "status": "implemented; pure specs pass; runtime rerun in progress",
       "evidence": "not run",
       "next": "follow launch phase dependencies"
     },
@@ -105,7 +105,7 @@
     },
     "WO-3.4": {
       "owner": "root",
-      "status": "queued",
+      "status": "reward policies and Progression integration implemented; review/runtime in progress",
       "evidence": "not run",
       "next": "follow launch phase dependencies"
     },
@@ -225,9 +225,9 @@
     },
     "WO-6.5": {
       "owner": "world + presentation + combat + root",
-      "status": "source audits and owner plans recorded; listed fixes pending",
-      "evidence": "ASSET_INPUT_REVIEW,SCENE_SOURCE_REVIEW,MOVEMENT_AUTHORITY_PLAN independentlyreviewed;existingparticleIDsregistered;actualpostVictory3427instances/52unparented(testbot39)/3575422audio bytes;ScriptMemoryflagunavailable,render1cube nonrepresentative;launchREADMEalllinksresolve",
-      "next": "afterfreeze fixinputfocus/modalcleanup; SEC03movementproposalandphysical/publishedchecks remain open; WorldLifetimefixturequeued"
+      "status": "input cleanup implemented and scoped Studio tests passed; other audits retained",
+      "evidence": "focus-cleanup.json:8 deterministicreleasecallbacks/endCancel/modal/window/life/disconnect/returngatesPASS;actualClientTextBox+MenuOpen/SettingsOpen3callbacksPASS;combatindependentreviewPASS;camera mathunchanged",
+      "next": "physicaltouch/controller/humancamera/devicegatesopen;SEC03movementoriginproposalnotimplemented"
     },
     "WO-6.6": {
       "owner": "world + root",
