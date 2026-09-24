@@ -9,6 +9,8 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 local SocialService = game:GetService("SocialService")
 local player = Players.LocalPlayer
 local Config = require(ReplicatedStorage:WaitForChild("Nightfall"):WaitForChild("Shared"):WaitForChild("Config"))
+local Heat = require(ReplicatedStorage.Nightfall.Shared:WaitForChild("HeatConfig"))
+local HeatDisplay = require(script.Parent:WaitForChild("HeatDisplay"))
 local remotes = ReplicatedStorage:WaitForChild("HubRemotes")
 local request = remotes:WaitForChild("Request") :: RemoteEvent
 local stateRemote = remotes:WaitForChild("State") :: RemoteEvent
@@ -23,14 +25,7 @@ local difficulty = "Normal"
 local selectedHeat: {[string]: boolean} = {}
 local selectedHero = Config.CharacterOrder[1]
 local mode = "QuickMatch"
-local heatDefinitions = {
-    {id="Frenzy",name="FRENZY",description="One extra attack token",reward=10},
-    {id="ShortFuse",name="SHORT FUSE",description="Faster enemy warnings",reward=15},
-    {id="IronHide",name="IRON HIDE",description="Tougher ordinary enemies",reward=10},
-    {id="NoSafetyNet",name="NO SAFETY NET",description="No mid-district checkpoint",reward=20},
-    {id="OneLife",name="ONE LIFE",description="One stock; revive stays available",reward=35},
-    {id="MutatedElites",name="MUTATED ELITES",description="An extra phase-two boss move",reward=15},
-}
+local heatDefinitions = HeatDisplay.Definitions(Heat)
 local function make(class: string, properties: any, parent: Instance): any
     local object = Instance.new(class)
     for key, value in pairs(properties) do (object :: any)[key] = value end
@@ -111,13 +106,20 @@ for index,id in ipairs({"Normal","Hard","Nightmare"}) do
     difficultyButtons[id]=b
     b.Activated:Connect(function() if b.Active and state.unlocks and state.unlocks[id] then difficulty=id end end)
 end
-local heatSection=section("HEAT CONTRACTS / OPTIONAL RISK",28+#heatDefinitions*55)
+local heatSection=section("HEAT CONTRACTS / OPTIONAL RISK",52+#heatDefinitions*55)
+local heatSummary=label(heatSection,"HEAT CONTRACTS ARE NOT AVAILABLE",11,gold)
+heatSummary.Name="HeatSummary"; heatSummary.Position=UDim2.fromOffset(3,27); heatSummary.Size=UDim2.new(1,-6,0,22)
 local heatButtons: {[string]: TextButton}={}
 for index,definition in ipairs(heatDefinitions) do
-    local b=button(heatSection,definition.name.."  +"..definition.reward.."%\n"..definition.description)
-    b.Name="Heat_"..definition.id; b.Position=UDim2.fromOffset(3,28+(index-1)*55); b.Size=UDim2.new(1,-6,0,49); b.TextSize=11
+    local b=button(heatSection,HeatDisplay.Label(Heat,definition))
+    b.Name="Heat_"..definition.id; b.Position=UDim2.fromOffset(3,52+(index-1)*55); b.Size=UDim2.new(1,-6,0,49); b.TextSize=11
     heatButtons[definition.id]=b
-    b.Activated:Connect(function() if b.Active and Config.HeatContracts and Config.HeatContracts[definition.id] then selectedHeat[definition.id]=not selectedHeat[definition.id] end end)
+    b.Activated:Connect(function()
+        local party=state.party
+        local isLeader=not party or party.leader==player.UserId
+        local isQueued=party and (party.status=="Queued"or party.status=="Matching"or party.status=="Matched"or party.status=="Teleporting")or false
+        if b.Active then HeatDisplay.Toggle(Heat,selectedHeat,definition.id,isLeader,isQueued)end
+    end)
 end
 local status=label(panel,"Connecting...",11,light); status.Name="QueueStatus"
 status.Position=UDim2.new(0,16,1,-109); status.Size=UDim2.new(1,-32,0,39)
@@ -129,9 +131,7 @@ local function queued(): boolean
     return state.party and (state.party.status=="Queued" or state.party.status=="Matching" or state.party.status=="Matched" or state.party.status=="Teleporting") or false
 end
 local function heatArray(): {string}
-    local result={}
-    for _,definition in ipairs(heatDefinitions) do if selectedHeat[definition.id] then table.insert(result,definition.id) end end
-    return result
+    return HeatDisplay.Summary(Heat,selectedHeat).ids
 end
 deploy.Activated:Connect(function()
     if not leader() then return end
@@ -203,15 +203,14 @@ local function refresh()
         b.Active=unlocked and isLeader and not isQueued or false; b.Selectable=b.Active
         b.BackgroundColor3=id==difficulty and teal or panelColor; b.TextColor3=id==difficulty and ink or (unlocked and light or muted)
     end
-    local bonus=0
+    local summary=HeatDisplay.Summary(Heat,selectedHeat)
+    heatSummary.Text=Heat.Enabled and (summary.points.." HEAT POINTS / +"..summary.rewardPercent.."% EARNED COINS + XP") or "HEAT CONTRACTS ARE NOT AVAILABLE"
     for _,definition in ipairs(heatDefinitions) do
         local b=heatButtons[definition.id]
-        local available=Config.HeatContracts and Config.HeatContracts[definition.id]~=nil
+        local available=HeatDisplay.Available(Heat,definition.id)
         if not available then selectedHeat[definition.id]=nil end
-        b.Active=available and isLeader and not isQueued or false; b.Selectable=b.Active
-        b.Text=definition.name..(available and ("  +"..definition.reward.."%\n"..definition.description) or " / NOT AVAILABLE")
+        HeatDisplay.ApplyButton(b,Heat,definition,isLeader,isQueued)
         b.BackgroundColor3=selectedHeat[definition.id] and gold or panelColor; b.TextColor3=selectedHeat[definition.id] and ink or light
-        if selectedHeat[definition.id] then bonus+=definition.reward end
     end
     local partySize=party and #(party.members or {}) or 1
     solo.Text=partySize>1 and "PRIVATE PARTY RUN" or "SOLO RUN"
@@ -222,7 +221,7 @@ local function refresh()
     deploy.Active=isLeader and (not isQueued or canCancel); deploy.Selectable=deploy.Active
     local elapsed=party and type(party.queuedAt)=="number" and math.max(0,os.time()-party.queuedAt) or 0
     deploy.Text=not isLeader and "PARTY LEADER CHOOSES DEPLOYMENT" or (isQueued and not canCancel) and "PREPARING YOUR CAMPAIGN..." or isQueued and ("CANCEL QUEUE / "..elapsed.."s") or mode=="Solo" and (partySize>1 and "DEPLOY PRIVATE PARTY" or "DEPLOY SOLO") or "FIND A MATCH"
-    status.Text=(isQueued and not canCancel) and "YOUR MATCH IS READY\nStay with your squad while deployment completes." or isQueued and ("FINDING YOUR SQUAD · "..elapsed.."s\nKeep your party together. You can cancel.") or (tostring(state.message or "")~="" and tostring(state.message) or (difficulty.." / HEAT BONUS +"..bonus.."% · Earned coins and XP"))
+    status.Text=(isQueued and not canCancel) and "YOUR MATCH IS READY\nStay with your squad while deployment completes." or isQueued and ("FINDING YOUR SQUAD · "..elapsed.."s\nKeep your party together. You can cancel.") or (tostring(state.message or "")~="" and tostring(state.message) or (difficulty.." / "..summary.points.." HEAT / +"..summary.rewardPercent.."% EARNED COINS + XP"))
     local authoritativeMessage=tostring(state.message or "")
     -- A held save or deployment failure must remain visible even while a match is preparing.
     if authoritativeMessage~="" and (state.messagePriority=="Attention" or authoritativeMessage~="Deployment queued.") then
@@ -230,6 +229,8 @@ local function refresh()
         status.TextColor3=gold
     else status.TextColor3=light end
     gui:SetAttribute("QueueActive",isQueued); gui:SetAttribute("SelectedDifficulty",difficulty); gui:SetAttribute("SelectedHeatCount",#heatArray())
+    gui:SetAttribute("SelectedHeatPoints",summary.points); gui:SetAttribute("SelectedHeatRewardPercent",summary.rewardPercent)
+    gui:SetAttribute("HeatAvailable",Heat.Enabled==true)
     updateRoster()
     local selected=GuiService.SelectedObject
     if selected and selected:IsDescendantOf(panel) and not selected.Selectable then GuiService.SelectedObject=close end
