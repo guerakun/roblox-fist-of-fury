@@ -3,7 +3,7 @@ return function(World,Config,Installer)
     local city=World.Build()
     if Installer then Installer.DressWorld() end
     local floor=assert(city.Streets:FindFirstChild("ContinuousCombatFloor"))
-    assert(floor.CanCollide and floor.Position.Y+floor.Size.Y/2==0 and floor.Size.Z>=56,"widened physical floor")
+    assert(floor.CanCollide and floor.Position.Y+floor.Size.Y/2==0 and floor.Size.Z>=Config.LaneMax-Config.LaneMin+8,"widened physical floor")
     local gates,markers=0,0
     local roles={"Wave","Wave","Miniboss","Boss"}
     for stageIndex,stage in ipairs(Config.Stages)do
@@ -32,7 +32,7 @@ return function(World,Config,Installer)
     for _,item in ipairs(city:GetDescendants())do
         if item:IsA("Model") and item:GetAttribute("Destructible")then
             props+=1
-            assert(item.PrimaryPart and math.abs(item.PrimaryPart.Position.Z)>=25,"props moved outside combat interior")
+            assert(item.PrimaryPart and math.abs(item.PrimaryPart.Position.Z)>=Config.LaneMax+1,"props moved outside combat interior")
         end
         if item:IsA("BasePart") and (item:IsDescendantOf(city.Architecture) or item:IsDescendantOf(city.StreetDetails))then
             assert(not item.CanCollide,"scenery never obstructs combat")
@@ -46,13 +46,30 @@ return function(World,Config,Installer)
                 assert(not item.CanCollide and not item.CanQuery and not item.CanTouch,"mesh decor nonphysical")
                 for _,x in ipairs({-1,1})do for _,y in ipairs({-1,1})do for _,z in ipairs({-1,1})do
                     local corner=item.CFrame:PointToWorldSpace(item.Size*Vector3.new(x,y,z)/2)
-                    assert(corner.Z < -24,"pump part bounds outside arena")
+                    assert(corner.Z < Config.LaneMin,"pump part bounds outside arena")
                 end end end
                 dressedParts+=1
             end
         end
         assert(dressedParts==12,"three preserved pumps")
     end
-    return {passed=true,gates=gates,entryMarkers=markers,destructibles=props,dressedParts=dressedParts,buildVersion=city:GetAttribute("BuildVersion"),
+    local surround=assert(city:FindFirstChild("ArenaSurrounds"),"orbit environment exists")
+    local solidCount=0;local parts=0;local sides={{}, {}, {}}
+    for _,item in ipairs(surround:GetDescendants())do
+        if item:IsA("BasePart")then
+            parts+=1
+            if item:GetAttribute("CameraOccluder")then
+                solidCount+=1
+                assert(item.CanCollide and item.CanQuery and not item.CanTouch and item.Transparency<1,"real camera occluder")
+                local zExtent=math.abs(item.CFrame.RightVector.Z)*item.Size.X/2+math.abs(item.CFrame.UpVector.Z)*item.Size.Y/2+math.abs(item.CFrame.LookVector.Z)*item.Size.Z/2
+                assert(item.Position.Z-zExtent>=Config.LaneMax or item.Position.Z+zExtent<=Config.LaneMin,"solid perimeter stays outside combat floor")
+                local stage=math.clamp(math.floor(item.Position.X/180)+1,1,3)
+                sides[stage][item.Position.Z<0 and "rear" or "front"]=true
+            end
+        end
+    end
+    assert(parts<=350 and solidCount>=60,"bounded substantial surround")
+    for stage=1,3 do assert(sides[stage].rear and sides[stage].front,"both sides have volumetric scenery")end
+    return {passed=true,surroundParts=parts,cameraOccluders=solidCount,gates=gates,entryMarkers=markers,destructibles=props,dressedParts=dressedParts,buildVersion=city:GetAttribute("BuildVersion"),
         scope="Actual built geometry only; gate transitions, player movement, attack fairness and visual readability require separate play tests"}
 end

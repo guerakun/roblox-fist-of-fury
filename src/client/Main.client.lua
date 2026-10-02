@@ -25,7 +25,8 @@ local COLORS = {
     red = Color3.fromRGB(255, 92, 112), green = Color3.fromRGB(88, 224, 167),
 }
 local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
-local CameraBounds = require(package.Shared:WaitForChild("CameraBounds"))
+local NativeCamera = require(script.Parent:WaitForChild("NativeCamera"))
+local nativeCamera = NativeCamera.new(player, RunService)
 local ArenaView = require(script.Parent:WaitForChild("ArenaView"))
 local CombatVisualGeometry = require(script.Parent:WaitForChild("CombatVisualGeometry"))
 local HeroSpecials = require(script.Parent:WaitForChild("HeroSpecials"))
@@ -48,8 +49,6 @@ local lastGuardFacingAt = 0
 local lastGuardFacing = Vector3.xAxis
 local humanoid: Humanoid? = nil
 local root: BasePart? = nil
-local cameraKick = 0
-local cameraCenter: Vector3? = nil
 local gamepadMove = Vector2.zero
 local touchMove = Vector2.zero
 local heldKeys: {[Enum.KeyCode]: boolean} = {}
@@ -391,8 +390,9 @@ local function characterReady(character: Model)
     focusGuard:Reset("character-ready")
     humanoid = character:WaitForChild("Humanoid") :: Humanoid
     root = character:WaitForChild("HumanoidRootPart") :: BasePart
+    nativeCamera:Subject(workspace.CurrentCamera, humanoid)
     humanoid.Died:Connect(function() if player.Character == character then focusGuard:Reset("death") end end)
-    shoulderDefaults = {}; rigJoints = {}; tracks = {}; cameraCenter = nil; poseAction = nil; localBlocking = false
+    shoulderDefaults = {}; rigJoints = {}; tracks = {}; poseAction = nil; localBlocking = false
     for _, item in ipairs(character:GetDescendants()) do
         if item:IsA("Motor6D") and item.Part1 then rigJoints[item] = item.C0 end
         if item:IsA("Motor6D") and (string.find(item.Name, "Shoulder") or item.Name == "Waist") then
@@ -402,7 +402,7 @@ local function characterReady(character: Model)
 end
 player.CharacterAdded:Connect(characterReady)
 if player.Character then task.spawn(characterReady, player.Character) end
--- Disable the default controller so movement cannot escape the authored arena control axes.
+-- Disable only ControlModule; Roblox CameraModule remains the sole follow/orbit camera owner.
 task.spawn(function()
     local module = player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule", 15)
     if module and module:IsA("ModuleScript") then
@@ -613,7 +613,6 @@ end
 -- Original authored special poses and effects share Config dimensions with server attacks.
 local heroSpecials = HeroSpecials.new(effectsFolder, preferences, function(position: Vector3)
     combatSound("Attack", position)
-    if root and (root.Position - position).Magnitude < 65 then cameraKick = math.max(cameraKick, .68) end
 end)
 local function startSpecial(position: Vector3, hero: string, direction: any, userId: number?): boolean
     return heroSpecials.Emit(position, hero, direction, userId)
@@ -807,7 +806,6 @@ fxRemote.OnClientEvent:Connect(function(event: any)
         local bossName = event.enemyName or event.name or (type(snapshot.boss) == "table" and snapshot.boss.name) or "BOSS"
         toast(string.upper(bossName) .. " / PHASE " .. tostring(event.phase or 2), COLORS.red)
         burst(position, typeof(event.color) == "Color3" and event.color or COLORS.red, true, 1)
-        cameraKick = math.max(cameraKick, 0.8)
     elseif kind == "BossStagger" then
         toast(string.upper(event.enemyName or "CURSE") .. " / EXPOSED — PUNISH NOW", COLORS.green)
         if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then
@@ -849,12 +847,10 @@ fxRemote.OnClientEvent:Connect(function(event: any)
         if typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then clearBodyTell(event.targetModel) end
         if event.tellStyle ~= "Body" then hazardFootprint(event, true) end
         bossEffects.Emit(event)
-        if root and (root.Position - position).Magnitude < 35 then cameraKick = math.max(cameraKick, 0.45) end
     end
     local heavy = event.heavy == true or event.action == "Heavy" or event.action == "Special" or kind == "KO"
     if kind == "Hit" or kind == "KO" or kind == "Attack" or kind == "Special" or kind == "Dash" or kind == "Recovery" then
         if not distinctSpecial and not importedEffect(kind, position) then burst(position, color, heavy, event.direction or Vector3.xAxis) end
-        if not distinctSpecial and root and (root.Position - position).Magnitude < 65 then cameraKick = math.max(cameraKick, heavy and 0.75 or 0.24) end
     end
     if kind == "Hit" and type(event.damage) == "number" and activeEffects < 24 then damageNumber(position, event.damage, heavy) end
 end)
@@ -905,8 +901,6 @@ end)
 
 local renderAccum = 0
 local partyAccum = 0
-local cameraTarget = Vector3.new(60, 5, 0)
-local cameraDistance = 52
 -- Sample original imported R6 KeyframeSequence data cosmetically; damage stays server-owned.
 local function applyHeroPose(joints: any, poses: any, dt: number)
     for joint, neutral in pairs(joints) do
@@ -1012,7 +1006,7 @@ RunService:BindToRenderStep("NightfallMovement", Enum.RenderPriority.Input.Value
         local arena=activeArena()
         local bounds={MinX=snapshot.walkingMinX or arena.MinX+2,MaxX=snapshot.walkingMaxX or arena.MaxX-2,
             MinZ=snapshot.walkingMinZ or arena.MinZ+2,MaxZ=snapshot.walkingMaxZ or arena.MaxZ-2}
-        local worldMove,nextFacing=ArenaView.Movement(movement,root.Position,bounds,facing)
+        local worldMove,nextFacing=ArenaView.Movement(movement,root.Position,bounds,facing,workspace.CurrentCamera and workspace.CurrentCamera.CFrame)
         local now=os.clock()
         if localBlocking and nextFacing:Dot(lastGuardFacing)<.995 and now-lastGuardFacingAt>=.1 then
             actionRemote:FireServer("Block",{held=true,direction=nextFacing});lastGuardFacingAt=now;lastGuardFacing=nextFacing
@@ -1021,10 +1015,8 @@ RunService:BindToRenderStep("NightfallMovement", Enum.RenderPriority.Input.Value
         humanoid:Move(worldMove,false)
     end
 end)
-local cachedArenaKey=nil
-local cachedCameraTarget=nil
-local cachedCameraDistance=nil
--- Single camera owner: a fixed viewing angle translated with one smoothed center.
+local cameraReportAccum=0
+-- Observe the native camera after it updates. Presentation never sets CFrame or Focus.
 RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.Value + 1, function(dt)
     local camera = workspace.CurrentCamera
     if not camera then return end
@@ -1039,24 +1031,15 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
             for _, enemy in ipairs(enemiesFolder:GetChildren()) do if enemy:IsA("Model") then registerActor(enemy) end end
         end
     end
-    -- Actor movement never changes this target: only area transitions and viewport changes do.
-    local arena=activeArena()
-    local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
-    local key=string.format("%.4f:%.4f:%.4f:%.4f:%.6f",arena.MinX,arena.MaxX,arena.MinZ,arena.MaxZ,aspect)
-    if key~=cachedArenaKey then
-        cachedArenaKey=key
-        cachedCameraTarget,cachedCameraDistance=CameraBounds.Arena(arena,aspect)
+    cameraReportAccum+=dt
+    if cameraReportAccum>=.2 then
+        cameraReportAccum=0
+        local reportRemote=remotes:FindFirstChild("CameraView")
+        local viewport=camera.ViewportSize
+        if reportRemote and reportRemote:IsA("RemoteEvent") and viewport.X>0 and viewport.Y>0 then
+            reportRemote:FireServer({frame=camera.CFrame,fov=camera.FieldOfView,aspect=viewport.X/viewport.Y})
+        end
     end
-    cameraTarget=cachedCameraTarget
-    camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=CameraBounds.Fov
-    cameraCenter,cameraDistance=ArenaView.CameraStep(cameraCenter,cameraDistance,cameraTarget,cachedCameraDistance,dt)
-    cameraKick = math.max(0, cameraKick - dt * 3)
-    local now = os.clock()
-    local shake = Vector3.new(math.noise(now * 28, 0), math.noise(0, now * 28), 0) * cameraKick * preferences.shake
-    local focus = cameraCenter + shake
-    -- Shared fixed yaw/pitch with the server fairness envelope.
-    camera.CFrame = CameraBounds.Frame(focus,cameraDistance)
-    camera.Focus = CFrame.new(focus)
     desperationHUD.Render(desperationTouchMode())
     renderAccum += dt
     if renderAccum > 0.1 then
@@ -1082,6 +1065,7 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
 end)
 if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize) end
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    nativeCamera:Subject(workspace.CurrentCamera, humanoid)
     if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(resize) end
     resize()
 end)

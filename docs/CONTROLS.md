@@ -20,11 +20,11 @@ The first grounded jump uses Roblox Humanoid jumping. A second airborne press re
 
 ## Camera and accessibility
 
-- The fixed-yaw elevated camera frames the active arena, independent of ordinary character movement or jumping. During traversal it frames the current/next area union, then smoothly settles onto the next cell before combat begins. This is an authored camera, not a free orbit. See [3D conversion](launch/ARENA_3D_CONVERSION.md) for scoped evidence and remaining comfort/visibility tests.
+- Roblox's normal third-person camera follows the character and can rotate/zoom using native camera controls: hold the right mouse button and drag to rotate, and scroll the mouse wheel to zoom. The camera subject is the local Humanoid. Keyboard, stick and touch movement follow the camera's horizontal forward/right axes. Source requests Classic camera mode, FOV70 and zoom8-28; actual device interaction and camera collision remain validation gates. See [3D conversion](launch/ARENA_3D_CONVERSION.md).
 - Health is represented by readable damage percentage and discrete stock marks. Cooldown buttons show numeric time remaining.
 - Buttons support mouse activation in addition to keyboard, gamepad, and touch inputs. Input resets when the app loses focus.
-- The custom controller replaces Roblox default controls so keyboard, thumbstick, and touch directions stay aligned with the authored arena. Cardinal speeds are equal and diagonal input is normalized. The Humanoid controls ordinary locomotion yaw; attacks and guard use a horizontal facing vector.
-- Settings (O / gamepad Back) provide camera shake, effect density, master volume, stage ambience, combat music, and high-contrast warnings. Setting shake to 0 disables camera kick. Critical telegraphs remain visible even at 0 effect density. Settings last for the current play session.
+- The custom controller replaces Roblox default controls so keyboard, thumbstick, and touch directions stay aligned with the current camera view. Cardinal speeds are equal and diagonal input is normalized. The Humanoid controls ordinary locomotion yaw; attacks and guard use a horizontal facing vector.
+- Settings (O / gamepad Back) provide effect density, master volume, stage ambience, combat music, and high-contrast warnings. The obsolete scripted-camera shake control is removed; native camera behavior is not driven by combat camera kicks. Critical telegraphs remain visible even at 0 effect density. Settings last for the current play session.
 
 ## Imported asset contract
 
@@ -44,13 +44,13 @@ When no compatible effect exists, bounded neon impact particles make attacks vis
 
 The source implementation should not be labeled on par with the requested Roblox combat-quality benchmark until these are observed in a running Roblox client:
 
-1. Solo and 2–4 player Studio sessions: every hit confirms once, party framing remains readable, and stocks/restarts agree for all clients.
+1. Solo and 2–4 player Studio sessions: every hit confirms once, each player's own camera view remains readable, and stocks/restarts agree for all clients.
 2. Keyboard, Xbox-style controller, and phone landscape: movement, guard release, hero selection, ability labels, and restart remain usable with safe-area insets.
 3. Every hero has distinct permission-cleared animation and VFX sets, readable windup/contact/recovery, and convincing audio.
 4. Low-end mobile stress test: effect bursts remain below budget during four concurrent specials. Verify frame time with MicroProfiler.
-5. Review camera kick, touch thumb-pad placement, UI text size, and color-independent combat readability with players.
+5. Review native camera rotation/zoom, touch thumb-pad placement, UI text size, and color-independent combat readability with players.
 
-Current limitations: no input rebinding, no dedicated portrait-phone layout, no cross-session settings persistence, and no split-screen camera. HUD and touch controls adapt for landscape; a real-device pass remains necessary. Camera party fit has a finite zoom limit. Offscreen teammates get stock/percentage markers and offscreen attacks get directional warnings, but a deliberately scattered squad is not guaranteed to fit in one camera view.
+Current limitations: no input rebinding, no dedicated portrait-phone layout, no cross-session settings persistence, and no split-screen camera. HUD and touch controls adapt for landscape; a real-device pass remains necessary. Each player has an individual third-person camera; there is no automatic party-fit zoom. A scattered squad is not expected to share one view. Co-op awareness, native occlusion and warning readability need a representative multiplayer/device pass.
 
 ## Hero special presentation
 
@@ -62,7 +62,7 @@ WO-1.3 replaces the retired special visuals with the following original language
 
 These are authored procedural visual effects layered onto imported Toolbox combat animation/audio. They are not additional imported Toolbox assets. Bespoke skeletal poses and VFX coverage must be checked against each server-defined windup, range and width.
 
-The effect scheduler caps concurrent hero specials at eight, uses one temporary render connection, and removes all parts in approximately one second. Parts are anchored, non-colliding, and non-queryable. Release sound and camera kick happen after windup. The visuals do not create hitboxes, move characters, apply damage, or freeze simulation; authoritative server attacks remain unchanged. Visual travel is stylized and is not a simulated projectile collision test.
+The effect scheduler caps concurrent hero specials at eight, uses one temporary render connection, and removes all parts in approximately one second. Parts are anchored, non-colliding, and non-queryable. Release sound happens after windup; the previous scripted camera kick is retired with the fixed camera. The visuals do not create hitboxes, move characters, apply damage, or freeze simulation; authoritative server attacks remain unchanged. Visual travel is stylized and is not a simulated projectile collision test.
 ## Three-chapter encounter HUD
 
 The HUD reads stage names directly from the server: city streets, abandoned station, and abandoned factory. Four waves per stage comprise skirmish, miniboss, skirmish, and boss. A chapter title introduces each district and is dismissed as soon as a critical attack warning arrives. The top-center boss meter shows the active miniboss/boss name, phase, and remaining break threshold; the delayed pale segment helps damage read clearly.
@@ -90,7 +90,7 @@ The initial lobby has no forced countdown. Choose a hero, review the movement/co
 
 Between encounters, the server may enter `Traverse`. A cyan world marker and objective banner show where the living squad must rally and the current count at the destination. The next wave does not spawn until the squad reaches it. The same guidance marks the district exit during `Advance`. Physical gates and server-owned rectangular bounds contain each fight. The prior exit remains open during traversal; an unexpired downed teammate outside the next area delays its rear seal so the party can return to rescue. This does not extend the revive deadline or restore stocks.
 
-Boss HUD now shows armor/exposure status and a separate poise strip. **EXPOSED — PUNISH NOW** marks a recovery opening. A server `BossStagger` cancels that enemy's outstanding floor and UI warnings, so a successfully interrupted attack is no longer presented as imminent. Guard direction updates from horizontal movement intent while held. The camera remains based on the arena, including for a downed player; it does not chase surviving teammates.
+Boss HUD now shows armor/exposure status and a separate poise strip. **EXPOSED — PUNISH NOW** marks a recovery opening. A server `BossStagger` cancels that enemy's outstanding floor and UI warnings, so a successfully interrupted attack is no longer presented as imminent. Guard direction updates from horizontal movement intent while held. The camera follows the local Humanoid through Roblox's normal camera controller. Downed-camera behavior and co-op rescue readability require an actual play check.
 
 Additional optional state fields: `ready`, `readyCount`, `playersTotal`, `targetX`, `objective`, `arena={MinX,MaxX,MinZ,MaxZ}`, and walking limits on both axes. Ready input is `Action("Ready", {ready=true/false})`. The journal uses **P / left-stick click**; settings uses **O / gamepad Back**.
 ## Elite impact identity and stage sound
@@ -114,3 +114,5 @@ When a living player has at least two stocks and a connected ally is downed, a c
 ## Preserved side-view direction and evidence limits
 
 Before the owner's 2026-10-02 conversion, the stages used a narrow Z lane, party-following side-view camera and skirmish/miniboss/skirmish/boss order. CAMERA_REGRESSION.md and the earlier HumanBot reports describe that version; they remain historical evidence. The new arena policy/geometry, scripted locomotion and route checks are scoped in [ARENA_3D_CONVERSION](launch/ARENA_3D_CONVERSION.md). They do not certify physical keyboard/controller/touch use, camera comfort, ordinary fights or co-op rescue/retry. Any unresolved action check remains open in the linked evidence. No launch acceptance is implied by this controls reference.
+
+The first 3D prototype used a fixed elevated camera and48-stud-deep arenas. WO-3D.2 supersedes that with native rotatable third-person follow and72-stud depth plus surrounding scenery. The custom controller now maps movement relative to the camera, preserving server-owned arena bounds and attack rules. Fixed-camera motion checks do not certify this revision.

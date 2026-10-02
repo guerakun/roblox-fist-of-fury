@@ -131,8 +131,7 @@ function EnemyAI.Step(t,c)
                 local d=(Vector3.new(pr.Position.X,0,pr.Position.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude
                 local focusPenalty=math.max(0,4-(t-(data.targetHistory[player] or 0)))*5
                 local assigned=director.slots[model]
-                local approachHidden=c.VisiblePosition and not c.VisiblePosition(Vector3.new(pr.Position.X-4,r.Position.Y,pr.Position.Z))
-                    and not c.VisiblePosition(Vector3.new(pr.Position.X+4,r.Position.Y,pr.Position.Z))
+                local approachHidden=c.CanAttack and not c.CanAttack(model,player)
                 local score=d+focusPenalty-(assigned and assigned.target==player and 8 or 0)+(approachHidden and 60 or 0)
                 if not bestScore or score<bestScore then target,distance,bestScore=player,d,score end
             end
@@ -142,15 +141,14 @@ function EnemyAI.Step(t,c)
         data.facing=ArenaMath.NormalizeDirection(pr.Position-r.Position,data.facing)
         model:SetAttribute("Facing",data.facing)
         r.CFrame=ArenaMath.FacingFrame(r.Position,data.facing)
-        local slot=Director.Assign(director,model,target,r.Position,pr.Position,c.arena,c.VisiblePosition)
-        local visible=c.CanAttack and c.CanAttack(model)
+        local slot=Director.Assign(director,model,target,r.Position,pr.Position,c.arena)
+        local visible=c.CanAttack and c.CanAttack(model,target)
         if c.ObserveAI then c.ObserveAI(model,t,{visible=visible,fixedSlotFeasible=slot.approachFeasible})end
         if c.CanAttack and not visible then
-            -- Offscreen actors must enter the shared view before reserving attack capacity.
+            -- An unseen actor may approach physically, but cannot reserve attack capacity.
             Director.Release(director,model);data.engaging=false;state(model,data,"Reposition")
             local desired=Vector3.new(pr.Position.X+slot.offset.X,r.Position.Y,math.clamp(pr.Position.Z+slot.offset.Z,c.arena.MinZ+2,c.arena.MaxZ-2))
-            local destination=c.SafePosition and c.SafePosition(desired)
-            destination=destination or Vector3.new(math.clamp(c.arena.CenterX or (c.arena.MinX+c.arena.MaxX)/2,c.arena.MinX+2,c.arena.MaxX-2),r.Position.Y,0)
+            local destination=ArenaMath.Clamp(desired,c.arena,2)
             h.WalkSpeed=data.spec.Speed;h:MoveTo(destination)
             continue
         end
@@ -181,7 +179,7 @@ function EnemyAI.Step(t,c)
             if ArenaMath.Flat(velocity):Dot(away)>.5 then action(model,data,"Retreat")end
             local retreatGoal=ArenaMath.Clamp(pr.Position+away*(data.retreatDistance or 17)+ArenaMath.Right(away)*(slot.serial%2==0 and 3 or -3),c.arena,2)
             retreatGoal=Vector3.new(retreatGoal.X,r.Position.Y,retreatGoal.Z)
-            h:MoveTo(c.SafePosition and c.SafePosition(retreatGoal) or retreatGoal)
+            h:MoveTo(retreatGoal)
             if archetype~="Pitcher" or t<data.attackAt or distance>7 then continue end
             -- A cornered ranged enemy can shove rather than retreat forever against a bound.
         end
@@ -200,7 +198,7 @@ function EnemyAI.Step(t,c)
         local range=not elite and (ranges[moveName] or data.spec.Reach-1) or (closeMoves[moveName] and data.spec.Reach or 65)
         local token=director.tokens[model]
         if token and token.target~=target then Director.Release(director,model);token=nil;data.engaging=false end
-        local inRange=(not c.CanAttack or c.CanAttack(model)) and distance<=range and (elite or ArenaMath.Flat(r.Position-pr.Position):Dot(slot.offset)>0)
+        local inRange=(not c.CanAttack or c.CanAttack(model,target)) and distance<=range and (elite or ArenaMath.Flat(r.Position-pr.Position):Dot(slot.offset)>0)
         if c.ObserveAI then c.ObserveAI(model,t,{inRange=inRange})end
         if token and not inRange and slot.approachFeasible==false then Director.Release(director,model);token=nil;data.engaging=false end
         if token and inRange and t>=data.attackAt then
@@ -216,7 +214,6 @@ function EnemyAI.Step(t,c)
                 local offset=archetype=="Pitcher" and ArenaMath.NormalizeDirection(slot.offset)*17 or slot.offset
                 local goal=pr.Position+offset
                 goal=Vector3.new(goal.X,r.Position.Y,goal.Z)
-                goal=c.SafePosition and c.SafePosition(goal) or goal
                 local slotDistance=(Vector3.new(goal.X,0,goal.Z)-Vector3.new(r.Position.X,0,r.Position.Z)).Magnitude
                 local nearSlot=slotDistance<5 or (data.aiState=="Hold" and slotDistance<8)
                 state(model,data,nearSlot and "Hold" or "Approach")
@@ -224,7 +221,7 @@ function EnemyAI.Step(t,c)
                     holdFootwork=true
                     goal=Footwork.Goal(data,r.Position,goal,t,function(point)
                         point=Vector3.new(math.clamp(point.X,c.arena.MinX+2,c.arena.MaxX-2),r.Position.Y,math.clamp(point.Z,c.arena.MinZ+2,c.arena.MaxZ-2))
-                        return c.SafePosition and c.SafePosition(point) or point
+                        return point
                     end)
                     if t>=(data.feintAt or t+1) then
                         data.feintAt=t+4+slot.serial%3
@@ -246,7 +243,6 @@ function EnemyAI.Step(t,c)
                 destination=destination+ArenaMath.Right(slot.offset)*(slot.serial%2==0 and 6 or -6)
             end
             destination=Vector3.new(math.clamp(destination.X,c.arena.MinX+2,c.arena.MaxX-2),r.Position.Y,math.clamp(destination.Z,c.arena.MinZ+2,c.arena.MaxZ-2))
-            destination=c.SafePosition and c.SafePosition(destination) or destination
             h.WalkSpeed=data.spec.Speed
             if holdFootwork then h:Move(Footwork.Direction(r.Position,destination),false) else h:MoveTo(destination)end
         end

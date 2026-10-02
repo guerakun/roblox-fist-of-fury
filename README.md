@@ -5,9 +5,10 @@ An original anime-styled Roblox co-op beat-em-up across controlled 3D arenas in 
 **Status: three-stage 3D arena prototype; scoped engineering checks, human play validation pending.** It has not been certified for public launch. The active launch program, evidence and open gates are in [LAUNCH_PLAN](docs/launch/LAUNCH_PLAN.md) and [PROGRESS](docs/PROGRESS.md). See [validation](docs/VALIDATION.md) and [publication readiness](docs/PUBLISH_READINESS.md).
 
 ## Play
-Open [places/CurtainBreak.rbxl](places/CurtainBreak.rbxl) in Roblox Studio and press Play to generate the world. Choose a hero, then press Enter / READY. Every connected player must ready up.
+Open [places/CurtainBreak-ThirdPerson.rbxl](places/CurtainBreak-ThirdPerson.rbxl) in Roblox Studio and press Play to generate the world. Choose a hero, then press Enter / READY. Every connected player must ready up.
 
-- WASD moves across the full arena floor; equal cardinal speed and normalized diagonals. Space jumps / requests air recovery.
+- Hold the right mouse button and drag to rotate the camera; use the scroll wheel to zoom.
+- WASD moves relative to the camera across the full arena floor; equal cardinal speed and normalized diagonals. Space jumps / requests air recovery.
 - Mouse1 or J light combo, K heavy launcher, L special.
 - Q dash, F hold block, E recovery.
 - 1 Rook Calder (Gale), 2 Bo Marlowe (Piston), 3 Isla Veyra (Tide) in safe areas. Candidate display names await owner approval.
@@ -27,9 +28,9 @@ Touch buttons and gamepad bindings are included; full controls are in [CONTROLS]
 Each stage has four enclosed arenas: enemy group, enemy group, miniboss, boss. Physical gates and server bounds control progression. Miniboss clears enable the final-area party retry checkpoint unless No Safety Net is selected; an individual stock respawn uses the current area. Elite attacks have distinct telegraphs, punish windows and second phases.
 
 ## Implemented systems
-Server-authoritative hit validation, percent knockback, stocks and recovery; three hero kits; party-ready and checkpoint flow; fixed elevated arena camera and full XZ movement; boss and party HUD; 34 destructible props; reviewed Toolbox animation, movement, VFX and hitbox ingredients; original generated factory props and station materials.
+Server-authoritative hit validation, percent knockback, stocks and recovery; three hero kits; party-ready and checkpoint flow; normal rotatable third-person camera and camera-relative XZ movement; boss and party HUD; 34 destructible props; reviewed Toolbox animation, movement, VFX and hitbox ingredients; original generated factory props and station materials.
 
-The original hero rigs and specials are implemented; candidate names/art still require owner approval. The 3D conversion changes combat geometry and encounter order. See [conversion scope and evidence](docs/launch/ARENA_3D_CONVERSION.md); earlier side-view tests do not certify this version.
+The original hero rigs and specials are implemented; candidate names/art still require owner approval. The current owner correction uses Roblox's normal rotatable third-person camera and expanded72-stud-deep arenas with scenery on both sides. The 3D conversion changes combat geometry and encounter order. See [conversion scope and evidence](docs/launch/ARENA_3D_CONVERSION.md); earlier side-view tests do not certify this version.
 
 The chapter journal includes earned coins, a 12-tier evergreen reward track, cosmetic trails/titles and free earned combat boons. Live sales are disabled. Studio progress is practice-only by default. Read the [monetization design](docs/MONETIZATION.md).
 
@@ -56,3 +57,5 @@ Original names, silhouettes and specials are required for launch. Owner approval
 Earlier local co-op observations remain in [VALIDATION](docs/VALIDATION.md). Retired-character screenshots were removed from current public materials; the historical revisions remain in Git. Original-cast captures are documented in [art evidence](docs/launch/ORIGINAL_ART_EVIDENCE.md); owner approval and representative 3D combat readability remain open.
 
 The earlier game used a narrow foreground/background lane, a party-following side-view camera, and skirmish/miniboss/skirmish/boss ordering. Those designs and their measurements remain preserved in the dated notes and Git history. The owner superseded them with full XZ arenas on 2026-10-02.
+
+The initial fixed elevated 3D camera was superseded by the owner's normal rotatable third-person request (WO-3D.2). Its earlier fixed-camera evidence is retained as history, not proof of the native camera or expanded surroundings.

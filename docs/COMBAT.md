@@ -310,3 +310,12 @@ A fixed-yaw elevated camera frames the entire active arena rather than chasing t
 Scoped geometry, actual scripted locomotion/action/FX and route checks are recorded in launch/evidence/arena-3d-validation.json. Old HumanBot numbers remain historical side-view evidence. A full human combat and co-op pass is the next tuning input; no new difficulty acceptance is claimed. Prior lane-based design and measurements above are preserved.
 
 The actual action fixture exposed an accepted dash that produced zero horizontal motion from its one-time velocity assignment. A server-created horizontal Plane LinearVelocity now holds the existing74 speed for.18seconds, preserves vertical physics and is removed on timeout, hit, reset, KO, travel or departure. Cooldown1.4seconds and invulnerability.24seconds are unchanged. The rerun moved21.6176studs along Z over.6seconds (including coast), with zero X drift. This verifies movement, not final dash feel.
+
+
+## Native third-person correction (2026-10-02; WO-3D.2)
+
+The owner clarified that the prior fixed elevated camera was not the requested normal Roblox3D experience. Native Custom/Classic camera now follows the Humanoid with orbit and zoom8..28 (initial16), FOV70. Gameplay scripts do not write camera CFrame/Focus. Movement is camera-relative; arenas deepen from48to72studs (Z+-36, actor inset2), while four controlled areas and existing role order remain. World surrounds provide visible perimeter collision. Prior fixed-arena and side-view camera decisions above are preserved history.
+
+Native camera reports are sampled5Hz, accepted no faster than10Hz and expire after.8seconds. Plausibility requires finite orthonormal frame, camera within40studs of its subject, FOV40..100, aspect.4..4 and the own character inside the reported frame. Attack starts use target view; each enemy/player hit also checks that victim/attacker view symmetrically. Stale views prevent player offensive actions before costs. Movement, guard and escape remain possible. View occlusion tests only explicit surrounds/gates/floor, excluding invisible movement bounds. This bounded client-reported view is not a trusted rendering attestation, nor a zero-offscreen-hit claim at every frame; network/camera turns can diverge between samples. No economic values or damage tuning changed.
+
+Scoped actual validation is recorded in launch/evidence/native-third-person-validation.json; physical mouse/controller/touch orbit, human feel, all-angle clipping, co-op and new difficulty acceptance remain open.

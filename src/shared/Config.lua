@@ -6,8 +6,8 @@ Config.Stocks = 3
 Config.Survival={StartStocks=3,MaxStocks=3,RetryStocks=2,ClearHeal=15,DownedDuration=12,ReviveDuration=2.5,RevivePercent=60,ReviveRange=8}
 Config.WalkSpeed = 22
 Config.JumpPower = 52
-Config.LaneMin = -24
-Config.LaneMax = 24
+Config.LaneMin = -36
+Config.LaneMax = 36
 Config.BlastMargin = 24
 Config.PlayerPercentLimit = 200
 Config.Stages = {

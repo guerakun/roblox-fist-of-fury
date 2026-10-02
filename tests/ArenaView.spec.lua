@@ -1,45 +1,30 @@
--- Pure full-plane input and fixed-target interpolation contract; no physical-input claim.
-return function(View,Bounds)
+-- Camera-relative horizontal movement policy; no physical-input or CameraModule runtime claim.
+return function(View)
     View=View or require(game.Players.LocalPlayer.PlayerScripts.NightfallClient.ArenaView)
-    local checks=0
-    local function check(value,message)checks+=1 assert(value,message)end
-    local bounds={MinX=4,MaxX=44,MinZ=-20,MaxZ=20}
-    local previous=Vector3.xAxis
-    for _,input in ipairs({Vector2.new(1,0),Vector2.new(-1,0),Vector2.new(0,1),Vector2.new(0,-1),Vector2.new(1,1)})do
-        local move,facing=View.Movement(input,Vector3.new(20,3,0),bounds,previous)
-        local expected=Vector3.new(input.X,0,input.Y).Unit
-        check((move-expected).Magnitude<1e-6,"Equal-speed plane input")
-        check((facing-expected).Magnitude<1e-6,"Full-plane facing")
-    end
-    for _,case in ipairs({{Vector3.new(4,3,0),Vector2.new(-1,0)},{Vector3.new(44,3,0),Vector2.new(1,0)},
-        {Vector3.new(20,3,-20),Vector2.new(0,-1)},{Vector3.new(20,3,20),Vector2.new(0,1)}})do
-        local move=View.Movement(case[2],case[1],bounds,previous)
-        check(move.Magnitude==0,"Outward input suppressed before correction")
-        local inward=View.Movement(-case[2],case[1],bounds,previous)
-        check(inward.Magnitude==1,"Inward input preserved")
-    end
-    local idle,held=View.Movement(Vector2.zero,Vector3.new(20,3,0),bounds,Vector3.zAxis)
-    check(idle==Vector3.zero and held==Vector3.zAxis,"Idle retains heading")
-    local goal=Vector3.new(24,5,0)
-    local center,distance=View.CameraStep(nil,0,goal,80,1/60)
-    for _,dt in ipairs({1/30,1/60,1/144,.05})do
-        center,distance=View.CameraStep(center,distance,goal,80,dt)
-        check(center==goal and distance==80,"Unchanged arena has no camera chase")
-    end
-    local a,d=goal,80
-    for _=1,60 do a,d=View.CameraStep(a,d,goal+Vector3.new(44,0,0),90,1/60)end
-    local b,e=View.CameraStep(goal,80,goal+Vector3.new(44,0,0),90,1)
-    check((a-b).Magnitude<.0001 and math.abs(d-e)<.0001,"Transition smoothing independent of frame rate")
-    if Bounds then
-        for _,aspect in ipairs({9/16,1,16/9,21/9})do
-            local focus,range=Bounds.Arena({MinX=4,MaxX=48,MinZ=-24,MaxZ=24},aspect)
-            local frame=Bounds.Frame(focus,range)
-            for _,x in ipairs({4,48})do for _,z in ipairs({-24,24})do for _,y in ipairs({0,12})do
-                check(Bounds.InFrame(Vector3.new(x,y,z),frame,range,aspect,0),"Arena body corners visible")
-            end end end
-            check(frame.RightVector:Dot(Vector3.xAxis)>.999,"D moves screen-right")
-            check(frame.UpVector:Dot(-Vector3.zAxis)>0,"W moves screen-up")
+    local n=0;local function check(value,message)n+=1 assert(value,message)end
+    local bounds={MinX=-30,MaxX=30,MinZ=-30,MaxZ=30}
+    for _,yaw in ipairs({0,math.pi/2,math.pi,math.pi*1.5,.71})do
+        for _,pitch in ipairs({0,-.65,-math.pi/2})do
+            local frame=CFrame.Angles(0,yaw,0)*CFrame.Angles(pitch,0,0)
+            local look,right=View.Basis(frame)
+            check(math.abs(look.Y)<1e-6 and math.abs(right.Y)<1e-6,"horizontal basis")
+            check(math.abs(look:Dot(right))<1e-6 and math.abs(look.Magnitude-1)<1e-6,"stable orthonormal basis")
+            for _,input in ipairs({Vector2.new(0,-1),Vector2.new(0,1),Vector2.new(1,0),Vector2.new(-1,0),Vector2.new(1,-1)})do
+                local move,facing=View.Movement(input,Vector3.new(0,3,0),bounds,Vector3.xAxis,frame)
+                local expected=(right*input.X-look*input.Y).Unit
+                check((move-expected).Magnitude<1e-5,"screen-relative cardinal/diagonal motion")
+                check((facing-expected).Magnitude<1e-5,"attack facing follows actual camera-relative intent")
+            end
         end
     end
-    return {passed=true,checks=checks,physicalInputVerified=false,cameraRuntimeVerified=false}
+    for _,case in ipairs({{Vector3.new(-30,3,0),Vector2.new(-1,0)},{Vector3.new(30,3,0),Vector2.new(1,0)},
+        {Vector3.new(0,3,-30),Vector2.new(0,-1)},{Vector3.new(0,3,30),Vector2.new(0,1)}})do
+        check(View.Movement(case[2],case[1],bounds,Vector3.xAxis,CFrame.identity).Magnitude==0,"world boundary suppresses outward intent")
+        check(View.Movement(-case[2],case[1],bounds,Vector3.xAxis,CFrame.identity).Magnitude==1,"inward remains available")
+    end
+    local move,facing=View.Movement(Vector2.zero,Vector3.zero,bounds,Vector3.zAxis,CFrame.Angles(0,2,0))
+    check(move==Vector3.zero and facing==Vector3.zAxis,"orbit without movement preserves attack facing")
+    local analog=View.Movement(Vector2.new(.2,0),Vector3.zero,bounds,Vector3.xAxis,CFrame.identity)
+    check(math.abs(analog.Magnitude-.2)<1e-5,"analog strength preserved")
+    return {passed=true,checks=n,physicalInputVerified=false}
 end

@@ -10,7 +10,8 @@ local Config = require(ReplicatedStorage.Nightfall.Shared.Config)
 local ArenaMath=require(ReplicatedStorage.Nightfall.Shared.ArenaMath)
 local CombatMath = require(ReplicatedStorage.Nightfall.Shared.CombatMath)
 local Archetypes = require(ReplicatedStorage.Nightfall.Shared.EnemyArchetypes)
-local CameraBounds = require(ReplicatedStorage.Nightfall.Shared.CameraBounds)
+local CameraVisibility=require(ReplicatedStorage.Nightfall.Shared.CameraVisibility)
+local CameraViewPolicy=require(script.Parent.CameraViewPolicy)
 local ToolboxHitbox = require(ReplicatedStorage.Nightfall.Shared.ToolboxHitbox)
 local Telemetry = require(script.Parent.CombatTelemetry)
 local EnemyAI = require(script.Parent.EnemyAI)
@@ -41,8 +42,6 @@ local difficulty = "Normal"
 local runOptionsLocked,admissionOptionsLocked=false,false
 local effectiveProfile=DifficultyPolicy.Profile(Config.Difficulties,difficulty,runHeat)
 local function difficultyProfile() return effectiveProfile end
-local cameraEstimate, cameraSpan, cameraGoal, cameraGoalSpan
-local lastCameraSample
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
 local disconnectedSurvival = {}
 local MAX_DISCONNECTED_SURVIVORS = 256
@@ -60,17 +59,42 @@ local encounter = {wave = 0, waves = 4, enemiesRemaining = 0, status = "Waiting"
 local function now() return workspace:GetServerTimeNow() end
 local function root(model) return model and model:FindFirstChild("HumanoidRootPart") end
 local function humanoid(model) return model and model:FindFirstChildOfClass("Humanoid") end
-local function enemyPositionVisible(position)
-    return cameraGoalSpan~=nil and cameraGoalSpan<160
-        and CameraBounds.Visible(position,cameraEstimate,cameraSpan or 0)
-        and CameraBounds.Visible(position,cameraGoal,cameraGoalSpan)
+local function freshCameraView(player,data)
+    local subject=root(player and player.Character)
+    return subject and CameraViewPolicy.Read(data,now(),subject.Position,data.lifeSerial,CameraVisibility)or nil
 end
-local function enemyVisible(model)
-    local r=root(model)
-    return r~=nil and enemyPositionVisible(r.Position)
+local occlusionCity,occlusionParameters
+local function enemyVisibleTo(model,player)
+    local data=records[player]
+    local actorRoot,subjectRoot=root(model),root(player and player.Character)
+    if not data or not actorRoot or not subjectRoot or data.downed or data.respawning then return false end
+    local view=freshCameraView(player,data)
+    if not view or not CameraVisibility.Contains(actorRoot.Position,view.frame,view.fov,view.aspect,.5)then return false end
+    local city=workspace:FindFirstChild("NightfallCity")
+    if city then
+        if occlusionCity~=city then
+            occlusionCity=city
+            occlusionParameters=RaycastParams.new()
+            occlusionParameters.FilterType=Enum.RaycastFilterType.Include
+            occlusionParameters.RespectCanCollide=true
+            local occluders={}
+            for _,name in ipairs({"ArenaSurrounds","Gates"})do
+                local folder=city:FindFirstChild(name);if folder then table.insert(occluders,folder)end
+            end
+            local streets=city:FindFirstChild("Streets")
+            local floor=streets and streets:FindFirstChild("ContinuousCombatFloor")
+            if floor then table.insert(occluders,floor)end
+            occlusionParameters.FilterDescendantsInstances=occluders
+        end
+        -- Authored visible surrounds, floor and closed gates only. Invisible movement bounds are excluded.
+        if workspace:Raycast(view.frame.Position,actorRoot.Position-view.frame.Position,occlusionParameters)then return false end
+    end
+    return true
 end
-local function enemySafePosition(position)
-    return CameraBounds.SafePosition(position,cameraEstimate,cameraSpan,cameraGoal,cameraGoalSpan,arena)
+local function enemyVisible(model,player)
+    if player then return enemyVisibleTo(model,player)end
+    for candidate in pairs(records)do if enemyVisibleTo(model,candidate)then return true end end
+    return false
 end
 local function modelOf(actor) return typeof(actor) == "Instance" and actor:IsA("Player") and actor.Character or actor end
 local function recordOf(model)
@@ -241,8 +265,6 @@ function Combat.SetArea(wave, previousBounds)
     for key,value in pairs(bounds)do arena[key]=value end
     arena.CenterX=(arena.MinX+arena.MaxX)/2
     walkingMaxX=arena.MaxX-2
-    -- Retain the smoothed camera estimate until it reaches the new fixed frame.
-    cameraGoal,cameraGoalSpan=CameraBounds.Party({},arena)
 end
 function Combat.SetArena(stage,index)
     stageDefinition,stageIndex=stage,index or stageIndex
@@ -312,13 +334,13 @@ function Combat.GetEnemies() return enemies end
 function Combat.GetAIDiagnostics()
     if not RunService:IsStudio() then return nil end
     local function vector(v) return v and {x=v.X,y=v.Y,z=v.Z} or false end
-    local t=now();local result={time=t,tokenCap=AttackDirector.Cap(#Combat.GetAlivePlayers(),difficultyProfile().TokenBonus),windupScale=difficultyProfile().WindupScale,cameraGoal=vector(cameraGoal),cameraEstimate=vector(cameraEstimate),cameraSpan=cameraSpan,cameraGoalSpan=cameraGoalSpan,actors={},players={}}
-    for _,player in ipairs(Combat.GetAlivePlayers())do table.insert(result.players,{id=player.UserId,position=vector(root(player.Character).Position)})end
+    local t=now();local result={time=t,tokenCap=AttackDirector.Cap(#Combat.GetAlivePlayers(),difficultyProfile().TokenBonus),windupScale=difficultyProfile().WindupScale,cameraMode="NativePerRecipient",actors={},players={}}
+    for _,player in ipairs(Combat.GetAlivePlayers())do table.insert(result.players,{id=player.UserId,position=vector(root(player.Character).Position),viewAge=records[player].cameraView and t-records[player].cameraView.receivedAt or false})end
     for model,data in pairs(enemies)do
         local r,h=root(model),humanoid(model);local slot,token=aiDirector.slots[model],aiDirector.tokens[model]
         local target=slot and root(slot.target.Character)
         table.insert(result.actors,{actorAlias=Telemetry.ActorAlias(model),kind=data.kind,state=data.aiState,position=r and vector(r.Position),velocity=r and vector(r.AssemblyLinearVelocity),
-            moveDirection=h and vector(h.MoveDirection),walkTo=h and vector(h.WalkToPoint),canAttack=enemyVisible(model),target=target and vector(target.Position),
+            moveDirection=h and vector(h.MoveDirection),walkTo=h and vector(h.WalkToPoint),canAttack=enemyVisible(model,slot and slot.target),target=target and vector(target.Position),
             targetId=slot and slot.target.UserId,slot=slot and vector(slot.offset),token=token~=nil,tokenRemaining=token and token.expires-t,
             attackIn=data.attackAt-t,recoveryIn=data.recoveryUntil-t,resolveIn=(data.resolveAt or 0)-t,attacking=data.attacking,
             footworkGoal=vector(data.footworkGoal),nextMove=data.nextMove,lastMove=data.lastMove,lastAttackAgo=data.lastAttackAt and t-data.lastAttackAt,retreatIn=(data.retreatUntil or 0)-t})
@@ -413,6 +435,7 @@ local function resetPosition(player, position, percent)
     local r, h = root(model), humanoid(model)
     if not data or not r or not h then return end
     DashMotion.Stop(data)
+    data.cameraView=nil
     position=ArenaMath.Clamp(position,arena,2)
     data.facing=Vector3.xAxis
     data.percent, data.blocking, data.downed, data.respawning = percent or 0, false, false, false
@@ -667,7 +690,8 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     local r, t = root(targetModel), now()
     if not data or not sourceData or not r or data.downed or data.respawning or sourceData.downed or t < data.invulnerableUntil then return false end
     if (victimPlayer ~= nil) == (sourcePlayer ~= nil) then return false end
-    if victimPlayer and not enemyVisible(sourceModel) then Telemetry.BoundsRejected();return false end
+    if victimPlayer and not enemyVisible(sourceModel,victimPlayer) then Telemetry.BoundsRejected();return false end
+    if sourcePlayer and not enemyVisible(targetModel,sourcePlayer)then return false end
     local victimModifiers=victimPlayer and enforceCapabilities(victimPlayer,data)or nil
     local enemyId=data.spec and Archetypes.Id(data.kind,data.spec)
     if not victimPlayer and data.grabbedPlayer and sourcePlayer then releaseGrab(targetModel,true) end
@@ -853,6 +877,7 @@ local function actionReceived(player, action, payload)
     end
     if action == "Block" and payload.held == false then data.blocking = false attributes(player.Character, data) return end
     if data.downed or data.respawning or data.grabbedBy then return end
+    if (Config.Attacks[action] or action=="Special" or action=="Desperation")and not freshCameraView(player,data)then return end
     local capabilities=enforceCapabilities(player,data)
     if action=="Dash"and not capabilities.canDash then return end
     if action=="Block"and payload.held==true and not capabilities.canBlock then return end
@@ -1019,7 +1044,7 @@ local function attackCount()
 end
 local function beginEnemyAttack(model,data,target,moveName,alive)
     local r,targetRoot=root(model),root(target.Character)
-    if not r or not targetRoot or not enemyVisible(model) then AttackDirector.Release(aiDirector,model);return end
+    if not r or not targetRoot or not enemyVisible(model,target) then AttackDirector.Release(aiDirector,model);return end
     local t,positions=now(),{}
     for _,player in ipairs(alive)do local pr=root(player.Character);if pr and not records[player].respawning then table.insert(positions,pr.Position)end end
     local direction=data.facing
@@ -1178,16 +1203,14 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     end)
 end
 local function aiStep(t)
-    local positions={}
-    for _,player in ipairs(Combat.GetAlivePlayers())do local r=root(player.Character);if r then table.insert(positions,r.Position)end end
-    cameraGoal,cameraGoalSpan=CameraBounds.Party(positions,arena)
-    if cameraGoal then
-        local alpha=1-math.exp(-6*math.max(0,t-(lastCameraSample or t-.1)))
-        cameraEstimate=cameraEstimate and cameraEstimate:Lerp(cameraGoal,alpha) or cameraGoal
-        cameraSpan=cameraSpan and cameraSpan+(cameraGoalSpan-cameraSpan)*alpha or cameraGoalSpan
-    else cameraEstimate,cameraSpan=nil,nil end
-    lastCameraSample=t
-    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, difficulty = difficultyProfile(), RecordAction = Telemetry.Action, ObserveAI = Telemetry.Enabled and Telemetry.AIContext or nil, ObserveEvent = Telemetry.Enabled and Telemetry.OpportunityEvent or nil, CanAttack = enemyVisible, VisiblePosition = enemyPositionVisible, SafePosition = enemySafePosition, SummonPhase = Combat.SpawnPhaseAdds,
+    local visibilityCache={}
+    local function canAttack(model,target)
+        local perActor=visibilityCache[model]
+        if not perActor then perActor={};visibilityCache[model]=perActor end
+        if perActor[target]==nil then perActor[target]=enemyVisible(model,target)end
+        return perActor[target]
+    end
+    EnemyAI.Step(t, {Combat = Combat, enemies = enemies, records = records, director = aiDirector, difficulty = difficultyProfile(), RecordAction = Telemetry.Action, ObserveAI = Telemetry.Enabled and Telemetry.AIContext or nil, ObserveEvent = Telemetry.Enabled and Telemetry.OpportunityEvent or nil, CanAttack = canAttack, SummonPhase = Combat.SpawnPhaseAdds,
         root = root, humanoid = humanoid, knockOut = knockOut, CombatMath = CombatMath,
         Config = Config, arena = arena, encounter = encounter, attributes = attributes,
         fx = fx, beginEnemyAttack = beginEnemyAttack, now = now})
@@ -1311,6 +1334,12 @@ function Combat.Init()
     if initialized then return end
     initialized = true
     remotes = ReplicatedStorage.Nightfall.Remotes
+    local cameraRemote=remotes:FindFirstChild("CameraView")
+    if not cameraRemote then cameraRemote=Instance.new("RemoteEvent");cameraRemote.Name="CameraView";cameraRemote.Parent=remotes end
+    cameraRemote.OnServerEvent:Connect(function(player,payload)
+        local data=records[player];local subject=root(player.Character)
+        if data and subject then CameraViewPolicy.Receive(data,payload,now(),subject.Position,data.lifeSerial,CameraVisibility)end
+    end)
     Players.CharacterAutoLoads = false
     remotes.Action.OnServerEvent:Connect(actionReceived)
     Players.PlayerAdded:Connect(addPlayer)

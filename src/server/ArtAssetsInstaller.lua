@@ -26,7 +26,7 @@ function Installer.DressWorld()
  for _,part in ipairs(city.Architecture:GetChildren()) do
   if part:IsA("BasePart") and (part.Name=="StationDado" or part.Name=="StationBackPlatform") then part.Material=Enum.Material.Concrete;part.MaterialVariant="NightfallStationTile" end
  end
- for index,placement in ipairs({{393,0,-37,1.05,math.rad(25)},{468,0,-36,1.15,math.rad(-20)},{523,0,-40,.9,math.rad(15)}}) do
+ for index,placement in ipairs({{393,0,-51,1.05,math.rad(25)},{468,0,-50,1.15,math.rad(-20)},{523,0,-54,.9,math.rad(15)}}) do
   local model=Instance.new("Model");model.Name="FoundryPump"..index;model:SetAttribute("OriginalAssetId","130740920499312");model.Parent=folder
   local scale=placement[4];local origin=CFrame.new(placement[1],placement[2],placement[3])*CFrame.Angles(0,placement[5],0)
   for _,spec in ipairs(pump) do

@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-02",
+  "workOrder": "WO-3D.2",
+  "scope": "Owner correction: native rotating third-person camera, camera-relative movement and surrounded72-stud-deep arenas",
+  "tests": {
+    "cameraGeometry": {
+      "passed": true,
+      "checks": 72
+    },
+    "cameraReceipt": {
+      "passed": true,
+      "checks": 12
+    },
+    "relativeMovementPolicy": {
+      "passed": true,
+      "checks": 190
+    },
+    "nativeConfigurationPolicy": {
+      "passed": true,
+      "checks": 11
+    },
+    "world": {
+      "passed": true,
+      "depth": 72,
+      "floorDepth": 80,
+      "gates": 12,
+      "entries": 48,
+      "props": 34,
+      "pumpParts": 12,
+      "surroundParts": 224,
+      "cameraOccluders": 86
+    },
+    "nativeClient": {
+      "passed": true,
+      "mode": "Custom",
+      "subject": "Humanoid",
+      "zoom": [
+        8,
+        28
+      ],
+      "noninterferenceFrames": 3,
+      "hardwareOrbitVerified": false
+    },
+    "motion": {
+      "cases": [
+        {
+          "heading": [
+            1,
+            0,
+            0
+          ],
+          "travel": 10.690448760986328,
+          "followError": 0.00196075439453125
+        },
+        {
+          "heading": [
+            0,
+            0,
+            -1
+          ],
+          "travel": 10.307140350341797,
+          "followError": 0.0019617080688476562
+        },
+        {
+          "heading": [
+            -1,
+            0,
+            0
+          ],
+          "travel": 10.307123184204102,
+          "followError": 0.0019626617431640625
+        },
+        {
+          "heading": [
+            0,
+            0,
+            1
+          ],
+          "travel": 10.591222763061523,
+          "followError": 0.024135589599609375
+        }
+      ],
+      "physicalOrbitVerified": false,
+      "passed": true,
+      "scriptedInput": true
+    },
+    "visibility": {
+      "realMainReports": true,
+      "stale": {
+        "Husk": false,
+        "Strider": false
+      },
+      "first": {
+        "Husk": true,
+        "Strider": false
+      },
+      "passed": true,
+      "cameraRestored": true,
+      "staleViewAge": 1.1667580604553223,
+      "resumed": true,
+      "rotated": {
+        "Husk": false,
+        "Strider": true
+      },
+      "staleOutgoingRequestBlocked": true,
+      "symmetricVisibleControls": true,
+      "hardwareOrbitVerified": false
+    },
+    "occlusion": {
+      "cameraZ": 44.074562072753906,
+      "scriptedInput": true,
+      "physicalOrbitVerified": false,
+      "rootZ": 34,
+      "actualObstructed": false,
+      "distance": 10.55502700805664,
+      "passed": true,
+      "obstruction": "CityCornerShop"
+    },
+    "progression": {
+      "scriptedEnemyClear": true,
+      "traversals": 9,
+      "areas": [
+        {
+          "role": "Wave",
+          "stage": 1,
+          "area": 1
+        },
+        {
+          "role": "Wave",
+          "stage": 1,
+          "area": 2
+        },
+        {
+          "role": "Miniboss",
+          "stage": 1,
+          "area": 3
+        },
+        {
+          "role": "Boss",
+          "stage": 1,
+          "area": 4
+        },
+        {
+          "role": "Wave",
+          "stage": 2,
+          "area": 1
+        },
+        {
+          "role": "Wave",
+          "stage": 2,
+          "area": 2
+        },
+        {
+          "role": "Miniboss",
+          "stage": 2,
+          "area": 3
+        },
+        {
+          "role": "Boss",
+          "stage": 2,
+          "area": 4
+        },
+        {
+          "role": "Wave",
+          "stage": 3,
+          "area": 1
+        },
+        {
+          "role": "Wave",
+          "stage": 3,
+          "area": 2
+        },
+        {
+          "role": "Miniboss",
+          "stage": 3,
+          "area": 3
+        },
+        {
+          "role": "Boss",
+          "stage": 3,
+          "area": 4
+        }
+      ],
+      "seconds": 74.89689269987866,
+      "passed": true,
+      "stageTransfers": 2
+    },
+    "sourceIntegrity": {
+      "comparedFiles": 83,
+      "differences": 0,
+      "compileErrors": 0
+    },
+    "ipGate": {
+      "files": 261,
+      "hits": 0
+    }
+  },
+  "limitations": [
+    "Native motion tests script camera orientation and production helper movement; physical mouse/controller/touch orbit and full Main input dispatch remain unverified.",
+    "Occlusion probe covers one wall/angle and the near-plane center ray, not all screen corners or every orbit angle.",
+    "Camera orientation is reported at5Hz and expires after.8s; bounded last-received view cannot attest the rendered frame. Network/camera turns can differ between samples.",
+    "Fresh plausible view and per-target visibility gate player/enemy hits symmetrically; this is not anti-cheat certification.",
+    "No full human co-op/balance/device/performance acceptance. Historical side-view and fixed-arena bot figures do not certify this version.",
+    "Progression fixture clears enemies and relocates the party; its74.90s pass tests flow/gates, not human combat skill, physical traversal, economy or co-op."
+  ],
+  "reviews": {
+    "presentation": "native input/camera, server view guards, world geometry, scripted motion fixture reviewed",
+    "combat": "nativecamera/input source reviewed",
+    "world": "symmetric camera guards, own-subject framing and occlusion probe reviewed"
+  },
+  "failuresFoundAndResolved": [
+    "Peer review caught invisible movement barriers being included in the view ray: replaced with explicit visible surround/gate/floor set.",
+    "Peer review caught stale views denying incoming damage while allowing offense: added symmetric target-visibility hit checks plus fresh-view offensive intent guard before cost.",
+    "Initial occlusion fixture tested camera origin and flagged native camera. Roblox resolves its near plane; corrected to test the rendered near-plane center ray and reran. No camera production change for this fixture correction."
+  ]
+}

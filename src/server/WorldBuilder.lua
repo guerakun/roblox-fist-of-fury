@@ -124,14 +124,14 @@ function WorldBuilder.Build()
 	grade.TintColor = Color3.fromRGB(250, 251, 255); grade.Parent = Lighting
 
 	part("CityFoundation", Vector3.new(1100, 7, 400), Vector3.new(270, -5.6, -30), C.ink, streets, Enum.Material.Asphalt, false)
-	part("ContinuousCombatFloor", Vector3.new(560, 2, 56), Vector3.new(270, -1, 0), C.asphalt, streets, Enum.Material.Concrete, true)
+	part("ContinuousCombatFloor", Vector3.new(560, 2, 80), Vector3.new(270, -1, 0), C.asphalt, streets, Enum.Material.Concrete, true)
 	for x = -6, 546, 12 do
-		part("PavementJoint", Vector3.new(.07, .018, 52), Vector3.new(x, .014, 0), C.ink, streets)
+		part("PavementJoint", Vector3.new(.07, .018, 76), Vector3.new(x, .014, 0), C.ink, streets)
 	end
-	for _, z in ipairs({-26, 26}) do
+	for _, z in ipairs({-38, 38}) do
 		part("RaisedCurb", Vector3.new(560, .7, 2), Vector3.new(270, .25, z), C.concrete, streets, Enum.Material.Concrete, true)
 		local edge = part("LaneBoundary", Vector3.new(562, 48, 2), Vector3.new(270, 23, z), C.ink, streets, nil, true)
-		edge.Transparency = 1; edge.CastShadow = false
+		edge.Transparency = 1; edge.CastShadow = false; edge.CanQuery = false
 		for x = -6, 546, 12 do
 			part("SafetyBollard", Vector3.new(.5, 2.6, .5), Vector3.new(x, 1.65, z), C.silver, details, Enum.Material.Metal)
 			glow("BollardCap", Vector3.new(.54, .17, .54), Vector3.new(x, 3, z), z < 0 and C.cyan or C.amber)
@@ -141,8 +141,8 @@ function WorldBuilder.Build()
 	-- Each area has a physical exit. EncounterService alone changes its collision/open state.
 	-- Side rails are low visual cues; invisible walls prevent jumping out of the authored floor.
 	for stageIndex, stage in ipairs(Config.Stages) do
-		local entrance = part("StageEntrance"..stageIndex, Vector3.new(2,48,52), Vector3.new(stage.MinX+3,23,0), C.ink, streets,nil,true)
-		entrance.Transparency, entrance.CastShadow = 1, false
+		local entrance = part("StageEntrance"..stageIndex, Vector3.new(2,48,76), Vector3.new(stage.MinX+3,23,0), C.ink, streets,nil,true)
+		entrance.Transparency, entrance.CastShadow, entrance.CanQuery = 1, false, false
 		for areaIndex, wave in ipairs(stage.Waves) do
 			local bounds = assert(wave.Bounds, "3D arena bounds required")
 			local gate = part("Stage"..stageIndex.."_Area"..areaIndex, Vector3.new(1,48,bounds.MaxZ-bounds.MinZ+4),
@@ -241,16 +241,16 @@ function WorldBuilder.Build()
 	local stationBlue = Color3.fromRGB(37,68,79)
 	local oldTile = Color3.fromRGB(99,113,116)
 	local rust = Color3.fromRGB(98,62,48)
-	part("StationLaneSurface",Vector3.new(178,.045,52),Vector3.new(270,.015,0),oldTile,streets,Enum.Material.Concrete)
+	part("StationLaneSurface",Vector3.new(178,.045,76),Vector3.new(270,.015,0),oldTile,streets,Enum.Material.Concrete)
 	for x=184,356,8 do
-		part("PlatformTileJoint",Vector3.new(.055,.025,52),Vector3.new(x,.052,0),C.ink,streets)
+		part("PlatformTileJoint",Vector3.new(.055,.025,76),Vector3.new(x,.052,0),C.ink,streets)
 	end
-	for z=-24,24,6 do
+	for z=-36,36,6 do
 		part("PlatformTileJoint",Vector3.new(178,.025,.055),Vector3.new(270,.052,z),C.ink,streets)
 	end
-	part("TactilePlatformLine",Vector3.new(176,.055,1.2),Vector3.new(270,.065,-23),C.amber,streets)
+	part("TactilePlatformLine",Vector3.new(176,.055,1.2),Vector3.new(270,.065,-35),C.amber,streets)
 	for x=187,354,7 do
-		part("TactileSegment",Vector3.new(.12,.03,1.25),Vector3.new(x,.1,-23),rust,streets)
+		part("TactileSegment",Vector3.new(.12,.03,1.25),Vector3.new(x,.1,-35),rust,streets)
 	end
 	part("StationBackWall",Vector3.new(178,37,2),Vector3.new(270,17,-48),stationBlue,architecture,Enum.Material.Concrete)
 	part("StationDado",Vector3.new(178,8,1),Vector3.new(270,3,-46.6),oldTile,architecture,Enum.Material.Concrete)
@@ -332,7 +332,7 @@ function WorldBuilder.Build()
 	local factorySteel=Color3.fromRGB(69,74,74)
 	local factoryRust=Color3.fromRGB(116,70,48)
 	local factoryFloor=Color3.fromRGB(66,65,62)
-	part("FactoryLaneSurface",Vector3.new(178,.045,52),Vector3.new(450,.015,0),factoryFloor,streets,Enum.Material.Concrete)
+	part("FactoryLaneSurface",Vector3.new(178,.045,76),Vector3.new(450,.015,0),factoryFloor,streets,Enum.Material.Concrete)
 	part("FactoryRearWall",Vector3.new(180,32,2),Vector3.new(450,15,-47),factoryRust,architecture,Enum.Material.CorrodedMetal)
 	part("FactoryWallBase",Vector3.new(180,5,3),Vector3.new(450,2,-46),C.concrete,architecture,Enum.Material.Concrete)
 	for x=365,538,8 do
@@ -683,7 +683,7 @@ function WorldBuilder.Build()
 		if child:IsA("Model") and child:GetAttribute("Destructible") then
 			local root=child.PrimaryPart
 			if root then
-				local dz=root.Position.Z<0 and -14 or 14
+				local dz=root.Position.Z<0 and -26 or 26
 				child:PivotTo(child:GetPivot()+Vector3.new(0,0,dz))
 				movedProps[child]=true
 			end
@@ -695,15 +695,15 @@ function WorldBuilder.Build()
 			if visual:IsA("BasePart") then
 				local prop=visual:FindFirstAncestorOfClass("Model")
 				if not movedProps[prop] and not boundaryDecoration[visual.Name] and visual.Position.Z < -8 then
-					visual.CFrame += Vector3.new(0,0,-16)
+					visual.CFrame += Vector3.new(0,0,-30)
 				elseif not movedProps[prop] and not boundaryDecoration[visual.Name] and visual.Position.Z > 16 then
-					visual.CFrame += Vector3.new(0,0,12)
+					visual.CFrame += Vector3.new(0,0,26)
 				end
 			end
 		end
 	end
 	-- The old apron drain bars otherwise sit above the expanded foreground floor.
-	-- Low painted detail may remain inside arenas, but no scenery is collidable.
+	-- Original backdrop pieces remain cosmetic; new perimeter solids below support camera collision.
 
 	-- Entrance anchors use floor coordinates inside the specific area, never district-wide clamps.
 	local entryMarkers, entryScenery = folder("EnemyEntries"), folder("EnemyEntryScenery")
@@ -739,9 +739,101 @@ function WorldBuilder.Build()
 			glow("ServiceDoorIndicator",Vector3.new(2,.16,.12),Vector3.new(center,7.9,rear+.36),trim,doorway)
 		end
 	end
+	-- Full surroundings for an orbiting third-person camera. All ground solids stay
+	-- outside legal arenas; the clear floor has no new navigation obstacles.
+	local surrounds=folder("ArenaSurrounds")
+	local function solid(name,size,position,color,parent,material)
+		local p=part(name,size,position,color,parent or surrounds,material or Enum.Material.Concrete,true)
+		p.CanTouch=false;p:SetAttribute("CameraOccluder",true)
+		return p
+	end
+	local function placard(name,text,x,y,z,width,height,color)
+		local board=part(name,Vector3.new(width,height,.3),Vector3.new(x,y,z),C.ink,surrounds)
+		-- Two authored faces stay readable from either side of the street/concourse.
+		for _,face in ipairs({Enum.NormalId.Front,Enum.NormalId.Back}) do
+			local gui=Instance.new("SurfaceGui");gui.Face=face;gui.SizingMode=Enum.SurfaceGuiSizingMode.PixelsPerStud
+			gui.PixelsPerStud=28;gui.MaxDistance=180;gui.LightInfluence=.2;gui.Parent=board
+			local label=Instance.new("TextLabel");label.Size=UDim2.fromScale(.94,.86);label.Position=UDim2.fromScale(.03,.07)
+			label.BackgroundTransparency=1;label.Text=text;label.TextColor3=color;label.TextScaled=true
+			label.Font=Enum.Font.GothamBold;label.Parent=gui
+		end
+	end
+	for stageIndex,stage in ipairs(Config.Stages)do
+		local stageFolder=Instance.new("Folder");stageFolder.Name="District"..stageIndex;stageFolder.Parent=surrounds
+		for _,side in ipairs({-1,1})do
+			local z=side*40
+			solid("PerimeterPlinth",Vector3.new(172,3,1.2),Vector3.new(stage.CenterX,1.5,z),C.concrete,stageFolder)
+			part("PerimeterWalkway",Vector3.new(176,.3,9),Vector3.new(stage.CenterX,-.2,side*43),stageIndex==1 and C.asphalt or C.concrete,stageFolder)
+			for x=stage.MinX+12,stage.MaxX-8,28 do
+				solid("PerimeterPier",Vector3.new(1.2,5,1.2),Vector3.new(x,2.5,z),C.silver,stageFolder)
+			end
+		end
+	end
+	-- City: front-facing shops with returns and separated back alleys, not painted billboards.
+	for index,x in ipairs({24,68,112,156})do
+		local height=({21,29,24,18})[index]
+		local facade=index%2==0 and Color3.fromRGB(57,69,78) or Color3.fromRGB(79,69,67)
+		solid("CityCornerShop",Vector3.new(30,height,14),Vector3.new(x,height/2,51),facade)
+		part("CityShopRoof",Vector3.new(32,.8,16),Vector3.new(x,height,51),C.ink,surrounds)
+		part("CityShopPlinth",Vector3.new(31,.6,15),Vector3.new(x,.3,51),C.concrete,surrounds)
+		for _,dx in ipairs({-8,0,8})do
+			for _,y in ipairs({11,17})do
+				part("FrontShopWindow",Vector3.new(5,3.5,.15),Vector3.new(x+dx,y,43.9),cityLitGlass,surrounds,Enum.Material.Glass)
+			end
+		end
+		part("ShopClosedDoor",Vector3.new(4.2,6,.2),Vector3.new(x,3,43.8),C.ink,surrounds)
+		part("ShopDoorGlass",Vector3.new(3,3,.12),Vector3.new(x,4,43.65),C.blue,surrounds,Enum.Material.Glass)
+		placard("FrontShopSign",({"ASHGATE GROCERY","NIGHT REPAIR","CORNER CAFE","TRANSIT BOOKS"})[index],x,7.5,43.5,27,2.3,index%2==0 and C.cyan or C.amber)
+		-- Rear alley returns bracket the older far facades without projecting into the arena.
+		solid("CityAlleyReturn",Vector3.new(2,13,13),Vector3.new(x+16,6.5,-49),C.ink)
+		part("AlleyRollerDoor",Vector3.new(9,7,.3),Vector3.new(x,3.5,-43),C.blue,surrounds,Enum.Material.Metal)
+		part("AlleyAwning",Vector3.new(11,.4,3),Vector3.new(x,8,-44),C.silver,surrounds)
+	end
+	for _,x in ipairs({2,178})do
+		for _,z in ipairs({-50,50})do solid("CityStreetReturn",Vector3.new(4,12,20),Vector3.new(x,6,z),C.ink)end
+	end
+	-- Station: a second concourse wall, platform returns, overhead ribs and shuttered bays.
+	solid("StationConcourseWall",Vector3.new(174,17,3),Vector3.new(270,8.5,49),stationBlue)
+	part("StationConcourseTile",Vector3.new(174,5,.2),Vector3.new(270,2.5,47.35),oldTile,surrounds)
+	part("ConcourseRoofStrip",Vector3.new(176,.7,15),Vector3.new(270,19,51),C.ink,surrounds)
+	for x=192,348,26 do
+		solid("ConcourseColumn",Vector3.new(2,19,2),Vector3.new(x,9.5,44),C.concrete)
+		part("ConcourseColumnBand",Vector3.new(2.1,2,2.1),Vector3.new(x,5,44),stationBlue,surrounds)
+		part("ConcourseHighWindow",Vector3.new(17,4,.15),Vector3.new(x,12.5,47.3),C.blue,surrounds,Enum.Material.Glass)
+		part("ConcourseRoofRib",Vector3.new(.6,.8,17),Vector3.new(x,19.5,50),C.silver,surrounds,Enum.Material.Metal)
+	end
+	for _,x in ipairs({210,254,298,342})do
+		part("ClosedPlatformBay",Vector3.new(14,7,.3),Vector3.new(x,3.5,47.2),C.ink,surrounds)
+		for y=1,6,1 do part("ConcourseShutter",Vector3.new(13,.12,.15),Vector3.new(x,y,46.98),C.silver,surrounds)end
+	end
+	placard("StationFrontWayfinding","PLATFORMS / SERVICE SUSPENDED",266,16,47.1,58,2.6,C.cyan)
+	for _,x in ipairs({182,358})do
+		for _,z in ipairs({-51,51})do solid("PlatformEndWall",Vector3.new(3,11,23),Vector3.new(x,5.5,z),stationBlue)end
+	end
+	-- Factory: front service hall, two-sided gantry supports and visible return pipework.
+	solid("FactoryServiceHall",Vector3.new(174,21,3),Vector3.new(450,10.5,49),factoryRust,surrounds,Enum.Material.CorrodedMetal)
+	for x=374,532,26 do
+		solid("FactoryFrontColumn",Vector3.new(1.5,25,2),Vector3.new(x,12.5,43),factorySteel,surrounds,Enum.Material.Metal)
+		part("FactoryFrontWindow",Vector3.new(14,4,.2),Vector3.new(x,15,47.3),C.blue,surrounds,Enum.Material.Glass)
+		part("FrontServiceRib",Vector3.new(.3,20,.4),Vector3.new(x,10,47.3),C.ink,surrounds,Enum.Material.Metal)
+		tube("FrontPipeRiser",Vector3.new(x+5,1,44),Vector3.new(x+5,19,44),.7,C.silver,surrounds)
+	end
+	for _,z in ipairs({-43,43})do
+		tube("FactoryRingMain",Vector3.new(367,18,z),Vector3.new(535,18,z),.8,C.silver,surrounds)
+	end
+	for _,x in ipairs({384,428,472,522})do
+		-- High overhead steel provides actual spatial depth; ground supports stay outside Z36.
+		for _,z in ipairs({-41,41})do solid("GantrySupport",Vector3.new(1.2,25,1.2),Vector3.new(x,12.5,z),factorySteel,surrounds,Enum.Material.Metal)end
+		part("ArenaOverheadGantry",Vector3.new(1.2,1.2,84),Vector3.new(x,25,0),factorySteel,surrounds,Enum.Material.Metal)
+	end
+	for _,x in ipairs({362,538})do
+		for _,z in ipairs({-51,51})do solid("FactoryHallReturn",Vector3.new(3,15,24),Vector3.new(x,7.5,z),factorySteel,surrounds,Enum.Material.Metal)end
+	end
+	placard("FactoryFrontWarning","SERVICE HALL / POWER ISOLATED",454,20,47.1,55,2.6,C.amber)
+	surrounds:SetAttribute("Revision","OrbitSurrounds1")
 	city:SetAttribute("EntryMarkerVersion",2)
 	city:SetAttribute("RouteLength",540)
-	city:SetAttribute("BuildVersion","Arena3D-1-TwelveAreas")
+	city:SetAttribute("BuildVersion","Arena3D-2-OrbitSurrounds")
 	return city
 end
 

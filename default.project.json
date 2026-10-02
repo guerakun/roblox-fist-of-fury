@@ -40,7 +40,13 @@
       "$properties": {
         "CharacterWalkSpeed": 22,
         "CharacterJumpPower": 52,
-        "CharacterUseJumpPower": true
+        "CharacterUseJumpPower": true,
+        "CameraMode": "Classic",
+        "DevComputerCameraMovementMode": "Classic",
+        "DevTouchCameraMovementMode": "Classic",
+        "DevCameraOcclusionMode": "Zoom",
+        "CameraMinZoomDistance": 8,
+        "CameraMaxZoomDistance": 28
       },
       "StarterPlayerScripts": {
         "NightfallClient": {

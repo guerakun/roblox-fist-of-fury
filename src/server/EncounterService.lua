@@ -155,7 +155,7 @@ local function run(startStage, startWave, token,startingMode)
             setGate(stageNumber,waveNumber,false)
             setState({status="Intermission",wave=waveNumber,waveTitle=wave.Title,encounterKind=wave.Kind,
                 targetX=wave.EntryX,objective="PREPARE / AREA "..waveNumber,nextWaveAt=workspace:GetServerTimeNow()+.9})
-            -- Empty entry interval lets the shared fixed camera settle before any windup.
+            -- Empty entry interval exposes the next arena before enemy arrival.
             if not waitCancelable(.9,token)then return end
             combat.BeginEncounter()
             -- Scale once per wave. Late joiners never heal an in-progress boss.

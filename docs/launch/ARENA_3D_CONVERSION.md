@@ -1,5 +1,36 @@
 # Controlled 3D arena conversion
 
+## Current owner correction: WO-3D.2 (scoped Studio checks passed; human validation open)
+
+The owner clarified that the camera should be the normal rotatable Roblox third-person camera. The fixed elevated camera documented below was an incorrect interpretation and is superseded, not discarded history. Root/presentation own native `CameraType.Custom` / Classic follow configuration; official reference: [Roblox camera documentation](https://create.roblox.com/docs/workspace/camera). None of the previous fixed-camera tests certifies the orbit camera.
+
+World geometry now uses72stud arena depth (Z=-36..36), unchanged44/44/44/40 widths and the same12 controlled gates. The physical floor is80deep with76deep finishes; side boundaries have innerfaces+/-37. New perimeter solids remain beyond legalZ+/-36 and provide visible, queryable camera occluders; invisible high gameplay boundary parts have query disabled. One actual native perimeter-collision probe passed; all-angle and physical device checks remain. No midfloor navigation obstacles were added.
+
+The city gains four volumetric front shop buildings, return walls and rear service alleys; the station gains a full front concourse wall, columns, roof strips, shuttered bays and platform returns opposite the preserved rear trains; the factory gains a front service hall, columns, front/rear pipe runs, outside-floor gantry supports and high cosmetic overhead steel. Signs have readable Front and Back faces. Existing rear art shifts30studs from its original coordinates, foreground apron detail26studs, and34 whole breakable assemblies26studs toward their original edge (~Z+/-38). Three scenic pumps now sit at Z=-51/-50/-54. Existing asset IDs are retained; new surrounds are native parts with no imported scripts.
+
+`WorldArenas.spec.lua` was updated to check expanded depth,12gates/48anchors/34props,12pump proxy boxes, front/rear camera-occluding solids for every district, no new solid inside the legal floor, and a350part upper bound for the new surround folder. Actual isolated Studio execution passed:224surround parts and86camera occluders, plus the listed gate/entry/prop/pump checks. Orbit-angle images, camera wall collision, normal movement/aiming/tells, co-op gate/rescue, device performance and balancing remain root/human validation. Previous775x356 captures also showed the percent/style overlay competing with actor labels and persistent touch controls; that readability issue remains open until a new actual view is checked.
+
+### Reported camera visibility boundary
+
+The client sends its current camera frame/FOV/aspect at5Hz (nominal200ms intervals). The server rate-limits reports to at most10Hz and uses only the last accepted view for up to0.8seconds, tied to the current character life. Validation requires finite orthonormal camera geometry, bounded FOV40-100/aspect0.4-4, camera within40studs of the local character, and that character inside the reported frame. At each check, the NPC root must be inside that frame with a0.5-stud margin and unobstructed by the authored surrounds, closed gates or physical floor. Invisible movement barriers are explicitly excluded from this ray filter.
+
+Visibility is symmetric for player/NPC hits: an NPC hidden from a player's accepted view can neither damage nor be damaged by that player. Light, Heavy, Special and Desperation also require a fresh accepted view before their costs/cooldowns begin; movement and escape remain available. Server hitboxes, cooldowns, damage and reward rules still resolve combat. Missing or stale view data cannot grant unilateral offensive damage.
+
+**This is a bounded last-reported-view policy, not camera attestation or an anticheat certification.** A view can lag a rapid camera turn by sampling/network delay, and the server cannot prove what an untrusted client actually rendered. A client-controlled view still affects combat eligibility, even with symmetric checks. This does not prove zero offscreen hits in every actual rendered frame, latency fairness, or resistance to all client manipulation. Actual native-camera, timing, co-op and visibility fixtures must state their scope separately; the previous fixed-camera frustum results cannot close these gates.
+
+## Current save and actual validation
+
+Open [CurtainBreak-ThirdPerson.rbxl](../../places/CurtainBreak-ThirdPerson.rbxl) after closing the older open copy. Press Play, choose a hero, click the game viewport and Ready. Hold right mouse and drag to rotate; scroll to zoom. WASD follows the camera. The canonical CurtainBreak.rbxl and CurtainBreak3D.rbxl are refreshed aliases. An already-open Studio place does not reload changed disk contents automatically.
+
+Scoped current checks:72camera geometry,12receipt lifecycle,190relative movement,11native configuration. Actual client confirmed Custom camera/Humanoid subject/zoom8-28 and no presentation transform overwrites. Four scripted headings moved10.31-10.69studs with native follow error0.002-0.024studs. A CityCornerShop perimeter probe reduced native distance16to10.555studs at playerZ34, with the near-plane center line unobstructed. Initial fixture incorrectly tested camera origin; corrected to actual near-plane center. This is one wall/angle, not whole-plane or all-angle certification.
+
+The actual Main reporter/server fixture passed front/back visibility swaps after180degree camera rotation, visible/offscreen hit eligibility in both directions, stale incoming/outgoing rejection, stale Special with no cooldown cost, refresh resume and camera cleanup. Its camera orientation is scripted; physical mouse/controller/touch gestures remain unverified. The scripted full route passed12areas/9traverses/2district transfers in74.8969seconds, clearing enemies and relocating the party deliberately. It is not a full human combat/co-op test. All83production campaign sources matched the tested tree with zero compile errors; IP gate261files/zero hits.
+
+See [native-third-person-validation.json](evidence/native-third-person-validation.json) and the following native-third-person-build.json manifest for exact scope and saved source provenance. Human combat feel, physical co-op rescue/retry, compactHUD readability, device performance and existing launch gates remain open. The earlier fixed-camera figures below are preserved history.
+
+## Preserved WO-3D.1 fixed-camera prototype
+
+
 Owner-directed scope change, 2026-10-02. Source implemented and scoped Studio checks executed; playable campaign and hub rebuilt from source commit0ad61cc. This is a prototype, not launch acceptance. Root owns Config/camera and all Studio runs; combat owns XZ hit logic, AI and encounter transitions; world owns geometry; presentation owns camera application, controls and visible tells.
 
 ## Play space and progression
@@ -38,7 +69,7 @@ Full human fights, physical co-op arrivals/revive/retry, camera transition reada
 
 The original controlled side-view beat-em-up route, per-district continuous lane, third-area escalation and broad camera chase remain design history, not deleted ideas. Their saved images, HumanBot difficulty failure reports and tuning notes are preserved. The owner now requested a real3D arena experience; none of those earlier runs certify this new geometry, order or combat model.
 
-## Open this save
+## Historical WO-3D.1 save instructions
 
 Open [CurtainBreak3D.rbxl](../../places/CurtainBreak3D.rbxl) in Studio and press Play. The world is generated when simulation starts; Edit mode begins empty. Choose a hero, click into the game viewport, then press Enter or READY. The canonical [CurtainBreak.rbxl](../../places/CurtainBreak.rbxl) is byte-identical. [CurtainBreak-SideView.rbxl](../../places/CurtainBreak-SideView.rbxl) preserves the previous artifact for comparison. Build provenance and SHA256 hashes are in [arena-3d-build.json](evidence/arena-3d-build.json). Both campaign and hub were rebuilt; live teleport validation is still pending.
 

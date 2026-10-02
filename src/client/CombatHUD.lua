@@ -225,7 +225,6 @@ function HUD.new(options: any): any
         Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 1, -118), CanvasSize = UDim2.fromOffset(0, 349),
         ScrollBarThickness = 4, ScrollBarImageColor3 = colors.cyan, ScrollingDirection = Enum.ScrollingDirection.Y}, menu)
     local definitions = {
-        {key = "shake", name = "CAMERA SHAKE", hint = "0% turns off camera movement", toggle = false},
         {key = "effects", name = "EFFECT DENSITY", hint = "Attack warnings always stay visible", toggle = false},
         {key = "volume", name = "MASTER VOLUME", hint = "Impacts, ambience, and music", toggle = false},
         {key = "ambience", name = "STAGE AMBIENCE", hint = "City, station, and factory sound", toggle = false},
