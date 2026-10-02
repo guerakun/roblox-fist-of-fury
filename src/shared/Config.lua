@@ -1,4 +1,4 @@
--- Server-owned tuning. Each district has a skirmish, miniboss, escalation, and boss.
+-- Server-owned tuning. Each district has two enemy arenas, a miniboss, then a boss.
 local Config = {}
 Config.Title = "CURTAIN BREAK"
 Config.MaxPlayers = 4
@@ -6,8 +6,8 @@ Config.Stocks = 3
 Config.Survival={StartStocks=3,MaxStocks=3,RetryStocks=2,ClearHeal=15,DownedDuration=12,ReviveDuration=2.5,RevivePercent=60,ReviveRange=8}
 Config.WalkSpeed = 22
 Config.JumpPower = 52
-Config.LaneMin = -14
-Config.LaneMax = 14
+Config.LaneMin = -24
+Config.LaneMax = 24
 Config.BlastMargin = 24
 Config.PlayerPercentLimit = 200
 Config.Stages = {
@@ -92,6 +92,22 @@ for _,stage in ipairs(Config.Stages)do
         wave.Entries={"Left","Right","Door","Drop"}
         wave.Pulse={After=12,AliveThreshold=1}
     end
+end
+-- WO-3D.1: preserve the authored encounters, ordered as four controlled 3D arenas.
+-- The legacy side-view order is retained in the design history, not in live wave indexing.
+Config.Arena3D = true
+for _, stage in ipairs(Config.Stages) do
+    stage.Waves[2], stage.Waves[3] = stage.Waves[3], stage.Waves[2]
+    stage.MinZ, stage.MaxZ = Config.LaneMin, Config.LaneMax
+    for index, wave in ipairs(stage.Waves) do
+        local minX = stage.MinX + 4 + (index - 1) * 44
+        local maxX = math.min(stage.MinX + 4 + index * 44, stage.MaxX - 4)
+        wave.Bounds = {MinX=minX, MaxX=maxX, MinZ=stage.MinZ, MaxZ=stage.MaxZ}
+        wave.Center = Vector3.new((minX + maxX) / 2, 4, 0)
+        wave.SpawnX, wave.EntryX = wave.Center.X + 6, minX + 6
+        wave.Checkpoint = Vector3.new(minX + 8, 4, 0)
+    end
+    stage.SpawnX = stage.Waves[1].Checkpoint.X
 end
 -- One-way legacy-ID fingerprints support retired save records without retaining display labels.
 -- Exact compatibility fixtures and provenance live in docs/launch/HERO_MIGRATION.md.

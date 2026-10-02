@@ -10,6 +10,7 @@ local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Nightf
 local CompactHUDLayout = require(script.Parent.CompactHUDLayout)
 local ReviveHUD = require(script.Parent.ReviveHUD)
 local DistrictHUD = require(script.Parent.DistrictHUD)
+local CombatVisualGeometry=require(script.Parent.CombatVisualGeometry)
 local HUD = {}
 local function make(class: string, properties: any, parent: Instance?): any
     local item = Instance.new(class)
@@ -355,7 +356,7 @@ function HUD.new(options: any): any
         lobbyHeroButtons[hero.id] = {button = card, stroke = stroke, title = title}
     end
     text(lobbyContent, "HOW TO SURVIVE", 13, colors.text, UDim2.fromOffset(3, 152), UDim2.fromOffset(300, 21))
-    local instructions = text(lobbyContent, "MOVE  A/D + W/S   ·   JUMP  SPACE\nLIGHT  J   ·   HEAVY  K   ·   SPECIAL  L\nDASH  Q   ·   HOLD GUARD  F   ·   RECOVER  E", 11, colors.cyan,
+    local instructions = text(lobbyContent, "MOVE  W A S D   ·   JUMP  SPACE\nLIGHT  J   ·   HEAVY  K   ·   SPECIAL  L\nDASH  Q   ·   HOLD GUARD  F   ·   RECOVER  E", 11, colors.cyan,
         UDim2.fromOffset(3, 180), UDim2.fromOffset(345, 73))
     instructions.TextYAlignment = Enum.TextYAlignment.Top
     local lesson = text(lobbyContent, "Higher damage % means bigger launches.\nStocks are lives. Stay near your squad.\nRed markers: move out. Cyan markers: jump.", 11, colors.muted,
@@ -493,7 +494,7 @@ function HUD.new(options: any): any
             readyHint.Text = state.ready and "Waiting for the rest of your squad..." or "Everyone must ready up. No forced timer."
             if controller then instructions.Text = "MOVE  LEFT STICK   ·   JUMP  A\nLIGHT  X   ·   HEAVY  Y   ·   SPECIAL  B\nDASH  LT   ·   HOLD GUARD  LB   ·   RECOVER  RB"
             elseif touchActive() then instructions.Text = "MOVE  LEFT THUMB PAD   ·   JUMP BUTTON\nTAP  LIGHT / HEAVY / SPECIAL\nDASH TO EVADE   ·   HOLD BLOCK TO GUARD"
-            else instructions.Text = "MOVE  A/D + W/S   ·   JUMP  SPACE\nLIGHT  J   ·   HEAVY  K   ·   SPECIAL  L\nDASH  Q   ·   HOLD GUARD  F   ·   RECOVER  E" end
+            else instructions.Text = "MOVE  W A S D   ·   JUMP  SPACE\nLIGHT  J   ·   HEAVY  K   ·   SPECIAL  L\nDASH  Q   ·   HOLD GUARD  F   ·   RECOVER  E" end
             for name, card in pairs(lobbyHeroButtons) do
                 local selected = name == state.hero
                 card.stroke.Transparency = selected and 0 or 0.7
@@ -596,15 +597,7 @@ function HUD.new(options: any): any
                 local event = item.event
                 local position = event.position
                 local delta = localRoot.Position - position
-                local radius = tonumber(event.radius) or 6
-                local size = event.size
-                local danger = false
-                if event.shape == "Circle" then danger = Vector2.new(delta.X, delta.Z).Magnitude <= radius + 1.5
-                elseif typeof(size) == "Vector3" then danger = math.abs(delta.X) <= size.X / 2 + 1.5 and math.abs(delta.Z) <= size.Z / 2 + 1.5
-                else
-                    local centerX = position.X + (event.heavy and 0 or (event.direction or 1) * radius * 0.5)
-                    danger = math.abs(localRoot.Position.X - centerX) <= (event.heavy and radius or radius * 0.5) + 1.5 and math.abs(delta.Z) <= (event.heavy and 12.5 or 3.5) + 1.5
-                end
+                local danger=CombatVisualGeometry.Contains(event,localRoot.Position,1.5)
                 local distance = Vector2.new(delta.X, delta.Z).Magnitude
                 if danger and item.finish < highestFinish then highest = item; highestFinish = item.finish end
                 local screen, visible = project(camera, position)

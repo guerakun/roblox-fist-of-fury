@@ -1,3 +1,4 @@
+local ArenaMath=require(game.ReplicatedStorage.Nightfall.Shared.ArenaMath)
 local Risk=require(script.Parent.RiskPolicy)
 -- Server-owned movement and engagement state; damage remains in CombatService.
 local Director=require(script.Parent.AttackDirector)
@@ -101,7 +102,7 @@ function EnemyAI.Step(t,c)
                     data.bounty.fleeX=r.Position.X<(left+right)/2 and left or right
                 end
                 h.WalkSpeed=data.spec.Speed*1.2
-                h:MoveTo(Vector3.new(data.bounty.fleeX,r.Position.Y,math.clamp(r.Position.Z,-11,11)))
+                h:MoveTo(Vector3.new(data.bounty.fleeX,r.Position.Y,math.clamp(r.Position.Z,c.arena.MinZ+2,c.arena.MaxZ-2)))
                 continue
             end
         end
@@ -113,7 +114,7 @@ function EnemyAI.Step(t,c)
         end
         if not data.entryComplete and (t<(data.entryUntil or 0) or (data.entryKind=="Drop" and h.FloorMaterial==Enum.Material.Air)) then
             state(model,data,"Enter");h.WalkSpeed=data.spec.Speed
-            h:MoveTo(Vector3.new(math.clamp(r.Position.X+(data.entryDirection or 1)*4,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(r.Position.Z,-11,11)))
+            h:MoveTo(Vector3.new(math.clamp(r.Position.X+(data.entryDirection or 1)*4,c.arena.MinX+2,c.arena.MaxX-2),r.Position.Y,math.clamp(r.Position.Z,c.arena.MinZ+2,c.arena.MaxZ-2)))
             continue
         end
         data.entryComplete=true
@@ -121,7 +122,7 @@ function EnemyAI.Step(t,c)
         if data.attacking then state(model,data,t<(data.resolveAt or 0) and "Attack" or "Recover");h:Move(Vector3.zero);continue end
         if t<data.recoveryUntil then state(model,data,"Recover");h:Move(Vector3.zero);continue end
         local pos=r.Position
-        local x,z=math.clamp(pos.X,c.arena.MinX+6,c.arena.MaxX-6),math.clamp(pos.Z,-12,12)
+        local x,z=math.clamp(pos.X,c.arena.MinX+2,c.arena.MaxX-2),math.clamp(pos.Z,c.arena.MinZ+2,c.arena.MaxZ-2)
         if x~=pos.X or z~=pos.Z then r.CFrame+=Vector3.new(x-pos.X,0,z-pos.Z)end
         local target,distance,bestScore
         for _,player in ipairs(alive)do
@@ -138,16 +139,18 @@ function EnemyAI.Step(t,c)
         end
         if not target then state(model,data,"Enter");h:Move(Vector3.zero);Director.Release(director,model);continue end
         local pr=c.root(target.Character)
-        data.facing=pr.Position.X>=r.Position.X and 1 or -1
+        data.facing=ArenaMath.NormalizeDirection(pr.Position-r.Position,data.facing)
+        model:SetAttribute("Facing",data.facing)
+        r.CFrame=ArenaMath.FacingFrame(r.Position,data.facing)
         local slot=Director.Assign(director,model,target,r.Position,pr.Position,c.arena,c.VisiblePosition)
         local visible=c.CanAttack and c.CanAttack(model)
         if c.ObserveAI then c.ObserveAI(model,t,{visible=visible,fixedSlotFeasible=slot.approachFeasible})end
         if c.CanAttack and not visible then
             -- Offscreen actors must enter the shared view before reserving attack capacity.
             Director.Release(director,model);data.engaging=false;state(model,data,"Reposition")
-            local desired=Vector3.new(pr.Position.X+slot.offset.X,r.Position.Y,math.clamp(pr.Position.Z+slot.offset.Z,-11,11))
+            local desired=Vector3.new(pr.Position.X+slot.offset.X,r.Position.Y,math.clamp(pr.Position.Z+slot.offset.Z,c.arena.MinZ+2,c.arena.MaxZ-2))
             local destination=c.SafePosition and c.SafePosition(desired)
-            destination=destination or Vector3.new(math.clamp(c.arena.CenterX or (c.arena.MinX+c.arena.MaxX)/2,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,0)
+            destination=destination or Vector3.new(math.clamp(c.arena.CenterX or (c.arena.MinX+c.arena.MaxX)/2,c.arena.MinX+2,c.arena.MaxX-2),r.Position.Y,0)
             h.WalkSpeed=data.spec.Speed;h:MoveTo(destination)
             continue
         end
@@ -164,7 +167,7 @@ function EnemyAI.Step(t,c)
             data.lastObservedHeavy=observed.attackAt;data.observedHeavies=(data.observedHeavies or 0)+1
             if DifficultyPolicy.Evade(data,profile) then
                 data.evadeUntil=t+.5;data.invulnerableUntil=math.max(data.invulnerableUntil or 0,t+.35)
-                r.AssemblyLinearVelocity=Vector3.new(-data.facing*26,24,0)
+                r.AssemblyLinearVelocity=-data.facing*26+Vector3.new(0,24,0)
                 Director.Release(director,model);data.engaging=false
                 c.fx("EnemyEvade",r.Position,{targetModel=model,duration=.5,direction=-data.facing,enemy=data.kind,moveId="LeaperEvade"})
             end
@@ -172,11 +175,12 @@ function EnemyAI.Step(t,c)
         if t<(data.evadeUntil or 0) then state(model,data,"Evade");action(model,data,"Evade");h:Move(Vector3.zero);continue end
         if (archetype=="Pitcher" and distance<12) or t<(data.retreatUntil or 0) then
             state(model,data,"Retreat");Director.Release(director,model);data.engaging=false
-            local away=r.Position.X>=pr.Position.X and 1 or -1
+            local away=ArenaMath.NormalizeDirection(r.Position-pr.Position,-data.facing)
             h.WalkSpeed=data.spec.Speed
             local velocity=r.AssemblyLinearVelocity or Vector3.zero
-            if velocity.X*away>.5 then action(model,data,"Retreat")end
-            local retreatGoal=Vector3.new(math.clamp(pr.Position.X+away*(data.retreatDistance or 17),c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(pr.Position.Z+(slot.serial%2==0 and 3 or -3),-11,11))
+            if ArenaMath.Flat(velocity):Dot(away)>.5 then action(model,data,"Retreat")end
+            local retreatGoal=ArenaMath.Clamp(pr.Position+away*(data.retreatDistance or 17)+ArenaMath.Right(away)*(slot.serial%2==0 and 3 or -3),c.arena,2)
+            retreatGoal=Vector3.new(retreatGoal.X,r.Position.Y,retreatGoal.Z)
             h:MoveTo(c.SafePosition and c.SafePosition(retreatGoal) or retreatGoal)
             if archetype~="Pitcher" or t<data.attackAt or distance>7 then continue end
             -- A cornered ranged enemy can shove rather than retreat forever against a bound.
@@ -196,7 +200,7 @@ function EnemyAI.Step(t,c)
         local range=not elite and (ranges[moveName] or data.spec.Reach-1) or (closeMoves[moveName] and data.spec.Reach or 65)
         local token=director.tokens[model]
         if token and token.target~=target then Director.Release(director,model);token=nil;data.engaging=false end
-        local inRange=(not c.CanAttack or c.CanAttack(model)) and distance<=range and (elite or (math.abs(pr.Position.Z-r.Position.Z)<=3 and (r.Position.X-pr.Position.X)*slot.offset.X>0))
+        local inRange=(not c.CanAttack or c.CanAttack(model)) and distance<=range and (elite or ArenaMath.Flat(r.Position-pr.Position):Dot(slot.offset)>0)
         if c.ObserveAI then c.ObserveAI(model,t,{inRange=inRange})end
         if token and not inRange and slot.approachFeasible==false then Director.Release(director,model);token=nil;data.engaging=false end
         if token and inRange and t>=data.attackAt then
@@ -206,10 +210,10 @@ function EnemyAI.Step(t,c)
             local destination,holdFootwork
             if token then
                 data.engaging=true;state(model,data,"Engage")
-                destination=Vector3.new(pr.Position.X+(slot.offset.X<0 and -1 or 1)*(archetype=="Pitcher" and 17 or 4),r.Position.Y,pr.Position.Z)
+                destination=pr.Position+ArenaMath.NormalizeDirection(slot.offset)*(archetype=="Pitcher" and 17 or 4)
             else
                 data.engaging=false
-                local offset=archetype=="Pitcher" and Vector3.new(slot.offset.X<0 and -17 or 17,0,slot.offset.Z*.4) or slot.offset
+                local offset=archetype=="Pitcher" and ArenaMath.NormalizeDirection(slot.offset)*17 or slot.offset
                 local goal=pr.Position+offset
                 goal=Vector3.new(goal.X,r.Position.Y,goal.Z)
                 goal=c.SafePosition and c.SafePosition(goal) or goal
@@ -219,7 +223,7 @@ function EnemyAI.Step(t,c)
                 if nearSlot then
                     holdFootwork=true
                     goal=Footwork.Goal(data,r.Position,goal,t,function(point)
-                        point=Vector3.new(math.clamp(point.X,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(point.Z,-11,11))
+                        point=Vector3.new(math.clamp(point.X,c.arena.MinX+2,c.arena.MaxX-2),r.Position.Y,math.clamp(point.Z,c.arena.MinZ+2,c.arena.MaxZ-2))
                         return c.SafePosition and c.SafePosition(point) or point
                     end)
                     if t>=(data.feintAt or t+1) then
@@ -230,18 +234,18 @@ function EnemyAI.Step(t,c)
                 end
                 destination=Vector3.new(goal.X,r.Position.Y,goal.Z)
                 if t>=data.attackAt and distance<=(elite and range or 20) and (inRange or slot.approachFeasible~=false) then
-                    local facing=c.records[target].facing or 1
-                    local behind=(r.Position.X-pr.Position.X)*facing<0
+                    local facing=ArenaMath.NormalizeDirection(c.records[target].facing)
+                    local behind=ArenaMath.Flat(r.Position-pr.Position):Dot(facing)<0
                     Director.Request(director,model,target,behind,data.lastAttackAt,t)
                     if c.ObserveEvent then c.ObserveEvent(model,"tokenRequests",t)end
                     candidates[model]={target=target,move=moveName,inRange=inRange}
                 end
             end
             -- Cross through a neighboring lane before closing the opposite-side slot.
-            if (r.Position.X-pr.Position.X)*slot.offset.X<0 and math.abs(r.Position.X-pr.Position.X)<10 then
-                destination=Vector3.new(destination.X,r.Position.Y,pr.Position.Z+(slot.serial%2==0 and 6 or -6))
+            if ArenaMath.Flat(r.Position-pr.Position):Dot(slot.offset)<0 and distance<10 then
+                destination=destination+ArenaMath.Right(slot.offset)*(slot.serial%2==0 and 6 or -6)
             end
-            destination=Vector3.new(math.clamp(destination.X,c.arena.MinX+6,c.arena.MaxX-6),r.Position.Y,math.clamp(destination.Z,-11,11))
+            destination=Vector3.new(math.clamp(destination.X,c.arena.MinX+2,c.arena.MaxX-2),r.Position.Y,math.clamp(destination.Z,c.arena.MinZ+2,c.arena.MaxZ-2))
             destination=c.SafePosition and c.SafePosition(destination) or destination
             h.WalkSpeed=data.spec.Speed
             if holdFootwork then h:Move(Footwork.Direction(r.Position,destination),false) else h:MoveTo(destination)end

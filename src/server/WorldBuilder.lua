@@ -1,5 +1,5 @@
 -- Nightfall District: authored, deterministic city built entirely with native Roblox geometry.
--- Forward is +X. The camera looks from +Z. Combat floor top is Y=0.
+-- Route progression is +X; combat occupies full XZ arenas. Combat floor top is Y=0.
 local Lighting = game:GetService("Lighting")
 local CollectionService = game:GetService("CollectionService")
 local Config = require(game.ReplicatedStorage.Nightfall.Shared.Config)
@@ -124,13 +124,13 @@ function WorldBuilder.Build()
 	grade.TintColor = Color3.fromRGB(250, 251, 255); grade.Parent = Lighting
 
 	part("CityFoundation", Vector3.new(1100, 7, 400), Vector3.new(270, -5.6, -30), C.ink, streets, Enum.Material.Asphalt, false)
-	part("ContinuousCombatFloor", Vector3.new(560, 2, 30), Vector3.new(270, -1, 0), C.asphalt, streets, Enum.Material.Concrete, true)
+	part("ContinuousCombatFloor", Vector3.new(560, 2, 56), Vector3.new(270, -1, 0), C.asphalt, streets, Enum.Material.Concrete, true)
 	for x = -6, 546, 12 do
-		part("PavementJoint", Vector3.new(.07, .018, 28), Vector3.new(x, .014, 0), C.ink, streets)
+		part("PavementJoint", Vector3.new(.07, .018, 52), Vector3.new(x, .014, 0), C.ink, streets)
 	end
-	for _, z in ipairs({-15.5, 15.5}) do
+	for _, z in ipairs({-26, 26}) do
 		part("RaisedCurb", Vector3.new(560, .7, 2), Vector3.new(270, .25, z), C.concrete, streets, Enum.Material.Concrete, true)
-		local edge = part("LaneBoundary", Vector3.new(562, 48, 1), Vector3.new(270, 23, z), C.ink, streets, nil, true)
+		local edge = part("LaneBoundary", Vector3.new(562, 48, 2), Vector3.new(270, 23, z), C.ink, streets, nil, true)
 		edge.Transparency = 1; edge.CastShadow = false
 		for x = -6, 546, 12 do
 			part("SafetyBollard", Vector3.new(.5, 2.6, .5), Vector3.new(x, 1.65, z), C.silver, details, Enum.Material.Metal)
@@ -138,15 +138,26 @@ function WorldBuilder.Build()
 			beam("GuardRail", Vector3.new(x, 2.3, z), Vector3.new(x+12, 2.3, z), .2, C.silver)
 		end
 	end
-	local start = part("RouteEntranceStop", Vector3.new(2, 50, 32), Vector3.new(-9, 23, 0), C.ink, streets, nil, true)
-	start.Transparency = 1
-	-- The encounter system owns these single parts, including their collision and visibility.
-	for index = 1, 3 do
-		local gate = part("Gate"..index, Vector3.new(1, 36, 30), Vector3.new(index*180, 17, 0), C.red, gates, Enum.Material.ForceField, true)
-		gate.Transparency = .65; gate:SetAttribute("Stage", index)
+	-- Each area has a physical exit. EncounterService alone changes its collision/open state.
+	-- Side rails are low visual cues; invisible walls prevent jumping out of the authored floor.
+	for stageIndex, stage in ipairs(Config.Stages) do
+		local entrance = part("StageEntrance"..stageIndex, Vector3.new(2,48,52), Vector3.new(stage.MinX+3,23,0), C.ink, streets,nil,true)
+		entrance.Transparency, entrance.CastShadow = 1, false
+		for areaIndex, wave in ipairs(stage.Waves) do
+			local bounds = assert(wave.Bounds, "3D arena bounds required")
+			local gate = part("Stage"..stageIndex.."_Area"..areaIndex, Vector3.new(1,48,bounds.MaxZ-bounds.MinZ+4),
+				Vector3.new(bounds.MaxX,23,(bounds.MinZ+bounds.MaxZ)/2), C.silver, gates,Enum.Material.ForceField,true)
+			gate.Transparency, gate.CastShadow = .82, false
+			gate:SetAttribute("Stage",stageIndex);gate:SetAttribute("Area",areaIndex);gate:SetAttribute("Opened",false)
+			-- Non-obstructing posts and a painted threshold show the barrier without an attack-red fill.
+			for _,z in ipairs({bounds.MinZ-1,bounds.MaxZ+1}) do
+				part("ArenaGatePost",Vector3.new(1,5,1),Vector3.new(bounds.MaxX+1,2.5,z),C.silver,streets,Enum.Material.Metal)
+			end
+			part("ArenaThreshold",Vector3.new(.35,.035,bounds.MaxZ-bounds.MinZ),Vector3.new(bounds.MaxX,.04,0),C.silver,streets)
+		end
 	end
 	local spawn = Instance.new("SpawnLocation")
-	spawn.Name = "NightfallSpawn"; spawn.Size = Vector3.new(7, 1, 7); spawn.Position = Vector3.new(14, 3, 0)
+	spawn.Name = "NightfallSpawn"; spawn.Size = Vector3.new(7, 1, 7); spawn.Position = Config.Stages[1].Waves[1].Checkpoint
 	spawn.Anchored = true; spawn.Transparency = 1; spawn.CanCollide = false; spawn.Neutral = true
 	spawn.Duration = 0; spawn.Parent = city
 
@@ -230,16 +241,16 @@ function WorldBuilder.Build()
 	local stationBlue = Color3.fromRGB(37,68,79)
 	local oldTile = Color3.fromRGB(99,113,116)
 	local rust = Color3.fromRGB(98,62,48)
-	part("StationLaneSurface",Vector3.new(178,.045,28),Vector3.new(270,.015,0),oldTile,streets,Enum.Material.Concrete)
+	part("StationLaneSurface",Vector3.new(178,.045,52),Vector3.new(270,.015,0),oldTile,streets,Enum.Material.Concrete)
 	for x=184,356,8 do
-		part("PlatformTileJoint",Vector3.new(.055,.025,28),Vector3.new(x,.052,0),C.ink,streets)
+		part("PlatformTileJoint",Vector3.new(.055,.025,52),Vector3.new(x,.052,0),C.ink,streets)
 	end
-	for z=-12,12,6 do
+	for z=-24,24,6 do
 		part("PlatformTileJoint",Vector3.new(178,.025,.055),Vector3.new(270,.052,z),C.ink,streets)
 	end
-	part("TactilePlatformLine",Vector3.new(176,.055,1.2),Vector3.new(270,.065,-12.9),C.amber,streets)
+	part("TactilePlatformLine",Vector3.new(176,.055,1.2),Vector3.new(270,.065,-23),C.amber,streets)
 	for x=187,354,7 do
-		part("TactileSegment",Vector3.new(.12,.03,1.25),Vector3.new(x,.1,-12.9),rust,streets)
+		part("TactileSegment",Vector3.new(.12,.03,1.25),Vector3.new(x,.1,-23),rust,streets)
 	end
 	part("StationBackWall",Vector3.new(178,37,2),Vector3.new(270,17,-48),stationBlue,architecture,Enum.Material.Concrete)
 	part("StationDado",Vector3.new(178,8,1),Vector3.new(270,3,-46.6),oldTile,architecture,Enum.Material.Concrete)
@@ -321,7 +332,7 @@ function WorldBuilder.Build()
 	local factorySteel=Color3.fromRGB(69,74,74)
 	local factoryRust=Color3.fromRGB(116,70,48)
 	local factoryFloor=Color3.fromRGB(66,65,62)
-	part("FactoryLaneSurface",Vector3.new(178,.045,28),Vector3.new(450,.015,0),factoryFloor,streets,Enum.Material.Concrete)
+	part("FactoryLaneSurface",Vector3.new(178,.045,52),Vector3.new(450,.015,0),factoryFloor,streets,Enum.Material.Concrete)
 	part("FactoryRearWall",Vector3.new(180,32,2),Vector3.new(450,15,-47),factoryRust,architecture,Enum.Material.CorrodedMetal)
 	part("FactoryWallBase",Vector3.new(180,5,3),Vector3.new(450,2,-46),C.concrete,architecture,Enum.Material.Concrete)
 	for x=365,538,8 do
@@ -541,6 +552,9 @@ function WorldBuilder.Build()
 	-- Six authored confrontation landmarks match the encounter director's spawn anchors.
 	local landmarkFolder=folder("EncounterLandmarks")
 	local function landmark(name,stage,role,x,title,accent)
+		for _,wave in ipairs(Config.Stages[stage].Waves) do
+			if wave.Kind==role then x=wave.SpawnX break end
+		end
 		local model=Instance.new("Model");model.Name=name;model.Parent=landmarkFolder
 		model:SetAttribute("Stage",stage);model:SetAttribute("Role",role);model:SetAttribute("EnemyKind",name == "CrosswalkExecutioner" and "Executioner" or name);model:SetAttribute("SpawnX",x)
 		local anchor=part("SpawnAnchor",Vector3.one,Vector3.new(x,3,0),accent,model)
@@ -662,51 +676,72 @@ function WorldBuilder.Build()
 			local other = arrow:Clone(); other.Position += Vector3.new(0,0,1.8); other.CFrame *= CFrame.Angles(0,math.rad(-80),0); other.Parent = streets
 		end
 	end
-	-- Authored entrance anchors use floor coordinates: Combat adds the rig's root height.
-	-- The director may adjust side anchors relative to the party within server bounds.
+	-- Preserve authored scenery as a backdrop outside the wider floor. Shift whole
+	-- breakable assemblies together; their restored offsets remain internally coherent.
+	local movedProps = {}
+	for _,child in ipairs(details:GetChildren()) do
+		if child:IsA("Model") and child:GetAttribute("Destructible") then
+			local root=child.PrimaryPart
+			if root then
+				local dz=root.Position.Z<0 and -14 or 14
+				child:PivotTo(child:GetPivot()+Vector3.new(0,0,dz))
+				movedProps[child]=true
+			end
+		end
+	end
+	local boundaryDecoration={SafetyBollard=true,BollardCap=true,GuardRail=true}
+	for _,container in ipairs({architecture,details}) do
+		for _,visual in ipairs(container:GetDescendants()) do
+			if visual:IsA("BasePart") then
+				local prop=visual:FindFirstAncestorOfClass("Model")
+				if not movedProps[prop] and not boundaryDecoration[visual.Name] and visual.Position.Z < -8 then
+					visual.CFrame += Vector3.new(0,0,-16)
+				elseif not movedProps[prop] and not boundaryDecoration[visual.Name] and visual.Position.Z > 16 then
+					visual.CFrame += Vector3.new(0,0,12)
+				end
+			end
+		end
+	end
+	-- The old apron drain bars otherwise sit above the expanded foreground floor.
+	-- Low painted detail may remain inside arenas, but no scenery is collidable.
+
+	-- Entrance anchors use floor coordinates inside the specific area, never district-wide clamps.
 	local entryMarkers, entryScenery = folder("EnemyEntries"), folder("EnemyEntryScenery")
-	entryMarkers:SetAttribute("SchemaVersion", 1)
+	entryMarkers:SetAttribute("SchemaVersion", 2)
 	for stageIndex, stage in ipairs(Config.Stages) do
 		for waveIndex, wave in ipairs(stage.Waves) do
+			local bounds=wave.Bounds
 			local entryName = "Stage"..stageIndex.."_Wave"..waveIndex
 			local group = Instance.new("Folder")
 			group.Name, group.Parent = entryName, entryMarkers
-			group:SetAttribute("Stage", stageIndex)
-			group:SetAttribute("Wave", waveIndex)
-			group:SetAttribute("WaveCenterX", wave.SpawnX)
-			local center = math.clamp(wave.SpawnX, stage.MinX+6, stage.MaxX-6)
-			local dropX = math.clamp(center+8, stage.MinX+6, stage.MaxX-6)
+			group:SetAttribute("Stage", stageIndex);group:SetAttribute("Wave", waveIndex)
+			group:SetAttribute("WaveCenterX", wave.Center.X)
+			for _,key in ipairs({"MinX","MaxX","MinZ","MaxZ"}) do group:SetAttribute(key,bounds[key]) end
+			local center=wave.Center.X
+			local dropX=math.clamp(center+6,bounds.MinX+6,bounds.MaxX-6)
 			local positions = {
-				Left = Vector3.new(math.clamp(center-24, stage.MinX+6, stage.MaxX-6),0,-7),
-				Right = Vector3.new(math.clamp(center+24, stage.MinX+6, stage.MaxX-6),0,7),
-				Door = Vector3.new(center,0,-12),
-				Drop = Vector3.new(dropX,14,-7),
+				Left=Vector3.new(bounds.MinX+6,0,8), Right=Vector3.new(bounds.MaxX-6,0,-8),
+				Door=Vector3.new(center,0,bounds.MinZ+6), Drop=Vector3.new(dropX,14,8),
 			}
-			for _, kind in ipairs({"Left", "Right", "Door", "Drop"}) do
-				local marker = part(kind, Vector3.one*.5, positions[kind], C.cyan, group)
-				marker.Transparency, marker.CastShadow = 1, false
-				marker:SetAttribute("EntryKind", kind)
-				if kind == "Drop" then marker:SetAttribute("LandingPosition", Vector3.new(dropX,0,-7)) end
+			for _,kind in ipairs({"Left","Right","Door","Drop"}) do
+				local marker=part(kind,Vector3.one*.5,positions[kind],C.cyan,group)
+				marker.Transparency,marker.CastShadow=1,false
+				marker:SetAttribute("EntryKind",kind)
+				if kind=="Drop" then marker:SetAttribute("LandingPosition",Vector3.new(dropX,0,8)) end
 			end
-			-- A shallow service doorway sits behind the -14 lane boundary. It cannot
-			-- block movement or damage queries and uses no attack-like floor glow.
-			local doorway = Instance.new("Model")
-			doorway.Name, doorway.Parent = entryName, entryScenery
-			doorway:SetAttribute("Stage", stageIndex)
-			doorway:SetAttribute("Wave", waveIndex)
-			doorway:SetAttribute("EntryKind", "Door")
-			local trim = stageIndex == 2 and C.cyan or C.amber
-			part("ServiceDoorRecess",Vector3.new(6.4,8,.3),Vector3.new(center,4,-15.25),C.ink,doorway)
-			for _, dx in ipairs({-3.5,3.5}) do
-				part("ServiceDoorJamb",Vector3.new(.6,8.5,.6),Vector3.new(center+dx,4.25,-14.85),C.silver,doorway,Enum.Material.Metal)
-			end
-			part("ServiceDoorLintel",Vector3.new(7.6,.6,.6),Vector3.new(center,8.5,-14.85),C.concrete,doorway,Enum.Material.Metal)
-			glow("ServiceDoorIndicator",Vector3.new(2,.16,.12),Vector3.new(center,7.9,-14.49),trim,doorway)
+			local doorway=Instance.new("Model");doorway.Name,doorway.Parent=entryName,entryScenery
+			doorway:SetAttribute("Stage",stageIndex);doorway:SetAttribute("Wave",waveIndex);doorway:SetAttribute("EntryKind","Door")
+			local rear=bounds.MinZ-3
+			local trim=stageIndex==2 and C.cyan or C.amber
+			part("ServiceDoorRecess",Vector3.new(6.4,8,.3),Vector3.new(center,4,rear-.4),C.ink,doorway)
+			for _,dx in ipairs({-3.5,3.5}) do part("ServiceDoorJamb",Vector3.new(.6,8.5,.6),Vector3.new(center+dx,4.25,rear),C.silver,doorway,Enum.Material.Metal) end
+			part("ServiceDoorLintel",Vector3.new(7.6,.6,.6),Vector3.new(center,8.5,rear),C.concrete,doorway,Enum.Material.Metal)
+			glow("ServiceDoorIndicator",Vector3.new(2,.16,.12),Vector3.new(center,7.9,rear+.36),trim,doorway)
 		end
 	end
-	city:SetAttribute("EntryMarkerVersion", 1)
+	city:SetAttribute("EntryMarkerVersion",2)
 	city:SetAttribute("RouteLength",540)
-	city:SetAttribute("BuildVersion","Nightfall-2-ThreeDistricts")
+	city:SetAttribute("BuildVersion","Arena3D-1-TwelveAreas")
 	return city
 end
 

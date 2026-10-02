@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Debris = game:GetService("Debris")
 local Config = require(game:GetService("ReplicatedStorage").Nightfall.Shared.Config)
+local Geometry=require(script.Parent.CombatVisualGeometry)
 local Specials = {}
 local function angle(x: number, y: number, z: number): CFrame
     return CFrame.Angles(math.rad(x), math.rad(y), math.rad(z))
@@ -52,12 +53,11 @@ function Specials.new(folder: Instance, preferences: any, onImpact: ((Vector3) -
         p.CFrame = CFrame.lookAt((a + b) * .5, b)
         p.Transparency = fade
     end
-    function api.Emit(position: Vector3, hero: string, direction: number, userId: number?): boolean
+    function api.Emit(position: Vector3, hero: string, direction: any, userId: number?): boolean
         local spec = Config.Characters[hero]
         if not spec or preferences.effects <= 0 or #effects >= 8 then return false end
         local attack = spec.Special
         local reach, width, windup = attack.Range, attack.Width, attack.Windup
-        direction = direction >= 0 and 1 or -1
         local holder = Instance.new("Folder")
         holder.Name = hero .. "Special"; holder.Parent = folder
         holder:SetAttribute("FootprintRange", reach); holder:SetAttribute("FootprintWidth", width)
@@ -99,7 +99,7 @@ function Specials.new(folder: Instance, preferences: any, onImpact: ((Vector3) -
             local strike = age >= windup
             local fade = math.clamp((age - windup - .10) / .38, 0, 1)
             local function point(x: number, y: number, z: number): Vector3
-                return origin + Vector3.new(direction * x, y, z)
+                return Geometry.Point(origin,direction,x,y,z)
             end
             -- Configured coverage edges clarify the forward box; replicated timing/origin remain a visual estimate.
             local corners = {point(0, -2.78, -width/2), point(reach, -2.78, -width/2),

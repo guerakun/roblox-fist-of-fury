@@ -7,6 +7,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage.Nightfall.Shared.Config)
+local ArenaMath=require(ReplicatedStorage.Nightfall.Shared.ArenaMath)
 local CombatMath = require(ReplicatedStorage.Nightfall.Shared.CombatMath)
 local Archetypes = require(ReplicatedStorage.Nightfall.Shared.EnemyArchetypes)
 local CameraBounds = require(ReplicatedStorage.Nightfall.Shared.CameraBounds)
@@ -20,6 +21,8 @@ local runHeat={}
 local function runRules()return HeatConfig.Rules(runHeat)end
 local PressurePolicy = require(script.Parent.PressurePolicy)
 local SurvivalPolicy = require(script.Parent.SurvivalPolicy)
+local AreaTraversalPolicy=require(script.Parent.AreaTraversalPolicy)
+local DashMotion=require(script.Parent.DashMotion)
 local StylePolicy=require(script.Parent.StylePolicy)
 local CombatModifiers=require(script.Parent.CombatModifiers)
 local Risk=require(script.Parent.RiskPolicy)
@@ -43,9 +46,12 @@ local lastCameraSample
 -- Only disconnected players are cached; a legitimate campaign/checkpoint reset owns restoration.
 local disconnectedSurvival = {}
 local MAX_DISCONNECTED_SURVIVORS = 256
-local arena, stageIndex = Config.Stages[1], 1
-local checkpointPosition = Vector3.new(arena.SpawnX, 4, 0)
-local walkingMaxX = arena.Waves[1].SpawnX + 30
+local stageDefinition,stageIndex=Config.Stages[1],1
+local arena=table.clone(stageDefinition)
+for k,v in pairs(stageDefinition.Waves[1].Bounds)do arena[k]=v end
+arena.CenterX=(arena.MinX+arena.MaxX)/2
+local checkpointPosition = stageDefinition.Waves[1].Checkpoint
+local walkingMaxX = arena.MaxX-2
 local remotes, restartCallback, readyCallback
 local initialized, battleEpoch = false, 0
 local admissionValidator, travelLocked = nil, false
@@ -204,6 +210,7 @@ function Combat.GetSnapshot(player)
         canShareStock = ally ~= nil and shareCooldown <= 0, shareStockCooldown = shareCooldown,
         boss = boss, waveTitle = encounter.waveTitle, encounterName = encounter.waveTitle, encounterKind = encounter.encounterKind,
         targetX = encounter.targetX, objective = encounter.objective, walkingMaxX = walkingMaxX,
+        arena=ArenaMath.Bounds(arena),walkingMinX=arena.MinX+2,walkingMinZ=arena.MinZ+2,walkingMaxZ=arena.MaxZ-2,facing=data.facing,
         nextWaveAt = encounter.nextWaveAt, checkpointLabel = encounter.checkpointLabel, resultReason = encounter.resultReason, runStats = stats}
 end
 function Combat.BroadcastState()
@@ -222,20 +229,30 @@ function Combat.SetEncounterState(state)
     end
     Combat.BroadcastState()
 end
-function Combat.SetArena(stage, index)
-    arena, stageIndex = stage, index or stageIndex
+function Combat.CanSealArea(bounds)
+    return AreaTraversalPolicy.CanSeal(records,bounds,now(),function(player,data)
+        local r=root(player.Character)
+        return r and r.Position or data.downedPosition
+    end)
+end
+function Combat.SetArea(wave, previousBounds)
+    local bounds=previousBounds and ArenaMath.Union(previousBounds,wave.Bounds)or wave.Bounds
+    arena=table.clone(stageDefinition)
+    for key,value in pairs(bounds)do arena[key]=value end
+    arena.CenterX=(arena.MinX+arena.MaxX)/2
+    walkingMaxX=arena.MaxX-2
+    -- Retain the smoothed camera estimate until it reaches the new fixed frame.
+    cameraGoal,cameraGoalSpan=CameraBounds.Party({},arena)
+end
+function Combat.SetArena(stage,index)
+    stageDefinition,stageIndex=stage,index or stageIndex
+    Combat.SetArea(stage.Waves[1])
     for _,data in pairs(records)do styleState(data,true)end
-    checkpointPosition = Vector3.new(stage.SpawnX, 4, 0)
-    walkingMaxX = stage.SpawnX + 30
-    workspace:SetAttribute("NightfallStage", stageIndex)
+    checkpointPosition=stage.Waves[1].Checkpoint
+    workspace:SetAttribute("NightfallStage",stageIndex)
 end
 function Combat.SetWalkingLimit(maxX)
-    local limit = math.clamp(maxX, arena.MinX + 8, arena.MaxX - 4)
-    for _, player in ipairs(Combat.GetAlivePlayers()) do
-        local r = root(player.Character)
-        if r and r.Position.X >= arena.MinX and r.Position.X <= arena.MaxX then limit = math.max(limit, r.Position.X) end
-    end
-    walkingMaxX = math.min(arena.MaxX - 4, math.max(walkingMaxX, limit))
+    walkingMaxX=math.clamp(maxX,arena.MinX+2,arena.MaxX-2)
 end
 function Combat.SetCheckpoint(position, label)
     checkpointPosition = position
@@ -267,6 +284,7 @@ function Combat.GetRunOptions()return {difficulty=difficulty,heat=table.clone(ru
 function Combat.SetTravelLocked(locked)
     assert(type(locked)=="boolean","Travel lock must be boolean")
     travelLocked=locked
+    if locked then for _,data in pairs(records)do DashMotion.Stop(data)end end
     Combat.BroadcastState()
 end
 function Combat.ReadyForMatch(players)
@@ -365,6 +383,7 @@ local function attributes(model, data)
     model:SetAttribute("Percent", data.percent)
     model:SetAttribute("Stocks", data.stocks or 1)
     model:SetAttribute("Blocking", data.blocking or false)
+    model:SetAttribute("Facing",ArenaMath.NormalizeDirection(data.facing))
     model:SetAttribute("Hero", data.hero or data.kind)
     model:SetAttribute("Downed", data.downed or false)
     if data.spec then
@@ -393,6 +412,9 @@ local function resetPosition(player, position, percent)
     local model, data = player.Character, records[player]
     local r, h = root(model), humanoid(model)
     if not data or not r or not h then return end
+    DashMotion.Stop(data)
+    position=ArenaMath.Clamp(position,arena,2)
+    data.facing=Vector3.xAxis
     data.percent, data.blocking, data.downed, data.respawning = percent or 0, false, false, false
     data.revive,data.downedUntil,data.downedPosition=nil,nil,nil
     data.stunnedUntil, data.launchedUntil, data.recovered = 0, 0, false
@@ -401,7 +423,7 @@ local function resetPosition(player, position, percent)
     data.invulnerableUntil = now() + 2
     r.Anchored = false
     r.AssemblyLinearVelocity = Vector3.zero
-    model:PivotTo(CFrame.new(position) * CFrame.Angles(0, -math.pi / 2, 0))
+    model:PivotTo(ArenaMath.FacingFrame(position,Vector3.xAxis))
     h.Health = h.MaxHealth
     h.WalkSpeed, h.JumpPower = Config.Characters[data.hero].Speed + modifiers(player).moveSpeedBonus, Config.JumpPower
     attributes(model, data)
@@ -423,9 +445,8 @@ function Combat.ShareStock(player, requestedUserId)
     local donor, recipient, t = records[player], records[target], now()
     if t < (donor.cooldowns.ShareStock or 0) then return false end
     local donorRoot = root(player.Character)
-    local z = donorRoot.Position.Z + (donorRoot.Position.Z > 0 and -4 or 4)
-    local position = Vector3.new(math.clamp(donorRoot.Position.X - donor.facing * 4, arena.MinX + 6, math.max(arena.MinX + 6, walkingMaxX - 2)), 4,
-        math.clamp(z, Config.LaneMin + 2, Config.LaneMax - 2))
+    local behind=donorRoot.Position-ArenaMath.NormalizeDirection(donor.facing)*4
+    local position=ArenaMath.Clamp(Vector3.new(behind.X,4,behind.Z),arena,2)
     donor.stocks -= 1
     donor.cooldowns.ShareStock = t + 10
     recipient.stocks, recipient.percent, recipient.downed, recipient.respawning = 1, 0, false, true
@@ -582,6 +603,7 @@ local function stepRevives(t)
 end
 local function knockOut(model)
     local knockedData, knockedPlayer=recordOf(model)
+    DashMotion.Stop(knockedData)
     if knockedData and knockedData.grabbedBy then releaseGrab(knockedData.grabbedBy,true) end
     if not knockedPlayer then releaseGrab(model,true) end
     local data, player = recordOf(model)
@@ -600,7 +622,7 @@ local function knockOut(model)
         end
         -- Last-KO exception: orbs require another live enemy so collection remains a combat risk.
         if pickups and next(enemies)and r and encounter.status=="Combat"then
-            local position=Vector3.new(math.clamp(r.Position.X,arena.MinX+6,walkingMaxX-2),2,math.clamp(r.Position.Z,-11,11))
+            local position=Vector3.new(math.clamp(r.Position.X,arena.MinX+2,walkingMaxX),2,math.clamp(r.Position.Z,arena.MinZ+2,arena.MaxZ-2))
             pickups:Spawn("ko:"..tostring(data.styleId),position,now()+Risk.ScoreOrbLifetime,
                 {campaignId=activeCampaign,stage=stageIndex,wave=encounter.wave})
         end
@@ -621,7 +643,7 @@ local function knockOut(model)
         data.downed, data.respawning = true, false
         data.downedUntil=now()+Config.Survival.DownedDuration
         local position=r and r.Position or checkpointPosition
-        data.downedPosition=Vector3.new(math.clamp(position.X,arena.MinX+6,walkingMaxX-2),3,math.clamp(position.Z,Config.LaneMin+2,Config.LaneMax-2))
+        data.downedPosition=Vector3.new(math.clamp(position.X,arena.MinX+2,walkingMaxX),3,math.clamp(position.Z,arena.MinZ+2,arena.MaxZ-2))
         attributes(model, data)
         if r then model:PivotTo(CFrame.new(data.downedPosition))end
         local h = humanoid(model)
@@ -637,6 +659,7 @@ local function knockOut(model)
     Combat.BroadcastState()
 end
 function Combat.ApplyHit(attacker, target, attack, direction)
+    direction=ArenaMath.NormalizeDirection(direction)
     local targetModel, sourceModel = modelOf(target), modelOf(attacker)
     if not targetModel or not sourceModel or targetModel == sourceModel then return false end
     local data, victimPlayer = recordOf(targetModel)
@@ -650,7 +673,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     if not victimPlayer and data.grabbedPlayer and sourcePlayer then releaseGrab(targetModel,true) end
     if victimPlayer and data.grabbedBy and data.grabbedBy~=sourceModel then releaseGrab(data.grabbedBy,true) end
     local light=sourcePlayer and sourceData.lastAction=="Light"
-    local blocked = not attack.Unblockable and data.blocking and data.facing == -direction
+    local blocked = not attack.Unblockable and data.blocking and ArenaMath.Frontal(data.facing,direction)
         and (victimPlayer~=nil or (enemyId=="Warden" and light))
     if victimPlayer and Risk.PerfectBlock(t,data.blockStartedAt,blocked,attack.Unblockable,data.perfectBlockConsumed)then
         data.perfectBlockConsumed=true
@@ -670,7 +693,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
         return false -- No damage, chip, grab, knockback or hit telemetry was accepted.
     end
     if enemyId=="Warden" and sourcePlayer and sourceData.lastAction=="Heavy" then data.guardBrokenUntil=t+1.1;data.blocking=false end
-    local styleBackHit=sourcePlayer and data.facing==direction
+    local styleBackHit=sourcePlayer and ArenaMath.NormalizeDirection(data.facing):Dot(direction)>=.5
     local targetHumanoid=humanoid(targetModel)
     local styleAirHit=sourcePlayer and t<(data.launchedUntil or 0)and targetHumanoid and targetHumanoid.FloorMaterial==Enum.Material.Air
     local damage = attack.Damage * (blocked and .2 or 1)
@@ -685,6 +708,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     local lightArmor=enemyId=="Grappler" and light
     local armored = (elite or enemyId=="Brute") and t < data.armoredUntil or lightArmor
     if armored then damage *= .9 end
+    DashMotion.Stop(data) -- Accepted damage interrupts dash before knockback is assigned.
     data.percent = math.min(999, data.percent + damage)
     local stun = blocked and .08 or attack.Stun
     if victimPlayer then
@@ -726,7 +750,7 @@ function Combat.ApplyHit(attacker, target, attack, direction)
     local effectiveWeight=victimPlayer and CombatModifiers.Weight(data.weight,victimModifiers)or(data.weight or 1)
     local velocity = CombatMath.Knockback(data.percent, attack, effectiveWeight) * knockbackMultiplier
     velocity *= blocked and .2 or armored and .08 or elite and .5 or 1
-    r.AssemblyLinearVelocity = Vector3.new(direction * velocity, blocked and 3 or armored and 0 or elite and math.min(attack.Lift, 8) or attack.Lift, r.AssemblyLinearVelocity.Z * .3)
+    r.AssemblyLinearVelocity = direction*velocity + Vector3.new(0,blocked and 3 or armored and 0 or elite and math.min(attack.Lift,8)or attack.Lift,0)
     if sourcePlayer then
         sourceData.runStats.damageDealt += damage
         if not attack.StyleId then styleEventSequence+=1 end
@@ -745,16 +769,17 @@ local function doHitbox(actor, attack, direction)
     local model = modelOf(actor)
     local r = root(model)
     if not r then return end
-    local offset = attack.Omnidirectional and 0 or direction * attack.Range / 2
+    direction=ArenaMath.NormalizeDirection(direction)
+    local offset = attack.Omnidirectional and Vector3.zero or direction * attack.Range / 2
     local length = attack.Omnidirectional and attack.Range * 2 or attack.Range
-    local parts = ToolboxHitbox.Query(CFrame.new(r.Position + Vector3.new(offset, 0, 0)), Vector3.new(length, 9, attack.Width), {model, workspace.NightfallCity})
+    local parts = ToolboxHitbox.Query(ArenaMath.BoxFrame(r.Position + offset,direction), Vector3.new(length, 9, attack.Width), {model, workspace.NightfallCity})
     local hit = {}
     for _, part in ipairs(parts) do
         local candidate = part:FindFirstAncestorOfClass("Model")
         if candidate and not hit[candidate] and recordOf(candidate) then
             hit[candidate] = true
             local candidateRoot = root(candidate)
-            local heading = attack.Omnidirectional and candidateRoot and (candidateRoot.Position.X >= r.Position.X and 1 or -1) or direction
+            local heading = attack.Omnidirectional and candidateRoot and ArenaMath.NormalizeDirection(candidateRoot.Position-r.Position,direction) or direction
             Combat.ApplyHit(actor, candidate, attack, heading)
         end
     end
@@ -772,12 +797,12 @@ local function performAttack(player, action, data)
     data.lastAction, data.attackStartedAt = action, now()
     data.cooldowns[action], data.busyUntil, data.blocking = now() + attack.Cooldown, now() + attack.Windup + .13, false
     local direction, epoch, lifeSerial = data.facing, battleEpoch, data.lifeSerial
-    r.CFrame = CFrame.lookAt(r.Position, r.Position + Vector3.new(direction, 0, 0))
+    r.CFrame = ArenaMath.FacingFrame(r.Position,direction)
     fx("Attack", r.Position, {hero = data.hero, action = action, direction = direction, playerUserId = player.UserId, combo = data.combo})
     task.delay(attack.Windup, function()
         if epoch ~= battleEpoch or encounter.status ~= "Combat" or records[player] ~= data or data.lifeSerial ~= lifeSerial or player.Character ~= model or data.downed or data.respawning or now() < data.stunnedUntil then return end
         doHitbox(player, attack, direction)
-        if action == "Heavy" or action == "Special" then Destruction.BreakNearby(r.Position + Vector3.new(direction * attack.Range / 2, 0, 0), math.clamp(attack.Width, 8, 14), direction) end
+        if action == "Heavy" or action == "Special" then Destruction.BreakNearby(r.Position + direction * attack.Range / 2, math.clamp(attack.Width, 8, 14), direction) end
     end)
 end
 local allowedActions = {Light = true, Heavy = true, Special = true, Dash = true, Block = true, Recovery = true, Jump = true, SelectCharacter = true, Restart = true, Ready = true, ShareStock = true, Revive = true, Desperation = true}
@@ -867,13 +892,14 @@ local function actionReceived(player, action, payload)
         end
         data.cooldowns.Dash, data.invulnerableUntil = t + 1.4, math.max(data.invulnerableUntil,t + .24)
         data.blocking, data.stunnedUntil = false, 0
-        r.AssemblyLinearVelocity = Vector3.new(data.facing * 74, math.max(0, r.AssemblyLinearVelocity.Y), 0)
+        r.AssemblyLinearVelocity = data.facing*74+Vector3.new(0,math.max(0,r.AssemblyLinearVelocity.Y),0)
+        DashMotion.Start(data,r,data.facing)
         data.launchedUntil = t + .18
         fx("Dash", r.Position, {direction = data.facing, hero = data.hero, playerUserId = player.UserId,burst=burstCost>0,cost=burstCost})
     elseif action == "Recovery" or action == "Jump" then
         if h.FloorMaterial == Enum.Material.Air and not data.recovered then
             data.recovered = true
-            r.AssemblyLinearVelocity = Vector3.new(data.facing * 26, 58, 0)
+            r.AssemblyLinearVelocity = data.facing*26+Vector3.new(0,58,0)
             fx("Recovery", r.Position, {hero = data.hero, playerUserId = player.UserId})
         elseif h.FloorMaterial ~= Enum.Material.Air then h.Jump = true end
     elseif (Config.Attacks[action] or action == "Special") and t >= (data.cooldowns[action] or 0) then performAttack(player, action, data) end
@@ -885,8 +911,9 @@ function Combat.SpawnEnemy(kind, position, healthScale)
     model.Parent = workspace.Enemies
     model:PivotTo(CFrame.new(position + Vector3.new(0, spec.Scale * 3, 0)) * CFrame.Angles(0, math.pi / 2, 0))
     root(model):SetNetworkOwner(nil)
+    humanoid(model).AutoRotate=false -- Server-owned NPC yaw follows its target, including guarding/retreat.
     local data = {kind = kind, percent = 0, threshold = spec.Threshold * (healthScale or 1) * DifficultyPolicy.EnemyHealthScale(spec.Role,difficultyProfile(),runHeat), weight = spec.Weight,
-        blocking = false, guard = 0, facing = -1, stunnedUntil = 0, launchedUntil = 0, invulnerableUntil = 0,
+        blocking = false, guard = 0, facing = -Vector3.xAxis, stunnedUntil = 0, launchedUntil = 0, invulnerableUntil = 0,
         attackAt = now() + 1.6, spec = spec, phase = 1, poise = 0, armoredUntil = 0, recoveryUntil = 0,
         moveIndex = 0, attackSerial = 0, contributors = {}, targetHistory = {}}
     enemySequence+=1
@@ -955,7 +982,7 @@ function Combat.SpawnEnemyEntry(kind,entryKind,stageNumber,waveNumber,healthScal
     local stagger=((index or 1)-1)%3*2
     if entryKind=="Left" and low~=math.huge then position=Vector3.new(low-14-stagger,0,position.Z)
     elseif entryKind=="Right" and high~=-math.huge then position=Vector3.new(high+18+stagger,0,position.Z)end
-    position=Vector3.new(math.clamp(position.X,stage.MinX+6,math.min(stage.MaxX-6,walkingMaxX-2)),position.Y,math.clamp(position.Z,-12,12))
+    position=Vector3.new(math.clamp(position.X,arena.MinX+2,walkingMaxX),position.Y,math.clamp(position.Z,arena.MinZ+2,arena.MaxZ-2))
     local model=Combat.SpawnEnemy(kind,position,healthScale)
     local data=enemies[model]
     data.entryUntil=now()+.6;data.entryKind=entryKind;data.entryDirection=entryKind=="Right" and -1 or 1
@@ -980,6 +1007,7 @@ function Combat.SpawnPhaseAdds(model,data)
     end)
 end
 function Combat.ClearEnemies()
+    for _,data in pairs(records)do DashMotion.Stop(data)end
     if pickups then pickups:Clear()end
     AttackDirector.Reset(aiDirector)
     battleEpoch += 1
@@ -1039,14 +1067,14 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     Telemetry.Windup(data.kind,moveName,move.Windup,attackCount(),AttackDirector.Cap(#alive,difficultyProfile().TokenBonus))
     data.armoredUntil=move.Armored and data.resolveAt or 0
     humanoid(model):Move(Vector3.zero)
-    r.CFrame=CFrame.lookAt(r.Position,r.Position+Vector3.new(direction,0,0))
+    r.CFrame=ArenaMath.FacingFrame(r.Position,direction)
     attributes(model,data)
     local function valid()
         return enemies[model]==data and data.attackSerial==serial and battleEpoch==epoch and encounter.status=="Combat" and root(model)~=nil
     end
     local function warn(duration,volumes)
         for _,volume in ipairs(volumes)do
-            fx("Telegraph",volume.position,{shape=volume.shape,size=volume.size,radius=volume.radius,height=volume.height,
+            fx("Telegraph",volume.position,{shape=volume.shape,cframe=volume.cframe,size=volume.size,radius=volume.radius,height=volume.height,
                 jumpable=volume.jumpable,direction=direction,duration=duration,enemy=data.kind,enemyName=data.spec.Name,
                 mechanic=move.Name,color=volume.color,heavy=data.spec.Role~="Grunt",targetModel=model,
                 tellStyle=tellStyle,pose=move.Pose or "Heavy",moveId=moveName})
@@ -1061,7 +1089,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
                 local pr=root(player.Character)
                 if pr and not hit[player] and EnemyMoves.Contains(volume,pr.Position)then
                     hit[player]=true
-                    local heading=volume.shape=="Box" and direction or (pr.Position.X>=volume.position.X and 1 or -1)
+                    local heading=volume.shape=="Box" and direction or ArenaMath.NormalizeDirection(pr.Position-volume.position,direction)
                     local accepted=Combat.ApplyHit(model,player,{Damage=data.spec.Damage*volume.multiplier,Knockback=27,Growth=.40,Lift=volume.jumpable and 24 or 15,Stun=.32,Unblockable=move.Grab==true},heading)
                     if move.Grab and accepted and not data.grabbedPlayer then
                         local victim=records[player]
@@ -1089,7 +1117,7 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
     end
     local function impactVisual()
         for _,volume in ipairs(move.Volumes)do
-            fx("EnemyImpact",volume.position,{shape=volume.shape,size=volume.size,radius=volume.radius,height=volume.height,color=volume.color,
+            fx("EnemyImpact",volume.position,{shape=volume.shape,cframe=volume.cframe,size=volume.size,radius=volume.radius,height=volume.height,color=volume.color,
                 mechanic=move.Name,enemy=data.kind,targetModel=model,tellStyle=tellStyle,moveId=moveName})
         end
     end
@@ -1107,23 +1135,23 @@ local function beginEnemyAttack(model,data,target,moveName,alive)
                 local point=start:Lerp(endpoint,alpha)
                 if move.Projectile then
                     local midpoint=(previous+point)/2
-                    impact({{position=Vector3.new(midpoint.X,0,midpoint.Z),size=Vector3.new(math.abs(point.X-previous.X)+4,12,math.abs(point.Z-previous.Z)+4),height=12,shape="Box",multiplier=1}},hit)
+                    impact({{position=Vector3.new(midpoint.X,0,midpoint.Z),cframe=ArenaMath.BoxFrame(Vector3.new(midpoint.X,0,midpoint.Z),move.Endpoint-attackOrigin),size=Vector3.new(ArenaMath.Flat(point-previous).Magnitude+4,12,4),height=12,shape="Box",multiplier=1}},hit)
                     previous=point
                 else
-                    model:PivotTo(CFrame.new(point+Vector3.new(0,math.sin(alpha*math.pi)*(move.Arc or 0),0))*CFrame.Angles(0,-direction*math.pi/2,0))
+                    model:PivotTo(ArenaMath.FacingFrame(point+Vector3.new(0,math.sin(alpha*math.pi)*(move.Arc or 0),0),direction))
                     root(model).AssemblyLinearVelocity=Vector3.zero
                 end
                 if alpha>=1 then break end
                 RunService.Heartbeat:Wait()
             until false
         elseif move.MoveTo then
-            model:PivotTo(CFrame.new(move.MoveTo+Vector3.new(0,data.spec.Scale*3,0))*CFrame.Angles(0,-direction*math.pi/2,0))
+            model:PivotTo(ArenaMath.FacingFrame(move.MoveTo+Vector3.new(0,data.spec.Scale*3,0),direction))
             root(model).AssemblyLinearVelocity=Vector3.zero
         end
         if not valid() then return end
         if moveName=="LeaperVaultKick" then
             local slot=aiDirector.slots[model]
-            if slot then slot.offset=Vector3.new(-slot.offset.X,0,slot.offset.Z)end
+            if slot then slot.offset=-slot.offset end
         end
         if not move.Projectile then impact(move.Volumes)end
         if not valid()then return end -- A perfect block invalidates the whole captured resolver.
@@ -1152,7 +1180,7 @@ end
 local function aiStep(t)
     local positions={}
     for _,player in ipairs(Combat.GetAlivePlayers())do local r=root(player.Character);if r then table.insert(positions,r.Position)end end
-    cameraGoal,cameraGoalSpan=CameraBounds.Party(positions,arena.MinX)
+    cameraGoal,cameraGoalSpan=CameraBounds.Party(positions,arena)
     if cameraGoal then
         local alpha=1-math.exp(-6*math.max(0,t-(lastCameraSample or t-.1)))
         cameraEstimate=cameraEstimate and cameraEstimate:Lerp(cameraGoal,alpha) or cameraGoal
@@ -1220,7 +1248,7 @@ local function addPlayer(player)
     if player.Parent~=Players or pendingAdmissions[player]~=ticket then return end
     pendingAdmissions[player]=nil
     records[player] = {hero = preferred, percent = 0, stocks = math.min(Config.Stocks,runRules().stockCap), cooldowns = {}, stunnedUntil = 0,
-        launchedUntil = 0, invulnerableUntil = 0, busyUntil = 0, selectAt = 0, facing = 1, combo = 0, lastLight = 0,
+        launchedUntil = 0, invulnerableUntil = 0, busyUntil = 0, selectAt = 0, facing = Vector3.xAxis, combo = 0, lastLight = 0,
         blocking = false, guard = 0, downed = false, recovered = false, rateStart = now(), rateCount = 0,
         hitAt = 0, lifeSerial = 0, contribution = 0, ready = false, runStats = freshStats(), runStart = now()}
     local saved = disconnectedSurvival[player.UserId]
@@ -1244,6 +1272,7 @@ local function addPlayer(player)
     task.spawn(spawnPlayer, player)
 end
 local function removePlayer(player)
+    DashMotion.Stop(records[player])
     pendingAdmissions[player]=nil
     local data = records[player]
     if not data then return end
@@ -1262,6 +1291,7 @@ local function removePlayer(player)
     records[player] = nil
 end
 function Combat.ResetLobby()
+    for _,data in pairs(records)do DashMotion.Stop(data)end
     if pickups then pickups:Clear();pickups=nil end
     table.clear(bountyWaves)
     activeCampaign=nil
@@ -1271,8 +1301,8 @@ function Combat.ResetLobby()
     end
     table.clear(disconnectedSurvival)
     Combat.SetArena(Config.Stages[1], 1)
-    walkingMaxX = arena.Waves[1].SpawnX + 30
-    Combat.SetCheckpoint(Vector3.new(arena.SpawnX, 4, 0), "DISTRICT ENTRANCE")
+    walkingMaxX = arena.MaxX-2
+    Combat.SetCheckpoint(stageDefinition.Waves[1].Checkpoint,"DISTRICT ENTRANCE")
     Combat.ClearReady()
     encounter.waveTitle, encounter.encounterKind = "ENTER THE CURTAIN", "Wave"
     encounter.targetX, encounter.objective, encounter.resultReason = 0, "CHOOSE A HERO / READY UP", ""
@@ -1297,8 +1327,14 @@ function Combat.Init()
             if not r or not h or data.downed or data.respawning then continue end
             if CombatMath.InBlastZone(r.Position, arena, Config.BlastMargin) then knockOut(model) continue end
             local pos = r.Position
-            local x = t > data.launchedUntil and math.clamp(pos.X, arena.MinX + 4, walkingMaxX) or pos.X
-            local z = math.clamp(pos.Z, Config.LaneMin, Config.LaneMax)
+            local x = t > data.launchedUntil and math.clamp(pos.X, arena.MinX+2, walkingMaxX) or pos.X
+            local z = t > data.launchedUntil and math.clamp(pos.Z,arena.MinZ+2,arena.MaxZ-2) or pos.Z
+            if not data.blocking and t>=data.busyUntil and t>=data.stunnedUntil then
+                -- Observe replicated locomotion yaw; never compete with engine AutoRotate.
+                local locomotion=h.MoveDirection.Magnitude>.1 and h.MoveDirection or r.CFrame.LookVector
+                data.facing=ArenaMath.NormalizeDirection(locomotion,data.facing)
+                model:SetAttribute("Facing",data.facing)
+            end
             if x ~= pos.X or z ~= pos.Z then r.CFrame += Vector3.new(x - pos.X, 0, z - pos.Z) end
             local capabilities=enforceCapabilities(player,data)
             local speed = Config.Characters[data.hero].Speed + capabilities.moveSpeedBonus

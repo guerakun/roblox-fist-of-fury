@@ -265,6 +265,14 @@ function Effects.new(preferences: any): any
         if #pieces > MAX_PARTS_PER_EFFECT then holder:Destroy(); return false end
         duration = math.min(duration, .85)
         Debris:AddItem(holder, duration + .05)
+        local authoredUpdate=update
+        local orientation=not circle and typeof(event.cframe)=="CFrame"and (event.cframe-event.cframe.Position)or CFrame.identity
+        local transform=CFrame.new(origin)*orientation*CFrame.new(-origin)
+        update=function(t)
+            for _,item in ipairs(pieces)do if item.authoredFrame then item.part.CFrame=item.authoredFrame end end
+            authoredUpdate(t)
+            for _,item in ipairs(pieces)do item.authoredFrame=item.part.CFrame;item.part.CFrame=transform*item.authoredFrame end
+        end
         update(0)
         table.insert(active, {holder = holder, parts = pieces, duration = duration, fadeStart = fadeStart, start = os.clock(), update = update})
         startTicker()

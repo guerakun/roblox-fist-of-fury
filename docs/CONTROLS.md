@@ -1,10 +1,10 @@
 # Player controls and presentation
 
-The game uses controlled side-view stages. Walk along X and use a small amount of foreground/background depth along Z. Clear each wave to move right into the next district. The server owns damage, hit detection, cooldowns, knockback, stocks, and encounter progression.
+The game uses controlled 3D arenas with full XZ floor movement. Each city, station and factory district has four areas: enemy group, enemy group, miniboss, boss. Clear an area to open its physical exit, then rally right together before the next area locks. The server owns damage, hit detection, cooldowns, knockback, stocks, and encounter progression.
 
 | Action | Keyboard | Gamepad | Touch |
 | --- | --- | --- | --- |
-| Move / lane depth | A D / W S | Left stick | Left thumb pad |
+| Move across arena floor | A D / W S | Left stick | Left thumb pad |
 | Jump / air recovery | Space | A | Jump |
 | Light attack | J | X | Light |
 | Heavy attack | K | Y | Heavy |
@@ -20,17 +20,17 @@ The first grounded jump uses Roblox Humanoid jumping. A second airborne press re
 
 ## Camera and accessibility
 
-- Scripted side-view camera follows the party with smooth movement and stage bounds. Party discovery runs at 10 Hz; camera target and eye sample and follow living party positions together every render frame. Movement runs separately after input. See CAMERA_REGRESSION.md.
+- The fixed-yaw elevated camera frames the active arena, independent of ordinary character movement or jumping. During traversal it frames the current/next area union, then smoothly settles onto the next cell before combat begins. This is an authored camera, not a free orbit. See [3D conversion](launch/ARENA_3D_CONVERSION.md) for scoped evidence and remaining comfort/visibility tests.
 - Health is represented by readable damage percentage and discrete stock marks. Cooldown buttons show numeric time remaining.
 - Buttons support mouse activation in addition to keyboard, gamepad, and touch inputs. Input resets when the app loses focus.
-- The custom controller replaces Roblox default controls so keyboard, thumbstick, and touch directions stay aligned with the authored lane.
+- The custom controller replaces Roblox default controls so keyboard, thumbstick, and touch directions stay aligned with the authored arena. Cardinal speeds are equal and diagonal input is normalized. The Humanoid controls ordinary locomotion yaw; attacks and guard use a horizontal facing vector.
 - Settings (O / gamepad Back) provide camera shake, effect density, master volume, stage ambience, combat music, and high-contrast warnings. Setting shake to 0 disables camera kick. Critical telegraphs remain visible even at 0 effect density. Settings last for the current play session.
 
 ## Imported asset contract
 
-The client actually samples imported Toolbox R6 pose data from `Nightfall.Shared.ToolboxAnimations`: Combat Animations **14578890309** by PixellDaZuera and Dash **109267687059124** by z0efx63. Light/alternate light/heavy/guard/dash plus idle/walk are interpolated from their original keyframes. Bespoke original hero special poses are scheduled in WO-1.3; the historical baseline reused Heavy. Teammates and enemies are sampled on each client; server combat timing remains authoritative.
+The client actually samples imported Toolbox R6 pose data from `Nightfall.Shared.ToolboxAnimations`: Combat Animations **14578890309** by PixellDaZuera and Dash **109267687059124** by z0efx63. Light/alternate light/heavy/guard/dash plus idle/walk are interpolated from their original keyframes. Authored original special poses/effects are implemented alongside these imported clips; the historical baseline reused Heavy. Teammates and enemies are sampled on each client; server combat timing remains authoritative.
 
-The installed Hit VFX template is cloned for impacts. Enemy attacks show red ground footprints during windup; boss overload has a distinct banner and burst. Toolbox audio references are Punch Impact1 **132504023010884**, whoosh **135315310485417**, and City Night Ambience3 **9112759731**. Impacts are deduplicated and limited to eight concurrent transient sounds. Audio still depends on Roblox asset availability/permissions in the published experience.
+The installed Hit VFX template is cloned for impacts. Enemy attacks use anticipation poses/flash or oriented floor footprints during windup; boss overload has a distinct banner and burst. Toolbox audio references are Punch Impact1 **132504023010884**, whoosh **135315310485417**, and City Night Ambience3 **9112759731**. Impacts are deduplicated and limited to eight concurrent transient sounds. Audio still depends on Roblox asset availability/permissions in the published experience.
 
 Audited imported templates live in `ReplicatedStorage.Nightfall.Assets`:
 
@@ -81,31 +81,36 @@ Run results show server-reported defeats, damage dealt, damage taken, and elapse
 
 ## Integration contracts
 
-`CombatHUD.lua` consumes the main combat snapshot, including optional `boss={name,kind,percent,threshold,phase,role}`, `encounterKind`, `nextWaveAt`, `checkpointLabel`, and `runStats={kills,damageDealt,damageTaken,duration}`. `boss=false` hides its meter. Telegraph/EnemyImpact fields are `position`, `shape`, `size`, `radius`, `duration`, `mechanic`, `color`, and `jumpable`; legacy directional range packets remain supported. Exact hit feedback uses `targetModel` or `targetUserId` from the server, while `playerUserId` still identifies the attacker.
+`CombatHUD.lua` consumes the main combat snapshot, including optional `boss={name,kind,percent,threshold,phase,role}`, `encounterKind`, `nextWaveAt`, `checkpointLabel`, and `runStats={kills,damageDealt,damageTaken,duration}`. `boss=false` hides its meter. Telegraph/EnemyImpact fields are `position`, oriented `cframe`, `shape`, `size`, `radius`, `duration`, `mechanic`, `color`, and `jumpable`; legacy directional range packets remain supported. Exact hit feedback uses `targetModel` or `targetUserId` from the server, while `playerUserId` still identifies the attacker.
 
 Main initializes the separate root-owned `ProgressionUI` module once when available. `NightfallHUD.Canvas` is named for integration. Settings and progression share a top-center utility row and independent player attributes so they do not clear each other's modal state. No client code awards currency or changes saved progression.
 ## Ready lobby and controlled traversal
 
 The initial lobby has no forced countdown. Choose a hero, review the movement/combat lesson, inspect progression/settings if needed, then press **Ready / Enter / gamepad Start**. The HUD shows how many connected players are ready. Solo starts when its one player readies; co-op starts once everyone is ready. Before the final ready, a player can cancel their ready state. The four-second chapter introduction begins only after the server starts the campaign.
 
-Between encounters, the server may enter `Traverse`. A cyan world marker and objective banner show where the living squad must rally and the current count at the destination. The next wave does not spawn until the squad reaches it. The same guidance marks the district exit during `Advance`. A faint red curtain and amber floor line display the currently unlocked forward limit during combat; these guides are non-colliding, and the server owns the actual movement bounds.
+Between encounters, the server may enter `Traverse`. A cyan world marker and objective banner show where the living squad must rally and the current count at the destination. The next wave does not spawn until the squad reaches it. The same guidance marks the district exit during `Advance`. Physical gates and server-owned rectangular bounds contain each fight. The prior exit remains open during traversal; an unexpired downed teammate outside the next area delays its rear seal so the party can return to rescue. This does not extend the revive deadline or restore stocks.
 
-Boss HUD now shows armor/exposure status and a separate poise strip. **EXPOSED — PUNISH NOW** marks a recovery opening. A server `BossStagger` cancels that enemy's outstanding floor and UI warnings, so a successfully interrupted attack is no longer presented as imminent. Guard direction updates when the player changes horizontal facing while holding guard. Downed teammates no longer force the active squad's camera to remain near a checkpoint; a downed local player frames surviving teammates.
+Boss HUD now shows armor/exposure status and a separate poise strip. **EXPOSED — PUNISH NOW** marks a recovery opening. A server `BossStagger` cancels that enemy's outstanding floor and UI warnings, so a successfully interrupted attack is no longer presented as imminent. Guard direction updates from horizontal movement intent while held. The camera remains based on the arena, including for a downed player; it does not chase surviving teammates.
 
-Additional optional state fields: `ready`, `readyCount`, `playersTotal`, `targetX`, `objective`, and `walkingMaxX`. Ready input is `Action("Ready", {ready=true/false})`. The journal uses **P / left-stick click**; settings uses **O / gamepad Back**.
+Additional optional state fields: `ready`, `readyCount`, `playersTotal`, `targetX`, `objective`, `arena={MinX,MaxX,MinZ,MaxZ}`, and walking limits on both axes. Ready input is `Action("Ready", {ready=true/false})`. The journal uses **P / left-stick click**; settings uses **O / gamepad Back**.
 ## Elite impact identity and stage sound
 
 `BossEffects.lua` responds only to server `EnemyImpact` packets, after damage resolves. Executioner cleaves leave amber shards; Siren Marshal impacts use red/blue beams and pulse fragments; Platform Widow leaves rail ribbons and spectral tickets; Last Conductor produces a short train afterimage or departure-clock flash; Furnace Hound leaves cinder claws and scorching fragments; Kiln Sovereign releases furnace columns and steam.
 
-These are original cosmetic additions. They do not replace the imported Toolbox animation/hit VFX pipeline and do not create damage. Each uses the locked packet position/size/radius. The train crosses its lane in 0.26 seconds after the instantaneous full-footprint impact flash; it is not a traveling hitbox or an extra dodge opportunity. The module caps six concurrent effects and 24 BaseParts per effect, uses one temporary render ticker, and cleans all effects in under one second. Zero effect density suppresses these ornaments while the critical telegraphs remain.
+These are original cosmetic additions. They do not replace the imported Toolbox animation/hit VFX pipeline and do not create damage. Each uses the locked packet position/cframe/size/radius. The train crosses its lane in 0.26 seconds after the instantaneous full-footprint impact flash; it is not a traveling hitbox or an extra dodge opportunity. The module caps six concurrent effects and 24 BaseParts per effect, uses one temporary render ticker, and cleans all effects in under one second. Zero effect density suppresses these ornaments while the critical telegraphs remain.
 
 `StageAudio.lua` switches looping ambience by chapter with 1.1-second envelopes: city **9112759731**, abandoned station **9112772977**, factory **9112890492**. A quiet combat score **1844978927** fades in/out over 0.7 seconds around Combat state. Master volume affects all audio; stage ambience and combat music have separate settings, and either can be muted independently. Silent channels pause, and the envelope ticker disconnects when levels settle. Permission failure does not create a per-frame play/retry loop.
 
 The supplied IDs were verified as loadable in the root's Studio edit session. The live published universe's audio permissions and final four-player mix still require verification. No anime soundtrack was added.
 ## Phone safe area
 
-Main and presentation GUIs use CoreUISafeInsets, which includes device cutouts and the Roblox top bar. Layout reads the resulting canvas size. Touch capability changes refresh the thumb pad and jump visibility. Phone combat uses compact headers and a 70-pixel health plate, a narrow boss/warning stack, and six action buttons with at least 48-pixel height. The full hero selector remains in the ready lobby; in-run hero quick-switch buttons hide on short landscape screens. Initial wave-zero intermission says ENTER THE CURTAIN / GET READY. Overlapping hazard text prioritizes the soonest impact. Physical-phone play and four-player overlap still require final validation.
+Main and presentation GUIs use CoreUISafeInsets, which includes device cutouts and the Roblox top bar. Layout reads the resulting canvas size. Touch capability changes refresh the thumb pad and jump visibility. Phone combat uses compact headers and a 70-pixel health plate, a narrow boss/warning stack, and six action buttons with at least 48-pixel height. The full hero selector remains in the ready lobby; compact safe-state hero tiles retain at least44-pixel targets even on short screens; action/rescue layouts have separate reserved rows. Initial wave-zero intermission says ENTER THE CURTAIN / GET READY. Overlapping hazard text prioritizes the soonest impact. Physical-phone play and four-player overlap still require final validation.
 
 ## Voluntary co-op stock sharing
 
 When a living player has at least two stocks and a connected ally is downed, a contextual GIVE 1 STOCK prompt identifies the ally. Press R, click the right stick (R3), or tap that prompt. The server selects/validates the target, transfers exactly one stock, preserves the donor's damage, and revives the ally with one stock, zero damage, and two seconds of protection. There is a ten-second donor cooldown. This uses no coins or purchases. The prompt disappears when unavailable and never becomes a persistent seventh combat button. R still retries on the results screen. Journal/settings suppress rescue input. This interaction requires multiplayer runtime validation.
+
+
+## Preserved side-view direction and evidence limits
+
+Before the owner's 2026-10-02 conversion, the stages used a narrow Z lane, party-following side-view camera and skirmish/miniboss/skirmish/boss order. CAMERA_REGRESSION.md and the earlier HumanBot reports describe that version; they remain historical evidence. The new arena policy/geometry, scripted locomotion and route checks are scoped in [ARENA_3D_CONVERSION](launch/ARENA_3D_CONVERSION.md). They do not certify physical keyboard/controller/touch use, camera comfort, ordinary fights or co-op rescue/retry. Any unresolved action check remains open in the linked evidence. No launch acceptance is implied by this controls reference.

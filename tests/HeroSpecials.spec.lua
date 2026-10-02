@@ -2,6 +2,7 @@
 return function(Specials)
     local Players = game:GetService("Players")
     Specials = Specials or require(Players.LocalPlayer.PlayerScripts:FindFirstChild("HeroSpecials", true))
+    local ArenaMath=require(game.ReplicatedStorage.Nightfall.Shared.ArenaMath)
     local Config = require(game.ReplicatedStorage.Nightfall.Shared.Config)
     local holder = Instance.new("Folder")
     holder.Name = "HeroSpecialsSpec"; holder.Parent = workspace
@@ -16,12 +17,13 @@ return function(Specials)
             assert(type(pose) == "table" and typeof(pose.Torso) == "CFrame", "Missing original pose " .. id)
             assert(Specials.Pose(id, attack.Windup + .6) == nil, "Pose must finish")
             results.poses += 1
-            for _, direction in ipairs({-1, 1}) do
+            for _, direction in ipairs({-1,1,Vector3.zAxis,-Vector3.zAxis,Vector3.new(1,0,1).Unit}) do
                 assert(api.Emit(center, id, direction), "Effect refused")
                 task.wait(attack.Windup + .05)
                 local effect = holder:FindFirstChild(id .. "Special")
                 assert(effect, "Missing effect " .. id)
                 local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
+                local basis=ArenaMath.BoxFrame(center,direction)
                 local edges = 0
                 for _, p in ipairs(effect:GetChildren()) do
                     if p:IsA("BasePart") then
@@ -29,8 +31,9 @@ return function(Specials)
                         results.cosmeticParts += 1
                         if p.Name == "CoverageEdge" then
                             edges += 1
-                            for _, side in ipairs({-1, 1}) do
+                            for _, side in ipairs({-1,1}) do
                                 local endpoint = p.Position + p.CFrame.LookVector * p.Size.Z * .5 * side
+                                endpoint=basis:PointToObjectSpace(endpoint)
                                 minX = math.min(minX, endpoint.X); maxX = math.max(maxX, endpoint.X)
                                 minZ = math.min(minZ, endpoint.Z); maxZ = math.max(maxZ, endpoint.Z)
                             end
@@ -38,9 +41,9 @@ return function(Specials)
                     end
                 end
                 assert(edges == 4, "Missing configured coverage edges")
-                assert(math.abs(minX - (center.X + math.min(0, direction * attack.Range))) < .02, "Rear X mismatch")
-                assert(math.abs(maxX - (center.X + math.max(0, direction * attack.Range))) < .02, "Forward X mismatch")
-                assert(math.abs(minZ + attack.Width / 2) < .02 and math.abs(maxZ - attack.Width / 2) < .02, "Lane width mismatch")
+                assert(math.abs(minX)<.02,"Rear local-X mismatch")
+                assert(math.abs(maxX-attack.Range)<.02,"Forward local-X mismatch")
+                assert(math.abs(minZ + attack.Width / 2) < .02 and math.abs(maxZ - attack.Width / 2) < .02, "Oriented lateral width mismatch")
                 results.coverageCases += 1
                 task.wait(.8)
                 assert(#holder:GetChildren() == 0, "Effect did not expire")

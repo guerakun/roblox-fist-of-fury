@@ -49,8 +49,8 @@ return function()
     context.partyPositions[1] = Vector3.new(150, 3, 10)
     assert(marks.Volumes[1].position == stored, "telegraphs do not retarget after lock")
     for _, stage in ipairs(Config.Stages) do
-        assert(#stage.Waves == 4 and stage.Waves[2].Kind == "Miniboss" and stage.Waves[4].Kind == "Boss", "district structure")
-        for kind in pairs(stage.Waves[2].Enemies) do assert(Config.Enemies[kind].Role == "Miniboss", "miniboss role") end
+        assert(#stage.Waves == 4 and stage.Waves[2].Kind == "Wave" and stage.Waves[3].Kind == "Miniboss" and stage.Waves[4].Kind == "Boss", "district structure")
+        for kind in pairs(stage.Waves[3].Enemies) do assert(Config.Enemies[kind].Role == "Miniboss", "miniboss role") end
         for kind in pairs(stage.Waves[4].Enemies) do assert(Config.Enemies[kind].Role == "Boss", "boss role") end
     end
     return "PASS: six elite rigs, " .. moveCount .. " pattern entries, punish windows, lane gaps, jumping, mark deduplication, locked targeting and district structure"

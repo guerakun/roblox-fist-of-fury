@@ -25,6 +25,9 @@ local COLORS = {
     red = Color3.fromRGB(255, 92, 112), green = Color3.fromRGB(88, 224, 167),
 }
 local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
+local CameraBounds = require(package.Shared:WaitForChild("CameraBounds"))
+local ArenaView = require(script.Parent:WaitForChild("ArenaView"))
+local CombatVisualGeometry = require(script.Parent:WaitForChild("CombatVisualGeometry"))
 local HeroSpecials = require(script.Parent:WaitForChild("HeroSpecials"))
 local EnemyPresentation = require(script.Parent:WaitForChild("EnemyPresentation"))
 local FocusGuard = require(script.Parent:WaitForChild("FocusGuard"))
@@ -40,7 +43,9 @@ for _, id in ipairs(HEROES) do
 end
 local snapshot: any = {hero = "Gale", percent = 0, stocks = 3, stage = 1, wave = 0,
     waves = 3, enemiesRemaining = 0, status = "Waiting", cooldowns = {}}
-local facing = 1
+local facing = Vector3.xAxis
+local lastGuardFacingAt = 0
+local lastGuardFacing = Vector3.xAxis
 local humanoid: Humanoid? = nil
 local root: BasePart? = nil
 local cameraKick = 0
@@ -190,7 +195,7 @@ for index, action in ipairs(abilityNames) do
     text.TextXAlignment = Enum.TextXAlignment.Center
     abilityLabels[action] = text; abilityButtons[action] = button; abilityKeyLabels[action] = key
 end
-local moveLabel = label(canvas, "A D  MOVE    W S  DEPTH    SPACE  JUMP / DOUBLE JUMP", 10, COLORS.muted,
+local moveLabel = label(canvas, "W A S D  MOVE    SPACE  JUMP / RECOVERY", 10, COLORS.muted,
     UDim2.new(1, -490, 1, -126), UDim2.fromOffset(468, 20))
 moveLabel.TextXAlignment = Enum.TextXAlignment.Right
 local moveName = label(canvas, HERO_MOVES[HEROES[1]], 12, COLORS.cyan, UDim2.new(1, -490, 1, -149), UDim2.fromOffset(468, 20))
@@ -245,7 +250,7 @@ local function inputLabels()
     for index, action in ipairs(abilityNames) do
         abilityKeyLabels[action].Text = captions[index]
     end
-    moveLabel.Text = controller and "LEFT STICK  MOVE / DEPTH    A  JUMP    D-PAD  HERO" or "A D  MOVE    W S  DEPTH    SPACE  JUMP / RECOVERY"
+    moveLabel.Text = controller and "LEFT STICK  MOVE    A  JUMP    D-PAD  HERO" or "W A S D  MOVE    SPACE  JUMP / RECOVERY"
     retry.Text = controller and "PLAY AGAIN / START" or touch and "PLAY AGAIN" or "PLAY AGAIN / R"
 end
 inputLabels()
@@ -397,7 +402,7 @@ local function characterReady(character: Model)
 end
 player.CharacterAdded:Connect(characterReady)
 if player.Character then task.spawn(characterReady, player.Character) end
--- Disable the default controller so movement cannot escape the authored side-view orientation.
+-- Disable the default controller so movement cannot escape the authored arena control axes.
 task.spawn(function()
     local module = player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule", 15)
     if module and module:IsA("ModuleScript") then
@@ -442,8 +447,8 @@ local function animate(action: string)
     local duration = action == "Heavy" and 0.32 or 0.21
     for joint, neutral in pairs(shoulderDefaults) do
         if joint.Parent then
-            local rotation = CFrame.Angles(math.rad(action == "Block" and -72 or -105), 0, math.rad(facing * 16))
-            if joint.Name == "Waist" then rotation = CFrame.Angles(0, math.rad(facing * -20), 0) end
+            local rotation = CFrame.Angles(math.rad(action == "Block" and -72 or -105), 0, math.rad(16))
+            if joint.Name == "Waist" then rotation = CFrame.Angles(0, math.rad(-20), 0) end
             TweenService:Create(joint, TweenInfo.new(0.07), {C0 = neutral * rotation}):Play()
         end
     end
@@ -471,7 +476,7 @@ local function send(action: string, held: boolean?)
         end
         return
     end
-    if action == "Block" then localBlocking = held == true end
+    if action == "Block" then localBlocking = held == true; if held then lastGuardFacing = facing end end
     actionRemote:FireServer(action, {direction = facing, held = held})
     if action == "Light" or action == "Heavy" or action == "Special" or action == "Dash" or (action == "Block" and held) then
         local now = os.clock()
@@ -584,7 +589,7 @@ local function particlePart(position: Vector3, color: Color3, size: Vector3): Ba
         CastShadow = false, Material = Enum.Material.Neon, Color = color, Size = size,
         Position = position, Transparency = 0.1}, effectsFolder)
 end
-local function burst(position: Vector3, color: Color3, heavy: boolean, direction: number)
+local function burst(position: Vector3, color: Color3, heavy: boolean, direction: any)
     if preferences.effects <= 0 or activeEffects >= 24 then return end
     activeEffects += 1
     task.delay(0.65, function() activeEffects -= 1 end)
@@ -598,7 +603,7 @@ local function burst(position: Vector3, color: Color3, heavy: boolean, direction
     local sparkCount = math.max(2, math.floor((heavy and 9 or 5) * preferences.effects))
     for index = 1, sparkCount do
         local angle = index * math.pi * 2 / sparkCount
-        local offset = Vector3.new(math.cos(angle) * 4 * direction, math.sin(angle) * 3, math.sin(angle * 2) * 1.3)
+        local offset = CombatVisualGeometry.Point(Vector3.zero, direction, math.cos(angle)*4, math.sin(angle)*3, math.sin(angle*2)*1.3)
         local streak = particlePart(position, color, Vector3.new(0.16, 0.16, heavy and 2 or 1))
         streak.CFrame = CFrame.lookAt(position, position + offset)
         TweenService:Create(streak, TweenInfo.new(0.23), {Position = position + offset, Transparency = 1}):Play()
@@ -610,7 +615,7 @@ local heroSpecials = HeroSpecials.new(effectsFolder, preferences, function(posit
     combatSound("Attack", position)
     if root and (root.Position - position).Magnitude < 65 then cameraKick = math.max(cameraKick, .68) end
 end)
-local function startSpecial(position: Vector3, hero: string, direction: number, userId: number?): boolean
+local function startSpecial(position: Vector3, hero: string, direction: any, userId: number?): boolean
     return heroSpecials.Emit(position, hero, direction, userId)
 end
 local function importedEffect(kind: string, position: Vector3): boolean
@@ -657,17 +662,14 @@ local function hazardFootprint(event: any, impact: boolean)
     local radius = math.clamp(tonumber(event.radius) or 6, 1, 60)
     local color = typeof(event.color) == "Color3" and event.color or (event.jumpable and COLORS.cyan or COLORS.red)
     if preferences.highContrast then color = event.jumpable and Color3.fromRGB(185, 255, 253) or COLORS.orange end
-    local position = event.position
-    local size: Vector3
-    if event.shape == "Circle" then size = Vector3.new(0.07, radius * 2, radius * 2)
-    elseif typeof(event.size) == "Vector3" then size = Vector3.new(math.max(0.1, event.size.X), 0.07, math.max(0.1, event.size.Z))
-    else
-        position += Vector3.new(event.heavy and 0 or (event.direction or 1) * radius * 0.5, 0, 0)
-        size = Vector3.new(event.heavy and radius * 2 or radius, 0.07, event.heavy and 25 or 7)
-    end
-    local floorPosition = Vector3.new(position.X, 0.17, position.Z)
+    local frame,size,radiusShape = CombatVisualGeometry.Footprint(event)
+    local floorPosition = Vector3.new(frame.Position.X, .17, frame.Position.Z)
     local warningPart = particlePart(floorPosition, color, size)
-    if event.shape == "Circle" then warningPart.Shape = Enum.PartType.Cylinder; warningPart.CFrame = CFrame.new(floorPosition) * CFrame.Angles(0, 0, math.pi / 2) end
+    if radiusShape then
+        warningPart.Size=Vector3.new(.07,radiusShape*2,radiusShape*2)
+        warningPart.Shape=Enum.PartType.Cylinder
+        warningPart.CFrame=CFrame.new(floorPosition)*CFrame.Angles(0,0,math.pi/2)
+    else warningPart.CFrame=CFrame.new(floorPosition)*(frame-frame.Position) end
     warningPart.Transparency = impact and 0.18 or 0.76
     if not impact and typeof(event.targetModel) == "Instance" and event.targetModel:IsA("Model") then hazardOwners[warningPart] = event.targetModel end
     if not impact then
@@ -798,7 +800,7 @@ fxRemote.OnClientEvent:Connect(function(event: any)
     if typeof(event.position) ~= "Vector3" then return end
     local position = event.position
     local distinctSpecial = kind == "Attack" and event.action == "Special"
-    if distinctSpecial then distinctSpecial = startSpecial(position, event.hero, tonumber(event.direction) or 1, event.playerUserId) end
+    if distinctSpecial then distinctSpecial = startSpecial(position, event.hero, event.direction or Vector3.xAxis, event.playerUserId) end
     if not distinctSpecial and (kind == "Hit" or kind == "Attack" or kind == "Dash") then combatSound(kind, position) end
     local color = HERO_COLORS[event.hero] or (event.enemy and COLORS.red or COLORS.cyan)
     if kind == "BossPhase" then
@@ -851,7 +853,7 @@ fxRemote.OnClientEvent:Connect(function(event: any)
     end
     local heavy = event.heavy == true or event.action == "Heavy" or event.action == "Special" or kind == "KO"
     if kind == "Hit" or kind == "KO" or kind == "Attack" or kind == "Special" or kind == "Dash" or kind == "Recovery" then
-        if not distinctSpecial and not importedEffect(kind, position) then burst(position, color, heavy, tonumber(event.direction) or 1) end
+        if not distinctSpecial and not importedEffect(kind, position) then burst(position, color, heavy, event.direction or Vector3.xAxis) end
         if not distinctSpecial and root and (root.Position - position).Magnitude < 65 then cameraKick = math.max(cameraKick, heavy and 0.75 or 0.24) end
     end
     if kind == "Hit" and type(event.damage) == "number" and activeEffects < 24 then damageNumber(position, event.damage, heavy) end
@@ -993,31 +995,35 @@ local function sampleToolbox(dt: number)
     end
 end
 RunService.PreSimulation:Connect(sampleToolbox)
--- Input is resolved after PlayerModule input, before physics/camera presentation.
--- This callback never writes character CFrame or camera state.
+local function activeArena()
+    if type(snapshot.arena)=="table"then return snapshot.arena end
+    local stage=Config.Stages[math.clamp(snapshot.stage or 1,1,#Config.Stages)]
+    local wave=stage.Waves[math.clamp(snapshot.wave or 1,1,#stage.Waves)]
+    return wave.Bounds
+end
+-- Input is resolved before physics; engine AutoRotate owns ordinary locomotion yaw.
+-- No local character CFrame or camera writes occur here.
 RunService:BindToRenderStep("NightfallMovement", Enum.RenderPriority.Input.Value + 1, function()
     if humanoid and root and humanoid.Health > 0 then
-        local keyboard = Vector2.new((heldKeys[Enum.KeyCode.D] and 1 or 0) - (heldKeys[Enum.KeyCode.A] and 1 or 0),
-            (heldKeys[Enum.KeyCode.S] and 1 or 0) - (heldKeys[Enum.KeyCode.W] and 1 or 0))
-        local movement = keyboard + (gamepadMove.Magnitude > 0.15 and gamepadMove or Vector2.zero) + touchMove
-        if movement.Magnitude > 1 then movement = movement.Unit end
-        if UserInputService:GetFocusedTextBox() or ending.Visible or player:GetAttribute("MenuOpen") or player:GetAttribute("SettingsOpen") then movement = Vector2.zero end
-        if math.abs(movement.X) > 0.1 then
-            local nextFacing = movement.X > 0 and 1 or -1
-            if nextFacing ~= facing and localBlocking then actionRemote:FireServer("Block", {held = true, direction = nextFacing}) end
-            facing = nextFacing
+        local keyboard=Vector2.new((heldKeys[Enum.KeyCode.D]and 1 or 0)-(heldKeys[Enum.KeyCode.A]and 1 or 0),
+            (heldKeys[Enum.KeyCode.S]and 1 or 0)-(heldKeys[Enum.KeyCode.W]and 1 or 0))
+        local movement=keyboard+(gamepadMove.Magnitude>.15 and gamepadMove or Vector2.zero)+touchMove
+        if UserInputService:GetFocusedTextBox()or ending.Visible or player:GetAttribute("MenuOpen")or player:GetAttribute("SettingsOpen")then movement=Vector2.zero end
+        local arena=activeArena()
+        local bounds={MinX=snapshot.walkingMinX or arena.MinX+2,MaxX=snapshot.walkingMaxX or arena.MaxX-2,
+            MinZ=snapshot.walkingMinZ or arena.MinZ+2,MaxZ=snapshot.walkingMaxZ or arena.MaxZ-2}
+        local worldMove,nextFacing=ArenaView.Movement(movement,root.Position,bounds,facing)
+        local now=os.clock()
+        if localBlocking and nextFacing:Dot(lastGuardFacing)<.995 and now-lastGuardFacingAt>=.1 then
+            actionRemote:FireServer("Block",{held=true,direction=nextFacing});lastGuardFacingAt=now;lastGuardFacing=nextFacing
         end
-        -- Stop walking into the server's hard bounds before prediction/correction can oscillate.
-        -- Only outward input is filtered. Launch velocity and all root transforms remain untouched.
-        local stageMin = ((snapshot.stage or 1) - 1) * 180
-        local forwardLimit = type(snapshot.walkingMaxX) == "number" and snapshot.walkingMaxX or stageMin + 176
-        local x, z = movement.X, movement.Y
-        local position = root.Position
-        if (x < 0 and position.X <= stageMin + 4.4) or (x > 0 and position.X >= forwardLimit - .4) then x = 0 end
-        if (z < 0 and position.Z <= -13.6) or (z > 0 and position.Z >= 13.6) then z = 0 end
-        humanoid:Move(Vector3.new(x, 0, z * 0.7), false)
+        facing=nextFacing
+        humanoid:Move(worldMove,false)
     end
 end)
+local cachedArenaKey=nil
+local cachedCameraTarget=nil
+local cachedCameraDistance=nil
 -- Single camera owner: a fixed viewing angle translated with one smoothed center.
 RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.Value + 1, function(dt)
     local camera = workspace.CurrentCamera
@@ -1033,45 +1039,23 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
             for _, enemy in ipairs(enemiesFolder:GetChildren()) do if enemy:IsA("Model") then registerActor(enemy) end end
         end
     end
-    -- Camera subjects are sampled every render, never on the 10 Hz HUD/discovery timer.
-    local localX = root and root.Position.X or 60
-    if snapshot.downed then
-        for _, teammate in ipairs(Players:GetPlayers()) do
-            local character = teammate.Character
-            local teammateRoot = character and character:FindFirstChild("HumanoidRootPart")
-            if teammateRoot and teammateRoot:IsA("BasePart") and not character:GetAttribute("Downed") then localX = teammateRoot.Position.X; break end
-        end
+    -- Actor movement never changes this target: only area transitions and viewport changes do.
+    local arena=activeArena()
+    local aspect=camera.ViewportSize.X/math.max(1,camera.ViewportSize.Y)
+    local key=string.format("%.4f:%.4f:%.4f:%.4f:%.6f",arena.MinX,arena.MaxX,arena.MinZ,arena.MaxZ,aspect)
+    if key~=cachedArenaKey then
+        cachedArenaKey=key
+        cachedCameraTarget,cachedCameraDistance=CameraBounds.Arena(arena,aspect)
     end
-    local minX, maxX = localX, localX
-    for _, teammate in ipairs(Players:GetPlayers()) do
-        local character = teammate.Character
-        local teammateRoot = character and character:FindFirstChild("HumanoidRootPart")
-        local teammateHumanoid = character and character:FindFirstChildOfClass("Humanoid")
-        if teammateRoot and teammateRoot:IsA("BasePart") and teammateHumanoid and teammateHumanoid.Health > 0 and not character:GetAttribute("Downed")
-            and math.abs(teammateRoot.Position.X - localX) < 170 then
-            minX = math.min(minX, teammateRoot.Position.X); maxX = math.max(maxX, teammateRoot.Position.X)
-        end
-    end
-    local stageStart = ((snapshot.stage or 1) - 1) * 180
-    local midpoint = math.clamp((minX + maxX) / 2, stageStart + 38, stageStart + 142)
-    cameraTarget = Vector3.new(midpoint, 5, 0)
-    local aspect = camera.ViewportSize.X / math.max(1, camera.ViewportSize.Y)
-    local desiredDistance = math.clamp((maxX - minX + 54) / (2 * math.tan(math.rad(22)) * aspect), 52, 140)
-    camera.CameraType = Enum.CameraType.Scriptable; camera.FieldOfView = 44
-    local alpha = 1 - math.exp(-6 * math.max(0, dt))
-    if cameraCenter then
-        cameraCenter = cameraCenter:Lerp(cameraTarget, alpha)
-        cameraDistance += (desiredDistance - cameraDistance) * alpha
-    else
-        cameraCenter = cameraTarget; cameraDistance = desiredDistance
-    end
+    cameraTarget=cachedCameraTarget
+    camera.CameraType=Enum.CameraType.Scriptable;camera.FieldOfView=CameraBounds.Fov
+    cameraCenter,cameraDistance=ArenaView.CameraStep(cameraCenter,cameraDistance,cameraTarget,cachedCameraDistance,dt)
     cameraKick = math.max(0, cameraKick - dt * 3)
     local now = os.clock()
     local shake = Vector3.new(math.noise(now * 28, 0), math.noise(0, now * 28), 0) * cameraKick * preferences.shake
     local focus = cameraCenter + shake
-    local eye = focus + Vector3.new(0, cameraDistance * 0.37, cameraDistance)
-    -- Eye and focus share the same smoothed center: movement cannot introduce yaw snaps.
-    camera.CFrame = CFrame.lookAt(eye, focus)
+    -- Shared fixed yaw/pitch with the server fairness envelope.
+    camera.CFrame = CameraBounds.Frame(focus,cameraDistance)
     camera.Focus = CFrame.new(focus)
     desperationHUD.Render(desperationTouchMode())
     renderAccum += dt

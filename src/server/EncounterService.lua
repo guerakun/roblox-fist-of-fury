@@ -33,18 +33,21 @@ local function fx(kind, stage, fields)
     packet.kind, packet.position = kind, Vector3.new(stage.CenterX, 4, 0)
     ReplicatedStorage.Nightfall.Remotes.FX:FireAllClients(packet)
 end
-local function setGate(index, opened)
-    local city = workspace:FindFirstChild("NightfallCity")
-    local gates = city and city:FindFirstChild("Gates")
-    local gate = gates and gates:FindFirstChild("Gate" .. index)
-    if gate then
-        gate.CanCollide = false -- Server bounds stop walking; launches can still ring out.
-        gate.Transparency = opened and 1 or .65
-        gate:SetAttribute("Opened", opened)
+local function setGate(stageNumber,areaNumber,opened)
+    local city=workspace:FindFirstChild("NightfallCity")
+    local gates=city and city:FindFirstChild("Gates")
+    local gate=gates and gates:FindFirstChild("Stage"..stageNumber.."_Area"..areaNumber)
+    if gate and gate:IsA("BasePart")then
+        gate.CanCollide=not opened
+        gate.Transparency=opened and 1 or .82
+        gate:SetAttribute("Opened",opened)
     end
 end
-local function checkpointFor(stage, wave)
-    return Vector3.new(wave >= 3 and stage.MinX + 92 or stage.SpawnX, 4, 0), wave >= 3 and "MINIBOSS CLEARED / MID-DISTRICT" or "DISTRICT ENTRANCE"
+local function lockAreas()
+    for s,stage in ipairs(Config.Stages)do for w in ipairs(stage.Waves)do setGate(s,w,false)end end
+end
+local function checkpointFor(stage,wave)
+    return stage.Waves[wave].Checkpoint,wave>1 and "AREA "..wave.." / CHECKPOINT"or "DISTRICT ENTRANCE"
 end
 local function defeat()
     setState({status = "Defeat", resultReason = "The party exhausted its stocks. Retry from the last checkpoint.", nextWaveAt = 0})
@@ -76,9 +79,10 @@ local function awardClear(stageNumber, waveNumber, kind)
     Progression.AwardEncounterClear(participants, stageNumber, kind, campaignId .. ":" .. stageNumber .. ":" .. waveNumber)
 end
 local function waitForTraverse(stage, wave, token)
-    local targetX = math.max(stage.SpawnX, wave.SpawnX - 25)
+    local targetX = wave.EntryX
     setState({status = "Traverse", targetX = targetX, objective = "MOVE RIGHT / RALLY FOR " .. wave.Title, nextWaveAt = 0})
     local emptySince
+    local rescueWaiting=false
     while token == generation do
         local alive = combat.GetAlivePlayers()
         local ready = #alive > 0
@@ -86,7 +90,15 @@ local function waitForTraverse(stage, wave, token)
             local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if not r or r.Position.X < targetX then ready = false break end
         end
-        if ready then return true end
+        local canSeal= combat.CanSealArea(wave.Bounds)
+        if not canSeal and not rescueWaiting then
+            rescueWaiting=true
+            setState({objective="RESCUE ALLY / GATE WAITS FOR REVIVE WINDOW"})
+        elseif canSeal and rescueWaiting then
+            rescueWaiting=false
+            setState({objective="MOVE RIGHT / RALLY FOR "..wave.Title})
+        end
+        if ready and canSeal then return true end
         if #alive == 0 then
             emptySince = emptySince or os.clock()
             if os.clock() - emptySince > 3.5 then defeat() return false end
@@ -123,10 +135,10 @@ local function run(startStage, startWave, token,startingMode)
         checkpointStage, checkpointWave = stageNumber, firstWave
         combat.ClearEnemies()
         combat.SetArena(stage, stageNumber)
-        combat.SetWalkingLimit(stage.Waves[firstWave].SpawnX + 30)
+        combat.SetArea(stage.Waves[firstWave])
         local checkpoint, label = checkpointFor(stage, firstWave)
         combat.SetCheckpoint(checkpoint, label)
-        for gateIndex = 1, #Config.Stages do setGate(gateIndex, gateIndex < stageNumber) end
+        lockAreas()
         setState({status = "Intermission", wave = firstWave - 1, waves = #stage.Waves, enemiesRemaining = 0,
             waveTitle = stage.Name, encounterKind = "Wave", targetX = 0, objective = "PREPARE / NEXT ENCOUNTER", nextWaveAt = workspace:GetServerTimeNow() + 4, resultReason = ""})
         if stageNumber==startStage and startingMode=="Campaign"then combat.ResetPlayers(checkpoint)
@@ -137,7 +149,14 @@ local function run(startStage, startWave, token,startingMode)
         for waveNumber = firstWave, #stage.Waves do
             if token ~= generation then return end
             local wave = stage.Waves[waveNumber]
-            combat.SetWalkingLimit(wave.SpawnX + 30)
+            combat.SetArea(wave)
+            combat.SetCheckpoint(wave.Checkpoint,"AREA "..waveNumber.." / ACTIVE ARENA")
+            if waveNumber>1 then setGate(stageNumber,waveNumber-1,false)end
+            setGate(stageNumber,waveNumber,false)
+            setState({status="Intermission",wave=waveNumber,waveTitle=wave.Title,encounterKind=wave.Kind,
+                targetX=wave.EntryX,objective="PREPARE / AREA "..waveNumber,nextWaveAt=workspace:GetServerTimeNow()+.9})
+            -- Empty entry interval lets the shared fixed camera settle before any windup.
+            if not waitCancelable(.9,token)then return end
             combat.BeginEncounter()
             -- Scale once per wave. Late joiners never heal an in-progress boss.
             local partySize = math.clamp(combat.GetPlayerCount(), 1, Config.MaxPlayers)
@@ -158,23 +177,24 @@ local function run(startStage, startWave, token,startingMode)
             fx("Wave", stage, {title = wave.Title, role = wave.Kind})
             if not waitForWave(token,pulses,spawnPulse,wave.Pulse) then return end
             awardClear(stageNumber, waveNumber, wave.Kind)
+            setGate(stageNumber,waveNumber,true)
             if wave.Kind == "Miniboss" and combat.GetRunRules().midCheckpoint then
                 checkpointStage, checkpointWave = stageNumber, waveNumber + 1
-                local midPosition, midLabel = checkpointFor(stage, waveNumber + 1)
-                combat.SetCheckpoint(midPosition, midLabel)
-                fx("Checkpoint", stage, {title = "MID-DISTRICT CHECKPOINT", subtitle = "Your next stock returns here."})
+                -- Retry begins at the next area; current-area stock respawn stays behind its gate.
+                fx("Checkpoint", stage, {title = "MID-DISTRICT CHECKPOINT", subtitle = "A party defeat now retries from the final arena."})
             end
             if waveNumber < #stage.Waves then
                 local pause = wave.Kind == "Miniboss" and 5 or 4
                 setState({status = "Intermission", enemiesRemaining = 0, nextWaveAt = workspace:GetServerTimeNow() + pause})
                 if not waitCancelable(pause, token) then return end
+                combat.SetArea(stage.Waves[waveNumber+1],wave.Bounds)
                 if not waitForTraverse(stage, stage.Waves[waveNumber + 1], token) then return end
             end
         end
         local results=combat.FinalizeDistrict(campaignId,stageNumber)
         for player,result in pairs(results)do Progression.AwardDistrict(player,result)end
         combat.CompleteDistrict(campaignId,stageNumber)
-        setGate(stageNumber, true)
+        setGate(stageNumber,4,true)
         fx("StageClear", stage, {title = stage.Name})
         if stageNumber < #Config.Stages then
             if not waitForRally(stage, token) then return end
@@ -214,7 +234,7 @@ function Encounter.Init(combatService)
                 generation += 1
                 active, campaignId = false, ""
                 combat.ResetLobby()
-                for gateIndex = 1, #Config.Stages do setGate(gateIndex, false) end
+                lockAreas()
                 checkpointStage, checkpointWave = 1, 1
                 combat.ClearEnemies()
                 setState({status = "Waiting", wave = 0, enemiesRemaining = 0, nextWaveAt = 0})

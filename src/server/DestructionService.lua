@@ -2,6 +2,7 @@
 -- Road, buildings, rails and encounter gates are never candidates.
 local CollectionService = game:GetService("CollectionService")
 local TweenService = game:GetService("TweenService")
+local ArenaMath = require(game.ReplicatedStorage.Nightfall.Shared.ArenaMath)
 local Destruction = {}
 local MAX_DEBRIS = 30
 local RESTORE_SECONDS = 20
@@ -53,7 +54,7 @@ local function spawnDebris(source, direction)
 	piece.CastShadow = false
 	piece.Parent = debrisFolder
 	piece:SetNetworkOwner(nil)
-	piece.AssemblyLinearVelocity = Vector3.new(direction * random:NextNumber(14, 28), random:NextNumber(14, 23), random:NextNumber(-9, 9))
+	piece.AssemblyLinearVelocity = direction * random:NextNumber(14, 28) + Vector3.yAxis * random:NextNumber(14, 23) + ArenaMath.Right(direction) * random:NextNumber(-9, 9)
 	piece.AssemblyAngularVelocity = Vector3.new(random:NextNumber(-8, 8), random:NextNumber(-8, 8), random:NextNumber(-8, 8))
 	liveDebris[piece] = true
 	debrisCount += 1
@@ -119,7 +120,7 @@ function Destruction.BreakNearby(position, radius, direction)
 	if not city then return 0 end
 	Destruction.Init()
 	radius = math.clamp(radius, 0, 24)
-	local heading = type(direction) == "number" and direction < 0 and -1 or 1
+	local heading = ArenaMath.NormalizeDirection(direction)
 	local count = 0
 	for _, assembly in ipairs(CollectionService:GetTagged("Destructible")) do
 		if assembly:IsA("Model") and assembly.PrimaryPart and assembly:IsDescendantOf(city) and not assembly:GetAttribute("Broken") and distanceToAssembly(assembly, position) <= radius then

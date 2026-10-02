@@ -7,7 +7,7 @@ return function()
  assert(#config.Stages==3,'three districts')
  assert(mathModule.Knockback(100,config.Attacks.Heavy,1)>mathModule.Knockback(0,config.Attacks.Heavy,1),'percent scales launch')
  assert(mathModule.Knockback(100,config.Attacks.Heavy,2)<mathModule.Knockback(100,config.Attacks.Heavy,1),'weight resists launch')
- assert(mathModule.Direction(0/0,-1)==-1,'NaN direction fallback')
+ assert(mathModule.Direction(0/0,-1)==-Vector3.xAxis,'NaN direction fallback')
  assert(mathModule.InBlastZone(Vector3.new(-25,3,0),config.Stages[1],24),'left blast boundary')
  assert(not mathModule.InBlastZone(Vector3.new(90,3,0),config.Stages[1],24),'arena center safe')
  for _,name in {'Light','Heavy','Walk','Idle','Block','Dash'} do assert(samples[name] and #samples[name].frames>1,'missing Toolbox '..name) end

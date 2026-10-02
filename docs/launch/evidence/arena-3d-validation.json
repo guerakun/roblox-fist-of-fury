@@ -1,0 +1,366 @@
+{
+  "date": "2026-10-02",
+  "workOrder": "WO-3D.1",
+  "scope": "Controlled 3D conversion; prototype engineering validation, not launch acceptance",
+  "sourceCommit": "Recorded in subsequent arena-3d-build.json",
+  "tests": {
+    "arenaCameraResult": {
+      "scope": "Shared geometry and12arenaConfig; actual client rendering separate",
+      "passed": true,
+      "checks": 2113
+    },
+    "arenaVisualResult": {
+      "renderedVerified": false,
+      "passed": true,
+      "checks": 42
+    },
+    "arenaGeometryResult": {
+      "view": {
+        "cameraRuntimeVerified": false,
+        "physicalInputVerified": false,
+        "passed": true,
+        "checks": 64
+      },
+      "world": {
+        "dressedParts": 12,
+        "gates": 12,
+        "buildVersion": "Arena3D-1-TwelveAreas",
+        "entryMarkers": 48,
+        "destructibles": 34,
+        "passed": true,
+        "scope": "Actual built geometry only; gate transitions, player movement, attack fairness and visual readability require separate play tests"
+      }
+    },
+    "arenaTraversalPolicyResult": {
+      "compileErrors": [],
+      "policy": {
+        "scope": "Pure downed gate lifecycle; physical co-op unverified",
+        "passed": true,
+        "assertions": 10
+      }
+    },
+    "arenaProgressionLatest": {
+      "scriptedEnemyClear": true,
+      "traversals": 9,
+      "areas": [
+        {
+          "role": "Wave",
+          "stage": 1,
+          "area": 1
+        },
+        {
+          "role": "Wave",
+          "stage": 1,
+          "area": 2
+        },
+        {
+          "role": "Miniboss",
+          "stage": 1,
+          "area": 3
+        },
+        {
+          "role": "Boss",
+          "stage": 1,
+          "area": 4
+        },
+        {
+          "role": "Wave",
+          "stage": 2,
+          "area": 1
+        },
+        {
+          "role": "Wave",
+          "stage": 2,
+          "area": 2
+        },
+        {
+          "role": "Miniboss",
+          "stage": 2,
+          "area": 3
+        },
+        {
+          "role": "Boss",
+          "stage": 2,
+          "area": 4
+        },
+        {
+          "role": "Wave",
+          "stage": 3,
+          "area": 1
+        },
+        {
+          "role": "Wave",
+          "stage": 3,
+          "area": 2
+        },
+        {
+          "role": "Miniboss",
+          "stage": 3,
+          "area": 3
+        },
+        {
+          "role": "Boss",
+          "stage": 3,
+          "area": 4
+        }
+      ],
+      "seconds": 75.7316183000803,
+      "passed": true,
+      "stageTransfers": 2
+    },
+    "arenaLocomotionResult": {
+      "boundaryX": 46,
+      "frames": 280,
+      "scriptedInput": true,
+      "maxCameraTranslation": 0,
+      "cases": [
+        {
+          "direction": "south",
+          "travel": 8.390507698059082,
+          "vertical": 0
+        },
+        {
+          "direction": "east",
+          "travel": 8.390501022338867,
+          "vertical": 0
+        },
+        {
+          "direction": "north",
+          "travel": 8.39050579071045,
+          "vertical": 0
+        },
+        {
+          "direction": "west",
+          "travel": 8.390509605407715,
+          "vertical": 0
+        }
+      ],
+      "hardwareInputVerified": false,
+      "passed": true,
+      "minCameraLookDot": 1
+    },
+    "arenaSpecialResult": {
+      "coverageCases": 15,
+      "cleanup": true,
+      "cap": true,
+      "cosmeticParts": 315,
+      "poses": 3
+    },
+    "arenaEffectsResult": {
+      "effects": {
+        "ok": true,
+        "result": {
+          "physicalInputVerified": false,
+          "cleanup": true,
+          "passed": true,
+          "orientedCases": 1
+        }
+      }
+    },
+    "combatGeometry": {
+      "passed": true,
+      "assertions": 874,
+      "headings": 5,
+      "scope": "ArenaCombatAI exact source pure policy/geometry"
+    },
+    "regressions": {
+      "StudioSmoke": "PASS",
+      "EnemyMoves": "PASS;6elite rigs/38pattern entries"
+    },
+    "finalPolicies": {
+      "combat": {
+        "scope": "Pure geometry and area metadata; physical gates/client actions unverified",
+        "assertions": 874,
+        "passed": true,
+        "directions": 5
+      },
+      "dash": {
+        "scope": "Actuator axes, speed and cleanup; real motion separate",
+        "passed": true,
+        "assertions": 20
+      }
+    },
+    "actualActions": {
+      "scriptedInput": true,
+      "dashCooldownAfter": 1790967668.244527,
+      "passed": true,
+      "dashCooldownBefore": 0,
+      "hardwareInputVerified": false,
+      "dashDelta": [
+        0,
+        -1,
+        21.61759376525879
+      ],
+      "cases": [
+        {
+          "frontDamage": 8,
+          "direction": [
+            1,
+            0,
+            0
+          ],
+          "sideDamage": 0,
+          "rearDamage": 0
+        },
+        {
+          "frontDamage": 8,
+          "direction": [
+            -1,
+            0,
+            0
+          ],
+          "sideDamage": 0,
+          "rearDamage": 0
+        },
+        {
+          "frontDamage": 12,
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "sideDamage": 0,
+          "rearDamage": 0
+        },
+        {
+          "frontDamage": 8,
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "sideDamage": 0,
+          "rearDamage": 0
+        },
+        {
+          "frontDamage": 8,
+          "direction": [
+            0.7071067690849304,
+            0,
+            0.7071067690849304
+          ],
+          "sideDamage": 0,
+          "rearDamage": 0
+        }
+      ],
+      "dashSamples": [
+        {
+          "vz": 0,
+          "z": 0
+        },
+        {
+          "vz": 0,
+          "z": 0
+        },
+        {
+          "vz": 0,
+          "z": 0
+        },
+        {
+          "vz": 0,
+          "z": 0
+        },
+        {
+          "vz": 0,
+          "z": 0
+        },
+        {
+          "vz": 0,
+          "z": 0
+        },
+        {
+          "vz": 0,
+          "z": 0
+        },
+        {
+          "vz": 4.966681957244873,
+          "z": 0.16334033012390137
+        },
+        {
+          "vz": 54.68672180175781,
+          "z": 1.798494577407837
+        },
+        {
+          "vz": 74,
+          "z": 2.7822166681289673
+        },
+        {
+          "vz": 74,
+          "z": 5.977662086486816
+        },
+        {
+          "vz": 74,
+          "z": 8.292150974273682
+        },
+        {
+          "vz": 74,
+          "z": 10.956809043884277
+        },
+        {
+          "vz": 73.99834442138672,
+          "z": 13.567307472229004
+        },
+        {
+          "vz": 67.20558166503906,
+          "z": 15.947627067565918
+        },
+        {
+          "vz": 57.257877349853516,
+          "z": 18.131064414978027
+        },
+        {
+          "vz": 53.26957702636719,
+          "z": 19.981032371520996
+        },
+        {
+          "vz": 42.66284942626953,
+          "z": 21.61759376525879
+        }
+      ]
+    },
+    "compile": {
+      "errors": [],
+      "scripts": 80
+    },
+    "finalSourceIntegrity": {
+      "files": 80,
+      "differences": 0,
+      "method": "Normalized UTF-8 source Adler32 comparison between candidate Edit tree and disk before final save"
+    },
+    "ipGate": {
+      "files": 250,
+      "prohibitedHits": 0
+    }
+  },
+  "limits": [
+    "Scripted full-route fixture clears enemies and relocates the party; it does not prove fight balance, physical traversal, rewards or co-op.",
+    "Locomotion fixture drives production ArenaView.Movement through Humanoid.Move; Main/CAS dispatch and hardware input are not certified.",
+    "MCP injected keys reached InputBegan but viewport was unfocused; production FocusGuard correctly suppressed movement. Native focus helper could not initialize. No comfort/hardware claim.",
+    "New full human campaign, co-op arrivals/downed rescue, retry, device, art/readability and performance acceptance remain open.",
+    "Historical HumanBot baselines describe the side-view build; no before/after difficulty comparison is valid for the new geometry.",
+    "Legacy flank/rear telemetry remains based on world X; do not label it a 3D relative-facing metric.",
+    "Dash has residual momentum after its.18s actuator, observed21.6176stud travel over.6s. No human tuning verdict.",
+    "Early QA setup attempts hit runtimeSource capability, serverPlayerScripts visibility and unavailable loadstring; fixtures were installed through Studio plugin/module sources, not shipped.",
+    "Actual775x356 combat still shows a dense percent/style bar over actor space with touch controls visible; compact HUD and hero readability require further work. This still does not establish motion readability."
+  ],
+  "failuresFoundAndResolved": [
+    "First progression run observed stale Traverse/wave state during .9-second settle; EncounterService now switches Intermission/next-wave before closing transition.",
+    "Initial compilation caught a missing separator in CombatService slot-offset assignment; fixed before Play.",
+    "Test-only special fixture endpoint loop accidentally used heading vectors; corrected separate scalar endpoint signs before successful execution.",
+    "Initial accepted Dash had0XZ travel across.6s/19samples. Short server actuator replaced one-shot velocity; finalactualremoteZtravel21.6176/X0,Y-1. Duration/cooldown/invulnerability unchanged."
+  ],
+  "dashInvestigation": {
+    "accepted": true,
+    "initialCooldownBefore": 0,
+    "observedDisplacementZ": 0,
+    "observedVelocityZ": 0,
+    "samples": 19,
+    "seconds": 0.6,
+    "status": "Resolved: replicated server horizontal Plane LinearVelocity at74 for.18s; actual remote rerun passed. Y remains unconstrained; current inertia/coast still needs human feel review."
+  },
+  "reviews": {
+    "combat": "Directional contracts and client fixture reviewed; reported root runtime outcomes kept separate.",
+    "presentation": "Final DashMotion authority/axes/hooks/stale callback cleanup and README/CONTROLS contracts PASS.",
+    "world": "Camera geometry and world/contracts plus downed rescue traversal and evidence scope PASS; pending dash wording resolved by actual result."
+  }
+}

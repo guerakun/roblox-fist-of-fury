@@ -1,6 +1,7 @@
+local ArenaMath=require(game.ReplicatedStorage.Nightfall.Shared.ArenaMath)
 -- Server-owned engagement positions and a party-wide windup budget.
 local Director = {}
-local offsets = {{5,0},{-5,0},{10,0},{-10,0},{12,8},{-12,-8}}
+local offsets = {{6,0},{-6,0},{0,6},{0,-6},{8,8},{-8,-8},{8,-8},{-8,8}}
 function Director.New() return {slots={},tokens={},requests={},lastGranted={},serial=0} end
 function Director.CountActive(enemies, now)
     local count=0
@@ -41,11 +42,13 @@ end
 function Director.Assign(state,model,target,origin,targetPosition,arena,positionAllowed)
     local existing=state.slots[model]
     local function feasible(offsetX,offsetZ)
-        if arena and (targetPosition.X+offsetX<arena.MinX+6 or targetPosition.X+offsetX>arena.MaxX-6)then return false end
-        return not positionAllowed or positionAllowed(Vector3.new(targetPosition.X+offsetX,origin.Y,math.clamp(targetPosition.Z+(offsetZ or 0),-11,11)))
+        local point=Vector3.new(targetPosition.X+offsetX,origin.Y,targetPosition.Z+(offsetZ or 0))
+        if arena and (ArenaMath.Clamp(point,arena,2)-point).Magnitude>.01 then return false end
+        return not positionAllowed or positionAllowed(point)
     end
     if existing and existing.target==target and feasible(existing.offset.X,existing.offset.Z) then
-        existing.approachFeasible=feasible(existing.offset.X<0 and -4 or 4,0)
+        local approach=ArenaMath.NormalizeDirection(existing.offset)*4
+        existing.approachFeasible=feasible(approach.X,approach.Z)
         return existing
     end
     state.slots[model]=nil
@@ -58,7 +61,8 @@ function Director.Assign(state,model,target,origin,targetPosition,arena,position
     for i,offset in ipairs(offsets)do if not occupied[i] and feasible(offset[1],offset[2]) then
         local delta=Vector3.new(offset[1],0,offset[2])
         -- Favor filling the other side before minimizing walking distance.
-        local crowd=offset[1]<0 and left or right
+        local crowd=0
+        for _,other in pairs(state.slots)do if other.target==target and ArenaMath.NormalizeDirection(other.offset):Dot(delta.Unit)>.5 then crowd+=1 end end
         local score=(targetPosition+delta-origin).Magnitude+crowd*35
         if not bestScore or score<bestScore then best,bestScore=i,score end
     end end
@@ -66,14 +70,15 @@ function Director.Assign(state,model,target,origin,targetPosition,arena,position
     local offset
     if best then offset=Vector3.new(offsets[best][1],0,offsets[best][2])
     else
-        best=6+state.serial
+        best=#offsets+state.serial
         local side=left<=right and -1 or 1
         if not feasible(side*14)then
             if feasible(-side*14)then side=-side else side=origin.X<targetPosition.X and -1 or 1 end
         end
         offset=Vector3.new(side*14,0,state.serial%2==0 and 10 or -10)
     end
-    local slot={target=target,index=best,offset=offset,serial=state.serial,approachFeasible=feasible(offset.X<0 and -4 or 4,0)}
+    local approach=ArenaMath.NormalizeDirection(offset)*4
+    local slot={target=target,index=best,offset=offset,serial=state.serial,approachFeasible=feasible(approach.X,approach.Z)}
     state.slots[model]=slot
     return slot
 end
