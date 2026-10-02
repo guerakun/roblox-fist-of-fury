@@ -2,19 +2,21 @@
 
 The game uses controlled 3D arenas with full XZ floor movement. Each city, station and factory district has four areas: enemy group, enemy group, miniboss, boss. Clear an area to open its physical exit, then rally right together before the next area locks. The server owns damage, hit detection, cooldowns, knockback, stocks, and encounter progression.
 
-| Action | Keyboard | Gamepad | Touch |
+| Action | Mouse / keyboard | Gamepad | Touch |
 | --- | --- | --- | --- |
 | Move across arena floor | A D / W S | Left stick | Left thumb pad |
 | Jump / air recovery | Space | A | Jump |
-| Light attack | J | X | Light |
-| Heavy attack | K | Y | Heavy |
-| Hero special | L | B | Special |
+| Light combo | Left mouse button / J | X | Light |
+| Heavy attack | Right mouse tap / K | Y | Heavy |
+| Hero special | E / L | B | Special |
 | Dash | Q | Left trigger | Dash |
 | Hold guard | F | Left bumper | Hold Block |
-| Air recovery | E | Right bumper | Recovery |
+| Air recovery | Space while airborne | Right bumper | Recovery |
 | Select Rook Calder / Bo Marlowe / Isla Veyra (candidate names) | 1 / 2 / 3 | D-pad left / right cycles | Hero name |
 | Ready in the lobby | Enter | Start | Ready |
 | Restart after end screen | R | Start | Play Again |
+
+Right mouse drag remains native camera orbit; Heavy is requested only by a short tap, not a drag. The source tap threshold is at most0.28seconds with at most6pixels of cumulative movement and release offset. Menu/UI focus and cancellation suppress combat gestures. J / K / L remain keyboard alternatives. When Special is cooling down and the server offers Desperation, hold E then tap the right mouse button to request it; holding L then pressing K remains the legacy chord. E normally requests Special when available. Physical mouse/controller/touch validation remains separate from source implementation.
 
 The first grounded jump uses Roblox Humanoid jumping. A second airborne press requests server-authorized Recovery. This is the prototype's shared double-jump/recovery resource, not an extra unlimited jump. High damage percentage means larger launches. Stocks are lives; guard and recover before your squad runs out. Hero selection availability and cooldowns are enforced by the server.
 
@@ -34,11 +36,11 @@ The installed Hit VFX template is cloned for impacts. Enemy attacks use anticipa
 
 Audited imported templates live in `ReplicatedStorage.Nightfall.Assets`:
 
-- `Animations/<Hero>/<Action>` (an `Animation` with an authorized published `AnimationId`). Flat `<Hero>_<Action>` or `<Action>` names also work. Current actions: Light, Heavy, Special, Block. These use action animation priority.
+- The current authored R6 cast uses the serialized Toolbox keyframes and authored special poses through one joint sampler. Optional published `AnimationId` playback is no longer a parallel animation path; this avoids competing writers for the same joints.
 - `VFX/<Hero>/<Event>` (Model, BasePart, Attachment, or ParticleEmitter). Flat hero-prefixed or event names also work. Events: Hit, KO, Attack, Special, Dash, Recovery. The client places the clone at the replicated event location, emits particles, and cleans up after three seconds. ParticleEmitters may carry numeric `BurstCount` or `EmitCount` attributes, clamped to 1–60.
 - The client removes script descendants from VFX clones as an additional precaution. This is not a substitute for inspecting imported assets in Studio before they enter the project.
 
-When no compatible effect exists, bounded neon impact particles make attacks visible. Non-R6 rigs use temporary shoulder/waist pose fallbacks. The imported clips and authored effects are **prototype presentation**, not an assertion of production animation quality. Rig compatibility, timing, readability, audio permission, and multiplayer visibility need Studio playtesting. Distinct cinematic special animations and a fully mixed soundtrack remain unfinished.
+When no compatible effect exists, bounded neon impact particles make attacks visible. The current renderer targets the authored R6 rigs; non-R6 compatibility is not promised. The imported clips and authored effects are **prototype presentation**, not an assertion of production animation quality. Rig compatibility, timing, readability, audio permission, and multiplayer visibility need Studio playtesting. Distinct cinematic special animations and a fully mixed soundtrack remain unfinished.
 
 ## Required hands-on QA
 
@@ -65,7 +67,7 @@ These are authored procedural visual effects layered onto imported Toolbox comba
 The effect scheduler caps concurrent hero specials at eight, uses one temporary render connection, and removes all parts in approximately one second. Parts are anchored, non-colliding, and non-queryable. Release sound happens after windup; the previous scripted camera kick is retired with the fixed camera. The visuals do not create hitboxes, move characters, apply damage, or freeze simulation; authoritative server attacks remain unchanged. Visual travel is stylized and is not a simulated projectile collision test.
 ## Three-chapter encounter HUD
 
-The HUD reads stage names directly from the server: city streets, abandoned station, and abandoned factory. Four waves per stage comprise skirmish, miniboss, skirmish, and boss. A chapter title introduces each district and is dismissed as soon as a critical attack warning arrives. The top-center boss meter shows the active miniboss/boss name, phase, and remaining break threshold; the delayed pale segment helps damage read clearly.
+The HUD reads stage names directly from the server: city streets, abandoned station, and abandoned factory. Four areas per stage comprise enemy group, enemy group, miniboss, and boss. A chapter title introduces each district and is dismissed as soon as a critical attack warning arrives. The top-center boss meter shows the active miniboss/boss name, phase, and remaining break threshold; the delayed pale segment helps damage read clearly.
 
 Server telegraphs specify exact locked box or circle footprints. Red/orange warnings say **DODGE** and jumpable cyan warnings say **JUMP**. Ground labels, a textual local-danger banner, and offscreen directional markers remain enabled with cosmetic effects disabled. The local warning uses X/Z footprint membership and does not claim that being airborne is safe. It is instructional presentation, not hit detection. Enemy impacts briefly flash the same footprint.
 
@@ -116,3 +118,13 @@ When a living player has at least two stocks and a connected ally is downed, a c
 Before the owner's 2026-10-02 conversion, the stages used a narrow Z lane, party-following side-view camera and skirmish/miniboss/skirmish/boss order. CAMERA_REGRESSION.md and the earlier HumanBot reports describe that version; they remain historical evidence. The new arena policy/geometry, scripted locomotion and route checks are scoped in [ARENA_3D_CONVERSION](launch/ARENA_3D_CONVERSION.md). They do not certify physical keyboard/controller/touch use, camera comfort, ordinary fights or co-op rescue/retry. Any unresolved action check remains open in the linked evidence. No launch acceptance is implied by this controls reference.
 
 The first 3D prototype used a fixed elevated camera and48-stud-deep arenas. WO-3D.2 supersedes that with native rotatable third-person follow and72-stud depth plus surrounding scenery. The custom controller now maps movement relative to the camera, preserving server-owned arena bounds and attack rules. Fixed-camera motion checks do not certify this revision.
+
+## WO-3D.3 attack timing and preserved controls
+
+The owner selected left mouse Light, right mouse tap Heavy, Q Dash, E Special, Space Jump / airborne Recovery, and F hold Guard. Right mouse drag continues to orbit the native camera. The previous E Recovery / L primary Special layout is superseded; J / K / L attack aliases and gamepad/touch actions remain.
+
+Source tuning reduces Gale / Piston / Tide base movement speeds to21 / 19 / 22 studs per second. An accepted attack scales movement to35% and holds its facing through the action. Light has a0.40-second presentation/action duration and0.44-second cooldown; Heavy lasts0.55seconds, while each special lasts its windup plus0.48seconds. The accepted dash drives58 studs per second for0.16seconds, then spends0.08seconds braking toward walking input. These are configured timings, not measured travel distances or a smoothness claim. Damage, combo acceptance, cooldowns and hit detection remain server-owned. Local anticipation must reconcile accepted events without replaying the same pose; rejected spam must not restart an active accepted animation.
+
+These source changes address the observed repeated pose starts and residual dash motion. Runtime timing, latency, cancellation, mouse tap-versus-drag and human control feel remain separate evidence gates in PROGRESS. Historical tests on the previous timing do not verify this revision.
+
+Preserved presentation paths: earlier builds could load optional `Animations/<Hero>/<Action>` published AnimationId assets and tween shoulders/waist on unsupported rigs. WO-3D.3 retires those parallel paths for the current R6 cast in favor of one sampled joint-pose writer. The imported Toolbox clip data and provenance remain in use.

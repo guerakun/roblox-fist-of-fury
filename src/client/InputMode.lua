@@ -19,7 +19,7 @@ end
 function Mode:Captions()
     if self.mode=="Touch"then return {"TAP","TAP","TAP","TAP","HOLD","TAP"}end
     if self.mode=="Gamepad"then return {"X","Y","B","LT","HOLD LB","RB"}end
-    return {"J","K","L","Q","HOLD F","E"}
+    return {"LMB / J","RMB / K","E / L","Q","HOLD F","SPACE"}
 end
 function Mode:Subscribe(callback)
     local token={}self.listeners[token]=callback

@@ -38,7 +38,7 @@
     },
     "StarterPlayer": {
       "$properties": {
-        "CharacterWalkSpeed": 22,
+        "CharacterWalkSpeed": 20,
         "CharacterJumpPower": 52,
         "CharacterUseJumpPower": true,
         "CameraMode": "Classic",

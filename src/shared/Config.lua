@@ -4,7 +4,9 @@ Config.Title = "CURTAIN BREAK"
 Config.MaxPlayers = 4
 Config.Stocks = 3
 Config.Survival={StartStocks=3,MaxStocks=3,RetryStocks=2,ClearHeal=15,DownedDuration=12,ReviveDuration=2.5,RevivePercent=60,ReviveRange=8}
-Config.WalkSpeed = 22
+Config.WalkSpeed = 20
+Config.AttackMoveScale = .35
+Config.Dash = {AnimationDuration=.30}
 Config.JumpPower = 52
 Config.LaneMin = -36
 Config.LaneMax = 36
@@ -43,18 +45,18 @@ Config.Pressure={HitInvulnerability=.15,ComboHits=3,ComboWindow=1.5,ComboInvulne
     BurstDelay=.16,BurstCost=8,BurstCooldown=4,GruntCooldownMax=1.8}
 for _,profile in pairs(Config.Difficulties)do profile.Pressure=Config.Pressure end
 Config.Attacks = {
-    Light = {Damage = 8, Knockback = 15, Growth = 0.24, Lift = 8, Range = 7, Width = 7, Windup = 0.10, Cooldown = 0.32, Stun = 0.26},
-    Heavy = {Damage = 19, Knockback = 38, Growth = 0.52, Lift = 26, Range = 9, Width = 8, Windup = 0.30, Cooldown = 0.95, Stun = 0.50},
+    Light = {Damage = 8, Knockback = 15, Growth = 0.24, Lift = 8, Range = 7, Width = 7, Windup = 0.10, Cooldown = 0.44, ActionDuration = 0.40, Stun = 0.26},
+    Heavy = {Damage = 19, Knockback = 38, Growth = 0.52, Lift = 26, Range = 9, Width = 8, Windup = 0.30, Cooldown = 0.95, ActionDuration = 0.55, Stun = 0.50},
 }
 Config.CharacterOrder = {"Gale", "Piston", "Tide"}
 Config.HeroNamesPendingApproval = true
 Config.Characters = {
-    Gale = {Name = "Rook Calder", Tip = "Close distance, then drive through with a wind-wrapped kick.", Title = "GALE RUNNER", Color = Color3.fromRGB(111, 222, 217), Speed = 23,
-        SpecialName = "CYCLONE DRIVE", Special = {Damage = 27, Knockback = 44, Growth = 0.56, Lift = 18, Range = 15, Width = 11, Windup = 0.22, Cooldown = 6, Stun = 0.60}},
-    Piston = {Name = "Bo Marlowe", Tip = "Line up the piston gauntlet for a long, narrow strike.", Title = "PISTON BRAWLER", Color = Color3.fromRGB(219, 168, 84), Speed = 21,
-        SpecialName = "RECOIL CANNON", Special = {Damage = 31, Knockback = 51, Growth = 0.65, Lift = 20, Range = 23, Width = 7, Windup = 0.38, Cooldown = 7, Stun = 0.65}},
-    Tide = {Name = "Isla Veyra", Tip = "Sweep a wide lane with the glaive; punish clustered enemies.", Title = "TIDE BLADE", Color = Color3.fromRGB(76, 168, 230), Speed = 24,
-        SpecialName = "UNDERTOW ARC", Special = {Damage = 23, Knockback = 40, Growth = 0.50, Lift = 29, Range = 12, Width = 19, Windup = 0.18, Cooldown = 5.5, Stun = 0.55}},
+    Gale = {Name = "Rook Calder", Tip = "Close distance, then drive through with a wind-wrapped kick.", Title = "GALE RUNNER", Color = Color3.fromRGB(111, 222, 217), Speed = 21,
+        SpecialName = "CYCLONE DRIVE", Special = {Damage = 27, Knockback = 44, Growth = 0.56, Lift = 18, Range = 15, Width = 11, Windup = 0.22, ActionDuration = 0.70, Cooldown = 6, Stun = 0.60}},
+    Piston = {Name = "Bo Marlowe", Tip = "Line up the piston gauntlet for a long, narrow strike.", Title = "PISTON BRAWLER", Color = Color3.fromRGB(219, 168, 84), Speed = 19,
+        SpecialName = "RECOIL CANNON", Special = {Damage = 31, Knockback = 51, Growth = 0.65, Lift = 20, Range = 23, Width = 7, Windup = 0.38, ActionDuration = 0.86, Cooldown = 7, Stun = 0.65}},
+    Tide = {Name = "Isla Veyra", Tip = "Sweep a wide lane with the glaive; punish clustered enemies.", Title = "TIDE BLADE", Color = Color3.fromRGB(76, 168, 230), Speed = 22,
+        SpecialName = "UNDERTOW ARC", Special = {Damage = 23, Knockback = 40, Growth = 0.50, Lift = 29, Range = 12, Width = 19, Windup = 0.18, ActionDuration = 0.66, Cooldown = 5.5, Stun = 0.55}},
 }
 Config.Enemies = {
     Grunt = {Name = "Veil Husk", Role = "Grunt", Color = Color3.fromRGB(119, 83, 172), Speed = 12, Weight = 1, Threshold = 56, Damage = 9, Reach = 6, Windup = 0.68, Cooldown = 1.85, Scale = 1},

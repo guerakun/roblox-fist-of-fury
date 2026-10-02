@@ -27,6 +27,11 @@ local COLORS = {
 local Config = require(package:WaitForChild("Shared"):WaitForChild("Config"))
 local NativeCamera = require(script.Parent:WaitForChild("NativeCamera"))
 local nativeCamera = NativeCamera.new(player, RunService)
+local PoseMixer = require(script.Parent:WaitForChild("PoseMixer"))
+local AttackPresentation = require(script.Parent:WaitForChild("AttackPresentation"))
+local attackPresentation = AttackPresentation.new(Config)
+local MouseCombatGesture = require(script.Parent:WaitForChild("MouseCombatGesture"))
+local mouseGesture = MouseCombatGesture.new()
 local ArenaView = require(script.Parent:WaitForChild("ArenaView"))
 local CombatVisualGeometry = require(script.Parent:WaitForChild("CombatVisualGeometry"))
 local HeroSpecials = require(script.Parent:WaitForChild("HeroSpecials"))
@@ -52,7 +57,10 @@ local root: BasePart? = nil
 local gamepadMove = Vector2.zero
 local touchMove = Vector2.zero
 local heldKeys: {[Enum.KeyCode]: boolean} = {}
-local lastLocalAction = 0
+local playbackStarts = 0
+local poseDuration = .4
+local currentRequestId = nil
+local locomotionState = {}
 local poseSerial = 0
 local shoulderDefaults: {[Motor6D]: CFrame} = {}
 local rigJoints: {[Motor6D]: CFrame} = {}
@@ -88,6 +96,7 @@ end
 local actionCapabilities = ActionCapabilities.new(releaseBlock)
 local focusGuard = FocusGuard.new({input = UserInputService, player = player, releaseBlock = releaseBlock,
     clearHeld = function()
+        mouseGesture:Cancel()
         heldKeys = {}; gamepadMove = Vector2.zero; touchMove = Vector2.zero; touchInput = nil
         inputMode:ClearPointers()
         if desperationControl then desperationControl:Reset() end
@@ -183,7 +192,7 @@ local abilityLabels: {[string]: TextLabel} = {}
 local abilityKeyLabels: {[string]: TextLabel} = {}
 local abilityButtons: {[string]: TextButton} = {}
 local abilityNames = {"Light", "Heavy", "Special", "Dash", "Block", "Recovery"}
-local abilityKeys = {"J / X", "K / Y", "L / B", "Q / LT", "F / LB", "E / RB"}
+local abilityKeys = {"LMB / X", "RMB / Y", "E / B", "Q / LT", "F / LB", "SPACE / RB"}
 for index, action in ipairs(abilityNames) do
     local button = make("TextButton", {Text = "", BackgroundColor3 = COLORS.ink, BackgroundTransparency = 0.05,
         Size = UDim2.fromOffset(73, 74), Position = UDim2.fromOffset((index - 1) * 79, 0), BorderSizePixel = 0}, abilities)
@@ -388,8 +397,12 @@ local function resize()
 end
 local function characterReady(character: Model)
     focusGuard:Reset("character-ready")
-    humanoid = character:WaitForChild("Humanoid") :: Humanoid
-    root = character:WaitForChild("HumanoidRootPart") :: BasePart
+    locomotionState={}; currentRequestId=nil
+    local nextHumanoid = character:WaitForChild("Humanoid") :: Humanoid
+    local nextRoot = character:WaitForChild("HumanoidRootPart") :: BasePart
+    if player.Character~=character then return end
+    humanoid, root = nextHumanoid, nextRoot
+    attackPresentation:Reset(character:GetAttribute("CombatLife")or snapshot.actorLife or 0)
     nativeCamera:Subject(workspace.CurrentCamera, humanoid)
     humanoid.Died:Connect(function() if player.Character == character then focusGuard:Reset("death") end end)
     shoulderDefaults = {}; rigJoints = {}; tracks = {}; poseAction = nil; localBlocking = false
@@ -418,46 +431,22 @@ local function asset(category: string, name: string): Instance?
     local heroFolder = folder:FindFirstChild(snapshot.hero)
     return (heroFolder and heroFolder:FindFirstChild(name)) or folder:FindFirstChild(snapshot.hero .. "_" .. name) or folder:FindFirstChild(name)
 end
-local function animate(action: string)
+local function animate(action: string, playback: any?)
     if not humanoid then return end
-    if action == "Special" then
-        poseAction = "Special"; poseStart = os.clock()
-        return
+    if playback and playback.matched and currentRequestId==playback.requestId and poseAction then
+        poseAction=action;poseDuration=playback.duration
+        return -- Same accepted swing, never rewind the local prediction on its echo.
     end
-    local animation = asset("Animations", action)
-    if animation and animation:IsA("Animation") and animation.AnimationId ~= "" then
-        local key = snapshot.hero .. action
-        local track = tracks[key]
-        if not track then
-            local animator = humanoid:FindFirstChildOfClass("Animator")
-            if animator then
-                local ok, loaded = pcall(function() return animator:LoadAnimation(animation) end)
-                if ok then track = loaded; tracks[key] = track end
-            end
-        end
-        if track then track.Priority = Enum.AnimationPriority.Action; track:Play(0.06); return end
+    poseAction=action
+    poseStart=playback and playback.startAt or workspace:GetServerTimeNow()
+    poseDuration=playback and playback.duration or (action=="Dash"and .24 or action=="Block"and 1 or .4)
+    currentRequestId=playback and playback.requestId or nil
+    playbackStarts+=1
+    if RunService:IsStudio()then
+        player:SetAttribute("PresentationStartCount",playbackStarts)
+        player:SetAttribute("PresentationPoseStart",poseStart)
+        player:SetAttribute("PresentationPose",action)
     end
-    if toolboxData and toolboxData[action] and humanoid.RigType == Enum.HumanoidRigType.R6 then
-        poseAction = action; poseStart = os.clock()
-        return
-    end
-    -- Visible authored pose fallback when an imported action or matching rig is unavailable.
-    poseSerial += 1
-    local serial = poseSerial
-    local duration = action == "Heavy" and 0.32 or 0.21
-    for joint, neutral in pairs(shoulderDefaults) do
-        if joint.Parent then
-            local rotation = CFrame.Angles(math.rad(action == "Block" and -72 or -105), 0, math.rad(16))
-            if joint.Name == "Waist" then rotation = CFrame.Angles(0, math.rad(-20), 0) end
-            TweenService:Create(joint, TweenInfo.new(0.07), {C0 = neutral * rotation}):Play()
-        end
-    end
-    task.delay(duration, function()
-        if serial ~= poseSerial then return end
-        for joint, neutral in pairs(shoulderDefaults) do
-            if joint.Parent then TweenService:Create(joint, TweenInfo.new(0.16), {C0 = neutral}):Play() end
-        end
-    end)
 end
 
 local function send(action: string, held: boolean?)
@@ -477,24 +466,29 @@ local function send(action: string, held: boolean?)
         return
     end
     if action == "Block" then localBlocking = held == true; if held then lastGuardFacing = facing end end
-    actionRemote:FireServer(action, {direction = facing, held = held})
-    if action == "Light" or action == "Heavy" or action == "Special" or action == "Dash" or (action == "Block" and held) then
-        local now = os.clock()
-        if now - lastLocalAction > 0.15 then animate(action); lastLocalAction = now end
+    if action=="Light"or action=="Heavy"or action=="Special"or action=="Dash"then
+        local playback=attackPresentation:Predict(action,workspace:GetServerTimeNow())
+        if not playback then return end
+        actionRemote:FireServer(action,{direction=facing,requestId=playback.requestId})
+        animate(playback.action,playback)
+    else
+        actionRemote:FireServer(action,{direction=facing,held=held})
     end
 end
 local function desperationTouchMode()
     return inputMode:Get() == "Touch"
 end
 desperationControl = DesperationControl.new({blocked=function()return focusGuard:Blocked()end,send=function()
-    actionRemote:FireServer("Desperation", {direction=facing})
-    animate("Special")
+    local playback=attackPresentation:Predict("Desperation",workspace:GetServerTimeNow())
+    if not playback then return end
+    actionRemote:FireServer("Desperation",{direction=facing,requestId=playback.requestId})
+    animate("Special",playback)
 end})
 desperationHUD = DesperationHUD.new({inputMode=inputMode,control=desperationControl,special=abilityButtons.Special,colors=COLORS})
 local bindings: any = {
     Light = {Enum.KeyCode.J, Enum.KeyCode.ButtonX}, Heavy = {Enum.KeyCode.K, Enum.KeyCode.ButtonY},
-    Special = {Enum.KeyCode.L, Enum.KeyCode.ButtonB}, Dash = {Enum.KeyCode.Q, Enum.KeyCode.ButtonL2},
-    Block = {Enum.KeyCode.F, Enum.KeyCode.ButtonL1}, Recovery = {Enum.KeyCode.E, Enum.KeyCode.ButtonR1},
+    Special = {Enum.KeyCode.E, Enum.KeyCode.L, Enum.KeyCode.ButtonB}, Dash = {Enum.KeyCode.Q, Enum.KeyCode.ButtonL2},
+    Block = {Enum.KeyCode.F, Enum.KeyCode.ButtonL1}, Recovery = {Enum.KeyCode.ButtonR1},
     Jump = {Enum.KeyCode.Space, Enum.KeyCode.ButtonA},
 }
 for action, keys in pairs(bindings) do
@@ -533,6 +527,8 @@ for action, button in pairs(abilityButtons) do
 end
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed or focusGuard:Blocked() or not inputMode:CanBegin(input.UserInputType.Name) then return end
+    if input.UserInputType==Enum.UserInputType.MouseButton1 then send("Light")
+    elseif input.UserInputType==Enum.UserInputType.MouseButton2 then mouseGesture:Begin(UserInputService:GetMouseLocation(),os.clock())end
     heldKeys[input.KeyCode] = true
     if input.KeyCode == Enum.KeyCode.One then actionRemote:FireServer("SelectCharacter", {hero = HEROES[1]})
     elseif input.KeyCode == Enum.KeyCode.Two then actionRemote:FireServer("SelectCharacter", {hero = HEROES[2]})
@@ -544,11 +540,18 @@ UserInputService.InputBegan:Connect(function(input, processed)
         actionRemote:FireServer("SelectCharacter", {hero = HEROES[(current - 1 + offset) % #HEROES + 1]})
     elseif input.KeyCode == Enum.KeyCode.ButtonStart and ending.Visible then actionRemote:FireServer("Restart", {}) end
 end)
-UserInputService.InputEnded:Connect(function(input)
+UserInputService.InputEnded:Connect(function(input,processed)
+    if input.UserInputType==Enum.UserInputType.MouseButton2 then
+        local tapped=mouseGesture:Finish(UserInputService:GetMouseLocation(),os.clock())
+        if tapped and not processed and not focusGuard:Blocked() and not ending.Visible and inputMode:CanBegin(input.UserInputType.Name)then
+            if not desperationControl:Handle("Heavy",Enum.UserInputState.Begin)then send("Heavy")end
+        end
+    end
     heldKeys[input.KeyCode] = nil
     if input == blockInput then releaseBlock() end
 end)
 UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseMovement then mouseGesture:Move(Vector2.new(input.Delta.X,input.Delta.Y))end
     if input.KeyCode == Enum.KeyCode.Thumbstick1 then gamepadMove = not focusGuard:Blocked() and inputMode:CanBegin(input.UserInputType.Name) and Vector2.new(input.Position.X, -input.Position.Y) or Vector2.zero end
 end)
 
@@ -750,9 +753,26 @@ local function hitFeedback(event: any)
     Debris:AddItem(flash, 0.2)
     task.delay(0.21, function() if hitFlashes[target] == flash then hitFlashes[target] = nil end end)
 end
+local acceptedPlayerFX={}
+Players.PlayerRemoving:Connect(function(departing)acceptedPlayerFX[departing.UserId]=nil end)
 fxRemote.OnClientEvent:Connect(function(event: any)
     if type(event) ~= "table" then return end
     local kind = event.kind
+    if (kind=="Attack"or kind=="Dash")and event.playerUserId and type(event.attackId)=="number"and type(event.actorLife)=="number"then
+        local owner=Players:GetPlayerByUserId(event.playerUserId)
+        local model=owner and owner.Character
+        if not model or event.actorModel and event.actorModel~=model then return end
+        local life=model:GetAttribute("CombatLife")
+        if type(life)=="number"and life~=event.actorLife then return end
+        if owner==player and type(life)=="number"and attackPresentation.life~=life then
+            local current=table.clone(snapshot);current.actorLife=life
+            attackPresentation:Update(current,workspace:GetServerTimeNow())
+        end
+        if type(event.startAt)=="number"and type(event.duration)=="number"and workspace:GetServerTimeNow()-event.startAt>=event.duration then return end
+        local seen=acceptedPlayerFX[event.playerUserId]
+        if seen and (event.actorLife<seen.life or event.actorLife==seen.life and event.attackId<=seen.id)then return end
+        acceptedPlayerFX[event.playerUserId]={life=event.actorLife,id=event.attackId}
+    end
     local riskMessage, riskColor = riskFeedback.Emit(event)
     if riskMessage then toast(riskMessage, riskColor) end
     enemyPresentation.Emit(event)
@@ -766,7 +786,9 @@ fxRemote.OnClientEvent:Connect(function(event: any)
         if action == "Slam" then action = "Heavy" end
         if action == "Light" and (event.combo or 1) % 2 == 0 then action = "Light2" end
         if event.playerUserId == player.UserId then
-            animate(action or "Light")
+            local playback,reason=attackPresentation:Echo(event,workspace:GetServerTimeNow())
+            if not playback and reason then return end
+            if playback then animate(playback.action or "Light",playback)end
         else
             local model: Model? = nil
             if event.playerUserId then
@@ -789,7 +811,7 @@ fxRemote.OnClientEvent:Connect(function(event: any)
             end
             if model then
                 local actor = registerActor(model)
-                if actor then actor.action = action; actor.start = os.clock(); actor.moveId = event.moveId; actor.moveDuration = .45; actor.tellUntil = nil end
+                if actor then actor.action = action; actor.start = os.clock()-math.max(0,workspace:GetServerTimeNow()-(event.startAt or workspace:GetServerTimeNow())); actor.duration=event.duration; actor.moveId = event.moveId; actor.moveDuration = .45; actor.tellUntil = nil end
             end
         end
     end
@@ -861,6 +883,7 @@ stateRemote.OnClientEvent:Connect(function(state: any)
     if state.kind == "Toast" or state.kind == "Message" then toast(state.text or state.message or ""); return end
     local wasDowned = snapshot.downed
     for key, value in pairs(state) do snapshot[key] = value end
+    attackPresentation:Update(snapshot,workspace:GetServerTimeNow())
     actionCapabilities:Update(snapshot, localBlocking or blockInput ~= nil)
     desperationControl:Update(snapshot)
     if snapshot.downed and not wasDowned then focusGuard:Reset("downed") end
@@ -905,54 +928,37 @@ local partyAccum = 0
 local function applyHeroPose(joints: any, poses: any, dt: number)
     for joint, neutral in pairs(joints) do
         if joint.Parent and joint.Part1 then
-            joint.C0 = joint.C0:Lerp(neutral * (poses[joint.Part1.Name] or CFrame.identity), math.min(1, dt * 24))
+            joint.C0 = joint.C0:Lerp(neutral * (poses[joint.Part1.Name] or CFrame.identity), 1-math.exp(-32*dt))
             joint.Transform = CFrame.identity
         end
     end
 end
 local function applyToolboxPose(joints: any, data: any, time: number, dt: number)
-    if not data or not data.frames or #data.frames == 0 then return end
-    local frames = data.frames
-    local before, after = frames[1], frames[#frames]
-    for index = 1, #frames - 1 do
-        if time >= frames[index].time and time <= frames[index + 1].time then before = frames[index]; after = frames[index + 1]; break end
-    end
-    local alpha = math.clamp((time - before.time) / math.max(0.0001, after.time - before.time), 0, 1)
-    for joint, neutral in pairs(joints) do
-        if joint.Parent and joint.Part1 then
-            local bodyName = joint.Part1.Name
-            local from = before.poses[bodyName] or CFrame.identity
-            local to = after.poses[bodyName] or from
-            joint.C0 = joint.C0:Lerp(neutral * from:Lerp(to, alpha), math.min(1, dt * 24))
-            joint.Transform = CFrame.identity
-        end
-    end
+    applyHeroPose(joints,PoseMixer.Sample(data,time),dt)
 end
+
 local function sampleToolbox(dt: number)
     if not toolboxData then return end
     local now = os.clock()
-    if humanoid and humanoid.RigType == Enum.HumanoidRigType.R6 then
-        local chosen = poseAction
-        local specialPose = chosen == "Special" and HeroSpecials.Pose(snapshot.hero, now - poseStart)
-        if chosen == "Special" and not specialPose then poseAction = nil; chosen = nil end
-        if specialPose then
-            applyHeroPose(rigJoints, specialPose, dt)
-        else
-        local data = chosen and toolboxData[chosen]
-        if data and now - poseStart > math.max(0.05, data.duration) then poseAction = nil; chosen = nil; data = nil end
-        if localBlocking and snapshot.blocking then chosen = "Block"; data = toolboxData.Block end
-        local actionPose = data ~= nil
-        if not data then
-            chosen = humanoid.MoveDirection.Magnitude > 0.1 and "Walk" or "Idle"
-            data = toolboxData[chosen]
+    if humanoid and root and humanoid.RigType == Enum.HumanoidRigType.R6 then
+        local velocity=root.AssemblyLinearVelocity
+        local speed=Vector3.new(velocity.X,0,velocity.Z).Magnitude
+        local grounded=humanoid.FloorMaterial~=Enum.Material.Air
+        local base=PoseMixer.Locomotion(locomotionState,toolboxData,speed,grounded,dt,now)
+        local age=workspace:GetServerTimeNow()-poseStart
+        if poseAction and age>=poseDuration then poseAction=nil;currentRequestId=nil end
+        if poseAction then
+            local actionPose
+            if poseAction=="Special"then actionPose=HeroSpecials.Pose(snapshot.hero,age)
+            else
+                local clip=toolboxData[poseAction]
+                if clip then actionPose=PoseMixer.Sample(clip,math.clamp(age/poseDuration,0,1)*clip.duration)end
+            end
+            if actionPose then base=PoseMixer.Blend(base,actionPose,PoseMixer.Weight(age,poseDuration))end
+        elseif localBlocking and snapshot.blocking and toolboxData.Block then
+            base=PoseMixer.Blend(base,PoseMixer.Sample(toolboxData.Block,now%toolboxData.Block.duration),.9)
         end
-        if data then
-            local duration = math.max(0.05, data.duration)
-            local time = actionPose and math.clamp(now - poseStart, 0, duration) or (now - locomotionStart) % duration
-            if now < hitPoseHoldUntil then poseStart += dt; locomotionStart += dt
-            else applyToolboxPose(rigJoints, data, time, dt) end
-        end
-        end
+        if now>=hitPoseHoldUntil then applyHeroPose(rigJoints,base,dt)end
     end
     for model, actor in pairs(actorPoses) do
         if not model.Parent or actor.humanoid.Health <= 0 then clearBodyTell(model); actorPoses[model] = nil
@@ -967,24 +973,24 @@ local function sampleToolbox(dt: number)
             if attackPose then applyHeroPose(actor.joints, attackPose, dt) end
         else
             actor.moveId = nil
-            local specialPose = actor.action == "Special" and HeroSpecials.Pose(model:GetAttribute("Hero"), now - actor.start)
-            if actor.action == "Special" and not specialPose then actor.action = nil end
-            if specialPose then applyHeroPose(actor.joints, specialPose, dt)
-            else
-            local data = actor.action and toolboxData[actor.action]
-            if data and now - actor.start > math.max(0.05, data.duration) then actor.action = nil; data = nil end
-            local actionPose = data ~= nil
-            if not data then
-                local actorRoot = model:FindFirstChild("HumanoidRootPart")
-                local moving = actorRoot and actorRoot:IsA("BasePart") and Vector3.new(actorRoot.AssemblyLinearVelocity.X, 0, actorRoot.AssemblyLinearVelocity.Z).Magnitude > 2
-                data = toolboxData[model:GetAttribute("Blocking") and "Block" or moving and "Walk" or "Idle"]
+            local actorRoot=model:FindFirstChild("HumanoidRootPart")
+            local velocity=actorRoot and actorRoot.AssemblyLinearVelocity or Vector3.zero
+            actor.locomotion=actor.locomotion or {}
+            local base=PoseMixer.Locomotion(actor.locomotion,toolboxData,Vector3.new(velocity.X,0,velocity.Z).Magnitude,
+                actor.humanoid.FloorMaterial~=Enum.Material.Air,dt,now)
+            local age=now-actor.start
+            local clip=actor.action and toolboxData[actor.action]
+            local duration=actor.duration or (actor.action=="Special"and 1 or clip and clip.duration or .4)
+            if actor.action and age>=duration then actor.action=nil end
+            if actor.action then
+                local poses=actor.action=="Special"and HeroSpecials.Pose(model:GetAttribute("Hero"),age)
+                    or clip and PoseMixer.Sample(clip,math.clamp(age/duration,0,1)*clip.duration)
+                if poses then base=PoseMixer.Blend(base,poses,PoseMixer.Weight(age,duration))end
+            elseif model:GetAttribute("Blocking")and toolboxData.Block then
+                base=PoseMixer.Blend(base,PoseMixer.Sample(toolboxData.Block,now%toolboxData.Block.duration),.9)
             end
-            if data then
-                local duration = math.max(0.05, data.duration)
-                if now < (actor.poseHoldUntil or 0) then actor.start += dt
-                else applyToolboxPose(actor.joints, data, actionPose and math.clamp(now - actor.start, 0, duration) or now % duration, dt) end
-            end
-        end
+            if now>=(actor.poseHoldUntil or 0)then applyHeroPose(actor.joints,base,dt)end
+
         end
     end
 end
@@ -1057,7 +1063,7 @@ RunService:BindToRenderStep("NightfallPresentation", Enum.RenderPriority.Camera.
         if desperationControl:Available() and not desperationTouchMode() then
             desperationHintActive = true
             local controller = inputMode:Get() == "Gamepad"
-            abilityKeyLabels.Special.Text = controller and "HOLD B + Y" or "HOLD L + K"
+            abilityKeyLabels.Special.Text = controller and "HOLD B + Y" or "HOLD E + RMB"
             abilityLabels.Special.Text = "+"..tostring(snapshot.desperationCost).."% SELF"
             abilityLabels.Special.TextColor3 = COLORS.orange
         elseif desperationHintActive then desperationHintActive = false; inputLabels() end

@@ -222,13 +222,14 @@ function Combat.GetSnapshot(player)
     stats.duration = math.floor((data.runFinished or now()) - data.runStart)
     stats.damageDealt, stats.damageTaken = math.floor(stats.damageDealt), math.floor(stats.damageTaken)
     return {kind = "Snapshot", hero = data.hero, percent = math.floor(data.percent), stocks = data.stocks,
+        actorLife=data.lifeSerial,acceptedActionId=data.acceptedActionSerial or 0,busyUntil=data.busyUntil,busyRemaining=math.max(0,data.busyUntil-now()),
         style=StylePolicy.Snapshot(style),districtResult=districtResult,districtReceipt=districtReceipt,
         canBlock=capabilities.canBlock,canDash=capabilities.canDash,weightMultiplier=capabilities.weightMultiplier,
         canDesperation=desperationAllowed(player,data,now()),desperationCost=Risk.DesperationCost,
         desperationCooldown=math.max(0,(data.cooldowns.Desperation or 0)-now()),
         stage = stageIndex, stageName = arena.Name, wave = encounter.wave, waves = encounter.waves, difficulty = difficulty, heat = table.clone(runHeat), heatPoints=runRules().points, runOptionsLocked=runOptionsLocked,
         enemiesRemaining = encounter.enemiesRemaining, pulse = encounter.pulse, pulses = encounter.pulses, status = encounter.status, blocking = data.blocking,
-        downed = data.downed, downedRemaining = math.max(0,(data.downedUntil or 0)-now()), revive=reviveSnapshot(player), grabbed = data.grabbedBy ~= nil, cooldowns = {Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
+        downed = data.downed, downedRemaining = math.max(0,(data.downedUntil or 0)-now()), revive=reviveSnapshot(player), grabbed = data.grabbedBy ~= nil, cooldowns = {Light=data.cooldowns.Light or 0,Heavy=data.cooldowns.Heavy or 0,Special = data.cooldowns.Special or 0, Dash = data.cooldowns.Dash or 0, Burst = data.cooldowns.Burst or 0}, burstCost = difficultyProfile().Pressure.BurstCost,
         ready = data.ready, travelLocked = travelLocked, readyCount = Combat.GetReadyCount(), playersTotal = Combat.GetPlayerCount(),
         rescueTarget = ally and {name = ally.DisplayName, userId = ally.UserId} or false,
         canShareStock = ally ~= nil and shareCooldown <= 0, shareStockCooldown = shareCooldown,
@@ -406,6 +407,7 @@ local function attributes(model, data)
     model:SetAttribute("Stocks", data.stocks or 1)
     model:SetAttribute("Blocking", data.blocking or false)
     model:SetAttribute("Facing",ArenaMath.NormalizeDirection(data.facing))
+    if data.lifeSerial~=nil then model:SetAttribute("CombatLife",data.lifeSerial)end
     model:SetAttribute("Hero", data.hero or data.kind)
     model:SetAttribute("Downed", data.downed or false)
     if data.spec then
@@ -442,6 +444,7 @@ local function resetPosition(player, position, percent)
     data.revive,data.downedUntil,data.downedPosition=nil,nil,nil
     data.stunnedUntil, data.launchedUntil, data.recovered = 0, 0, false
     data.recentHits = {}
+    data.busyUntil=0;h.AutoRotate=true
     data.blockStartedAt,data.perfectBlockConsumed,data.lastBlockPressedAt=nil,false,nil
     data.invulnerableUntil = now() + 2
     r.Anchored = false
@@ -808,7 +811,7 @@ local function doHitbox(actor, attack, direction)
         end
     end
 end
-local function performAttack(player, action, data)
+local function performAttack(player, action, data,requestId,requestedAction)
     local model, r = player.Character, root(player.Character)
     if not r then return end
     local attack = table.clone(action == "Special" and Config.Characters[data.hero].Special or Config.Attacks[action])
@@ -818,11 +821,15 @@ local function performAttack(player, action, data)
         if data.combo == 3 then attack.Damage *= 1.5 attack.Knockback += 18 attack.Lift = 18 end
     end
     styleEventSequence+=1;attack.StyleId=styleEventSequence
-    data.lastAction, data.attackStartedAt = action, now()
-    data.cooldowns[action], data.busyUntil, data.blocking = now() + attack.Cooldown, now() + attack.Windup + .13, false
+    local began=now()
+    local duration=math.max(attack.Windup,attack.ActionDuration or attack.Windup+.48)
+    data.lastAction, data.attackStartedAt = action, began
+    data.acceptedActionSerial=(data.acceptedActionSerial or 0)+1
+    data.cooldowns[action], data.busyUntil, data.blocking = began + attack.Cooldown, began + duration, false
+    local h=humanoid(model);if h then h.AutoRotate=false end
     local direction, epoch, lifeSerial = data.facing, battleEpoch, data.lifeSerial
     r.CFrame = ArenaMath.FacingFrame(r.Position,direction)
-    fx("Attack", r.Position, {hero = data.hero, action = action, direction = direction, playerUserId = player.UserId, combo = data.combo})
+    fx("Attack", r.Position, {actorModel=model,hero = data.hero, action = action, direction = direction, playerUserId = player.UserId, combo = data.combo,requestId=requestId,attackId=data.acceptedActionSerial,actorLife=data.lifeSerial,startAt=began,duration=duration,requestedAction=requestedAction or action})
     task.delay(attack.Windup, function()
         if epoch ~= battleEpoch or encounter.status ~= "Combat" or records[player] ~= data or data.lifeSerial ~= lifeSerial or player.Character ~= model or data.downed or data.respawning or now() < data.stunnedUntil then return end
         doHitbox(player, attack, direction)
@@ -844,6 +851,8 @@ local function actionReceived(player, action, payload)
     local data = records[player]
     if not data or type(action) ~= "string" or not allowedActions[action] or (payload ~= nil and type(payload) ~= "table") then return end
     payload = payload or {}
+    local requestId=payload.requestId
+    if requestId~=nil and (type(requestId)~="number"or requestId~=requestId or requestId%1~=0 or requestId<1 or requestId>2147483647)then return end
     local t = now()
     if t - data.rateStart >= 1 then data.rateStart, data.rateCount = t, 0 end
     data.rateCount += 1
@@ -889,8 +898,8 @@ local function actionReceived(player, action, payload)
     if t < data.stunnedUntil and not (action == "Dash" and dashAllowed) then return end
     local r, h = root(player.Character), humanoid(player.Character)
     if not r or not h or h.Health <= 0 then return end
-    data.facing = CombatMath.Direction(payload.direction, data.facing)
     if t < data.busyUntil then return end
+    data.facing = CombatMath.Direction(payload.direction, data.facing)
     if action == "Block" then
         if payload.held == true then
             if not data.blocking then
@@ -906,7 +915,7 @@ local function actionReceived(player, action, payload)
         data.percent=paid;attributes(player.Character,data)
         fx("Desperation",r.Position,{targetModel=player.Character,playerUserId=player.UserId,cost=Risk.DesperationCost})
         if ko then knockOut(player.Character);return end
-        performAttack(player,"Special",data)
+        performAttack(player,"Special",data,requestId,"Desperation")
     elseif action == "Dash" and t >= (data.cooldowns.Dash or 0) then
         if not dashAllowed then return end
         if burstCost>0 then
@@ -917,17 +926,18 @@ local function actionReceived(player, action, payload)
         end
         data.cooldowns.Dash, data.invulnerableUntil = t + 1.4, math.max(data.invulnerableUntil,t + .24)
         data.blocking, data.stunnedUntil = false, 0
-        r.AssemblyLinearVelocity = data.facing*74+Vector3.new(0,math.max(0,r.AssemblyLinearVelocity.Y),0)
+        data.acceptedActionSerial=(data.acceptedActionSerial or 0)+1
+        r.AssemblyLinearVelocity = data.facing*DashMotion.Speed+Vector3.new(0,math.max(0,r.AssemblyLinearVelocity.Y),0)
         DashMotion.Start(data,r,data.facing)
-        data.launchedUntil = t + .18
-        fx("Dash", r.Position, {direction = data.facing, hero = data.hero, playerUserId = player.UserId,burst=burstCost>0,cost=burstCost})
+        data.launchedUntil = t + DashMotion.Duration
+        fx("Dash", r.Position, {actorModel=player.Character,direction = data.facing, hero = data.hero, playerUserId = player.UserId,burst=burstCost>0,cost=burstCost,requestId=requestId,attackId=data.acceptedActionSerial,actorLife=data.lifeSerial,startAt=t,duration=DashMotion.PresentationDuration,movementDuration=DashMotion.Duration,brakeDuration=DashMotion.BrakeDuration})
     elseif action == "Recovery" or action == "Jump" then
         if h.FloorMaterial == Enum.Material.Air and not data.recovered then
             data.recovered = true
             r.AssemblyLinearVelocity = data.facing*26+Vector3.new(0,58,0)
             fx("Recovery", r.Position, {hero = data.hero, playerUserId = player.UserId})
         elseif h.FloorMaterial ~= Enum.Material.Air then h.Jump = true end
-    elseif (Config.Attacks[action] or action == "Special") and t >= (data.cooldowns[action] or 0) then performAttack(player, action, data) end
+    elseif (Config.Attacks[action] or action == "Special") and t >= (data.cooldowns[action] or 0) then performAttack(player, action, data,requestId) end
 end
 function Combat.SpawnEnemy(kind, position, healthScale)
     local spec = Config.Enemies[kind]
@@ -1367,7 +1377,9 @@ function Combat.Init()
             if x ~= pos.X or z ~= pos.Z then r.CFrame += Vector3.new(x - pos.X, 0, z - pos.Z) end
             local capabilities=enforceCapabilities(player,data)
             local speed = Config.Characters[data.hero].Speed + capabilities.moveSpeedBonus
-            h.WalkSpeed = t < data.stunnedUntil and 0 or (data.blocking and 8 or speed)
+            local swinging=t<data.busyUntil
+            h.AutoRotate=not swinging
+            h.WalkSpeed = t < data.stunnedUntil and 0 or (data.blocking and 8 or speed*(swinging and Config.AttackMoveScale or 1))
             h.JumpPower = (data.blocking or t < data.stunnedUntil) and 0 or Config.JumpPower
             if h.FloorMaterial ~= Enum.Material.Air then data.recovered = false end
             data.guard = math.max(0, data.guard - dt * (data.blocking and 3 or 14))

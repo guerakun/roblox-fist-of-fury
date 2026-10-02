@@ -1,0 +1,45 @@
+-- Real policy modules composed with production Config/Toolbox data; no physical dispatch claim.
+return function(Ledger,Gesture,Mixer,Config,Clips)
+    local ps=game.Players.LocalPlayer and game.Players.LocalPlayer.PlayerScripts.NightfallClient
+    Ledger=Ledger or require(ps.AttackPresentation);Gesture=Gesture or require(ps.MouseCombatGesture);Mixer=Mixer or require(ps.PoseMixer)
+    Config=Config or require(game.ReplicatedStorage.Nightfall.Shared.Config);Clips=Clips or require(game.ReplicatedStorage.Nightfall.Shared.ToolboxAnimations)
+    local n=0;local function check(v,m)n+=1 assert(v,m)end
+    local state={hero="Gale",status="Combat",actorLife=3,cooldowns={},busyRemaining=0}
+    local ledger=Ledger.new(Config);ledger:Update(state,10)
+    local first=ledger:Predict("Light",10);check(first and first.action=="Light","first light predicts")
+    for i=1,39 do check(ledger:Predict("Light",10+i*.01)==nil,"spam cannot restart swing")end
+    local echo=ledger:Echo({kind="Attack",action="Light",actorLife=3,attackId=1,requestId=first.requestId,startAt=10.03,duration=.4,combo=1},10.08)
+    check(echo and echo.matched and echo.startAt==10,"accepted echo keeps prediction clock")
+    check(math.abs(ledger.cooldowns.Light-10.47)<1e-6,"accepted server clock reconciles cooldown")
+    check(ledger:Echo({action="Light",actorLife=3,attackId=1},10.1)==nil,"duplicate accepted event ignored")
+    local second=ledger:Predict("Light",10.48);check(second and second.action=="Light2","second combo variant")
+    ledger:Echo({action="Light",actorLife=3,attackId=2,requestId=second.requestId,startAt=10.48,duration=.4,combo=2},10.5)
+    local third=ledger:Predict("Light",10.93);check(third and third.action=="Light","third combo retains authored first variant")
+    check(ledger:Predict("Heavy",11)==nil,"cross-action busy gate")
+    -- A rejection may change predicted combo, but the next authoritative combo repairs it.
+    ledger:Echo({action="Light",actorLife=3,attackId=3,requestId=third.requestId,startAt=10.93,duration=.4,combo=1},11)
+    local nextLight=ledger:Predict("Light",11.38);check(nextLight.action=="Light2","accepted combo repairs parity")
+    check(ledger:Echo({action="Light",actorLife=2,attackId=99,startAt=11.38,duration=.4},11.4)==nil,"old life ignored")
+    ledger:Reset(4);check(ledger.serverBusyUntil==0 and next(ledger.pending)==nil,"reset clears stale state")
+    state.actorLife=4;ledger:Update(state,20)
+    local a=ledger:Predict("Light",20);local b=ledger:Predict("Light",20.45)
+    check(ledger:Echo({action="Light",actorLife=4,attackId=4,requestId=a.requestId,startAt=20.2,duration=.4,combo=1},20.5)==nil,"delayed old echo cannot replace newer prediction")
+    local delayed=Ledger.new(Config)
+    delayed:Update({hero="Gale",status="Combat",actorLife=1,cooldowns={},busyUntil=30.4,busyRemaining=.4},30.2)
+    check(delayed.serverBusyUntil==30.4,"receipt latency does not extend absolute busy deadline")
+    check(delayed:Predict("Light",30.45)~=nil,"late snapshot permits action after true deadline")
+    local g=Gesture.new();g:Begin(Vector2.zero,1);check(g:Finish(Vector2.new(2,1),1.1),"short still RMB tap")
+    g:Begin(Vector2.zero,2);g:Move(Vector2.new(8,0));check(not g:Finish(Vector2.zero,2.1),"locked pointer drag uses delta")
+    g:Begin(Vector2.zero,3);check(not g:Finish(Vector2.zero,3.4),"long hold remains camera-only")
+    g:Begin(Vector2.zero,4);g:Cancel();check(not g:Finish(Vector2.zero,4.1),"focus/modal cancellation cannot fire on release")
+    check(not g:Finish(Vector2.zero,5),"unowned release ignored")
+    check(Mixer.Weight(0,.4)==0 and Mixer.Weight(.4,.4)==0,"action envelope has no boundary snap")
+    check(Mixer.Weight(.15,.4)==1,"strike has full pose weight")
+    local pose=Mixer.Sample(Clips.Light,.1);check(typeof(pose.Torso)=="CFrame","actual Toolbox sampling retained")
+    local neutral=Mixer.Blend({Torso=CFrame.identity},pose,0);check(neutral.Torso==CFrame.identity,"zero-weight transition neutral")
+    local grounded=Mixer.Ground({Torso=CFrame.new(1,2,3)});check((grounded.Torso.Position-Vector3.new(.12,.24,.36)).Magnitude<1e-5,"locomotion offsets damped")
+    local still={};Mixer.Locomotion(still,Clips,0,true,1,0);check(still.phase==0 and still.walk==0,"blocked movement does not walk in place")
+    local moving={};Mixer.Locomotion(moving,Clips,16,true,1,1);check(moving.phase==1 and moving.walk>.99,"cycle driven by actual speed")
+    local airborne={};Mixer.Locomotion(airborne,Clips,16,false,.1,1);check(airborne.walk==0,"airborne has separate pose")
+    return {passed=true,checks=n,physicalInputVerified=false,actualMainPlaybackVerified=false}
+end

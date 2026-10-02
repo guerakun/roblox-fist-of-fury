@@ -46,7 +46,7 @@ return function(modules)
                         risk.Render(name=="Touch")
                         game:GetService("RunService").RenderStepped:Wait()
                         check(widgets.pad.Visible==(name=="Touch")and widgets.jump.Active==(name=="Touch"),"Layout agrees with mode")
-                        check(labels[1].Text==(name=="Touch"and "TAP"or name=="Gamepad"and "X"or "J"),"Captions agree")
+                        check(labels[1].Text==(name=="Touch"and "TAP"or name=="Gamepad"and "X"or "LMB / J"),"Captions agree")
                         for _,button in ipairs(widgets.buttons)do check(button.AbsoluteSize.X>=44 and button.AbsoluteSize.Y>=44,"44px target")end
                         check(not overlaps(widgets.settings,widgets.progress)and not overlaps(widgets.settings,widgets.top)and not overlaps(widgets.progress,widgets.encounter),"Header controls separate")
                         check(not overlaps(widgets.health,widgets.style)and not overlaps(widgets.warning,widgets.abilities),"Readout separation")

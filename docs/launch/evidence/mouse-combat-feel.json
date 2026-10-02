@@ -1,0 +1,605 @@
+{
+  "date": "2026-10-02",
+  "workOrder": "WO-3D.3",
+  "baseline": {
+    "sourceCommit": "c531638",
+    "dash": {
+      "samples": [
+        {
+          "x": 0,
+          "time": 0.033391499891877174,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.005341341253370047
+        },
+        {
+          "x": 0,
+          "time": 0.06666649994440377,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.000991883222013712
+        },
+        {
+          "x": 0,
+          "time": 0.10065819998271763,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.0005224441410973668
+        },
+        {
+          "x": 0,
+          "time": 0.13410289981402457,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.16776530002243817,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.20012719999067485,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.23477309988811612,
+          "z": 0.4311814308166504,
+          "vz": 13.110908508300781,
+          "vx": 0,
+          "vy": 0.016134293749928474
+        },
+        {
+          "x": 0,
+          "time": 0.26775219989940524,
+          "z": 1.8576078414916992,
+          "vz": 56.484169006347656,
+          "vx": 0,
+          "vy": 0.06950946152210236
+        },
+        {
+          "x": 0,
+          "time": 0.3003700999543071,
+          "z": 2.6136386394500732,
+          "vz": 73.99999237060547,
+          "vx": 0,
+          "vy": 0.08823202550411224
+        },
+        {
+          "x": 0,
+          "time": 0.33363040001131594,
+          "z": 5.507578134536743,
+          "vz": 74,
+          "vx": 0,
+          "vy": 0.04268974810838699
+        },
+        {
+          "x": 0,
+          "time": 0.3664381999988109,
+          "z": 7.461430072784424,
+          "vz": 74,
+          "vx": 0,
+          "vy": 0.013233338482677937
+        },
+        {
+          "x": 0,
+          "time": 0.40024470002390444,
+          "z": 10.355730056762695,
+          "vz": 74,
+          "vx": 0,
+          "vy": 0.007369591388851404
+        },
+        {
+          "x": 0,
+          "time": 0.43335879989899695,
+          "z": 13.062041282653809,
+          "vz": 74,
+          "vx": 0,
+          "vy": 0.0009494327241554856
+        },
+        {
+          "x": 0,
+          "time": 0.466990299988538,
+          "z": 15.798465728759766,
+          "vz": 67.47901916503906,
+          "vx": 0,
+          "vy": 0.000452493317425251
+        },
+        {
+          "x": 0,
+          "time": 0.4998600999824703,
+          "z": 18.498807907104492,
+          "vz": 57.045196533203125,
+          "vx": 0,
+          "vy": 4.597037332132459e-06
+        },
+        {
+          "x": 0,
+          "time": 0.5345703999046236,
+          "z": 20.09072494506836,
+          "vz": 52.52357482910156,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.5671903998591006,
+          "z": 21.12786102294922,
+          "vz": 44.85797119140625,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": -1.9073486328125e-06,
+          "time": 0.600128100020811,
+          "z": 22.44388198852539,
+          "vz": 41.14680480957031,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.6336292999330908,
+          "z": 23.91653060913086,
+          "vz": 29.19730567932129,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.6673961998894811,
+          "z": 24.841503143310547,
+          "vz": 24.83322525024414,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.6999287998769432,
+          "z": 25.3217716217041,
+          "vz": 16.893016815185547,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.7342215999960899,
+          "z": 25.69428062438965,
+          "vz": 12.018223762512207,
+          "vx": 0,
+          "vy": 0
+        }
+      ],
+      "passed": false,
+      "accepted": true,
+      "cooldownBefore": 0,
+      "targetFailure": "Accepted idle dash must travel3..14 studs and settle below2 studs/s by.7s without side drift",
+      "targets": {
+        "maximumCrossDrift": 1,
+        "maximumEndSpeed": 2,
+        "maximumTravel": 14,
+        "minimumTravel": 3
+      },
+      "endHorizontalSpeed": 12.018223762512207,
+      "delta": [
+        0,
+        0.0063495635986328125,
+        25.69428062438965
+      ],
+      "scriptedIdleRequest": true,
+      "hardwareInputVerified": false,
+      "cooldownAfter": 1790977591.8481522
+    }
+  },
+  "after": {
+    "idleDash": {
+      "samples": [
+        {
+          "x": 0,
+          "time": 0.034106200095266104,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.007823331281542778
+        },
+        {
+          "x": 0,
+          "time": 0.06757920002564788,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.0013883591163903475
+        },
+        {
+          "x": 0,
+          "time": 0.10052590002305806,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.0006786324083805084
+        },
+        {
+          "x": 0,
+          "time": 0.1339589999988675,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 4.010286647826433e-05
+        },
+        {
+          "x": 0,
+          "time": 0.16795739997178316,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.20089540001936257,
+          "z": 0,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.2337915999814868,
+          "z": 0.3616058826446533,
+          "vz": 7.297327041625977,
+          "vx": 0,
+          "vy": 0.009337905794382095
+        },
+        {
+          "x": 0,
+          "time": 0.26769750006496906,
+          "z": 2.267747163772583,
+          "vz": 45.76390838623047,
+          "vx": 0,
+          "vy": 0.05856103450059891
+        },
+        {
+          "x": 0,
+          "time": 0.30062639992684126,
+          "z": 3.1548990607261658,
+          "vz": 58,
+          "vx": 0,
+          "vy": 0.07014075666666031
+        },
+        {
+          "x": 0,
+          "time": 0.33403309993445873,
+          "z": 5.5302348136901855,
+          "vz": 58,
+          "vx": 0,
+          "vy": 0.03564603999257088
+        },
+        {
+          "x": 0,
+          "time": 0.36769420001655817,
+          "z": 7.6335906982421875,
+          "vz": 58,
+          "vx": 0,
+          "vy": 0.005101031623780727
+        },
+        {
+          "x": 0,
+          "time": 0.40101519995369017,
+          "z": 8.23622179031372,
+          "vz": 42.13673400878906,
+          "vx": 0,
+          "vy": 0.0030601033940911293
+        },
+        {
+          "x": 0,
+          "time": 0.43463029991835356,
+          "z": 9.375611305236816,
+          "vz": 7.954249858856201,
+          "vx": 0,
+          "vy": 0.0009737701620906591
+        },
+        {
+          "x": 0,
+          "time": 0.4669494000263512,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.0004482842923607677
+        },
+        {
+          "x": 0,
+          "time": 0.5007034000009298,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0.00018585188081488013
+        },
+        {
+          "x": 0,
+          "time": 0.5341401000041515,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 3.8353027775883675e-07
+        },
+        {
+          "x": 0,
+          "time": 0.5672321999445558,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.6010131000075489,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.633685200009495,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.6673439999576658,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        },
+        {
+          "x": 0,
+          "time": 0.7005121000111103,
+          "z": 9.6407470703125,
+          "vz": 0,
+          "vx": 0,
+          "vy": 0
+        }
+      ],
+      "passed": true,
+      "accepted": true,
+      "cooldownBefore": 0,
+      "targets": {
+        "maximumCrossDrift": 1,
+        "maximumEndSpeed": 2,
+        "maximumTravel": 14,
+        "minimumTravel": 3
+      },
+      "endHorizontalSpeed": 0,
+      "delta": [
+        0,
+        0.007498264312744141,
+        9.6407470703125
+      ],
+      "scriptedIdleRequest": true,
+      "hardwareInputVerified": false,
+      "cooldownAfter": 1790977835.322307
+    },
+    "movingDash": {
+      "crossDrift": 0,
+      "forwardSpeed": 21,
+      "peakForwardSpeed": 57.99999237060547,
+      "hardwareInputVerified": false,
+      "accepted": true,
+      "passed": true,
+      "travelZ": 20.14560890197754,
+      "scriptedInput": true,
+      "walkSpeed": 21
+    },
+    "playbackPolicy": {
+      "passed": true,
+      "checks": 65,
+      "actualMainPlaybackVerified": false,
+      "physicalInputVerified": false
+    },
+    "dashActuator": {
+      "passed": true,
+      "checks": 27
+    },
+    "inputMode": {
+      "passed": true,
+      "checks": 25,
+      "physicalInputVerified": false
+    },
+    "attackRhythm": {
+      "actualMainAcceptedPlaybackVerified": true,
+      "duringSpeed": 7.349999904632568,
+      "hardwareClicksVerified": false,
+      "passed": true,
+      "requests": 12,
+      "echo": {
+        "actorLife": 2,
+        "action": "Light",
+        "attackId": 1,
+        "startAt": 1790978500.195277,
+        "duration": 0.4,
+        "combo": 1,
+        "requestId": 1
+      },
+      "baseSpeed": 21,
+      "restoredSpeed": 21,
+      "localPredictionVerified": false,
+      "presentationPoseStart": 1790978500.195277,
+      "busyRemaining": 0.3822941780090332,
+      "presentationStarts": 1,
+      "accepted": 1
+    }
+  },
+  "limitations": [
+    "Scripted fixtures are not physical mouse/controller/touch acceptance or a human animation comfort verdict.",
+    "New timing and speeds need human co-op/balance review. No live publication/service changes.",
+    "Accepted-event playback verified in actual Main; local prediction plus echo is a composed policy test, not physical click dispatch. Existing campaign/co-op/launch gates remain open."
+  ],
+  "tuning": {
+    "Light": {
+      "cooldown": 0.44,
+      "actionDuration": 0.4,
+      "previousCooldown": 0.32
+    },
+    "Heavy": {
+      "cooldown": 0.95,
+      "actionDuration": 0.55
+    },
+    "SpecialDuration": {
+      "Gale": 0.7,
+      "Piston": 0.86,
+      "Tide": 0.66
+    },
+    "walkSpeed": {
+      "before": [
+        23,
+        21,
+        24
+      ],
+      "after": [
+        21,
+        19,
+        22
+      ],
+      "order": [
+        "Gale",
+        "Piston",
+        "Tide"
+      ]
+    },
+    "attackMoveScale": 0.35,
+    "dash": {
+      "speed": 58,
+      "burst": 0.16,
+      "brake": 0.08,
+      "pose": 0.3,
+      "oldSpeed": 74,
+      "oldBurst": 0.18,
+      "oldBrake": 0
+    }
+  },
+  "findings": [
+    "Local.15s animation throttle was shorter than.383/.4 imported punch clips; local prediction and unconditional accepted FX both rewound the same animation.",
+    "Dash actuator previously disappeared without braking, leaving residual horizontal velocity.",
+    "Velocity-driven locomotion replaces input-intent walk playback; one R6 mixer owns animation, with grounded/air/action transitions.",
+    "Moving-dash fixture initially could pass ordinary walking; fixed before execution to require own accepted Dash FX and peak>40.",
+    "Absolute server busy/cooldown deadlines reconcile latency without extending lock by receipt time; delayed echo preserves predicted animation clock."
+  ],
+  "sourceValidation": {
+    "studioSourceMatches": 86,
+    "compileErrors": 0,
+    "ipGateFiles": 270,
+    "ipGateHits": 0,
+    "independentReview": "combat/client, presentation/server, world/final deadline and lifecycle: PASS",
+    "candidateStopped": true
+  },
+  "sourceHashes": {
+    "src/client/ActionCapabilities.lua": "7f504f2d136a5918e9c8a3e2d9fae3a6d1999f0fad253d4582bcda50d053ebee",
+    "src/client/ArenaView.lua": "33055c421e695a13f29147d3baf98806bef69c484d6a7dcab8de0974d373dc54",
+    "src/client/AttackPresentation.lua": "714f93695b54fcb8f70fb32715e92aecd4b8e07bba614afc6db85f3be75556be",
+    "src/client/BoonDisplay.lua": "a181882e57820bb2e64090229934e0a65e387fa30cb6226f43efcd17b1793a29",
+    "src/client/BossEffects.lua": "f33217ecc2ff1d17a6f7001609ccc830c274095bf5cb02d081092d3188eccde3",
+    "src/client/CampaignTravel.client.lua": "7ed2892772cb4618d039b378e3908baf15db1f50bb3011f947af35a6de57bdc1",
+    "src/client/CombatHUD.lua": "82f226b9103641b6d74e3faa950ee8e7e4a4210a38dffccb0e50578ebfa49d05",
+    "src/client/CombatVisualGeometry.lua": "383672540dce5a50046903ccfef79aa5febcec92173b09ca64e895213599fc8e",
+    "src/client/CompactHUDLayout.lua": "112286621d40bb4410f191347a6f3c291e79493a2cbd7654d20c58ffee8b4fb6",
+    "src/client/DesperationControl.lua": "d22173b7c27a029ffb19a9303a5ec237620bb924a56f98d11acf0c2f979705ff",
+    "src/client/DesperationHUD.lua": "3b6294d9b73448dd5d33d2085f24e80946fcf666784578547e3c760ba35ab686",
+    "src/client/DistrictHUD.lua": "30af90964bffd537f231cbcc2810bd17e0349fac277b1919560dc2a8964bd06d",
+    "src/client/DistrictResultModel.lua": "e98b9bf928706870389b7899d3161cb4fb99fe7101f6facd4d580dfa94206128",
+    "src/client/EnemyPresentation.lua": "4aee5a1e5af42bd31ee1d29a0e658901bba287662a94ac41e6a594f6a42ba45c",
+    "src/client/FocusGuard.lua": "41b15216a9186cd320b779cfd42ca2755dfbd1b6bc3fb40749d9fedc78f9a4a2",
+    "src/client/HeroSpecials.lua": "69707270bcc5e8c07798743eecc42fa17da8cbc948b7610f740b0204a0bcab07",
+    "src/client/InputMode.lua": "94d3c43f8af2b6b16c2f191499b402668f11ec9e62eab3abbda08ca40b7cf514",
+    "src/client/Main.client.lua": "11a9560f0678354bd9aec6695c6e603a77080685727319981751db3fb62525d3",
+    "src/client/MouseCombatGesture.lua": "122c198d6642dbb425652d0de6f024b1f2573b8820300863f090c8b9c809e95b",
+    "src/client/NativeCamera.lua": "0ff1edfdcf317c9aded3a2af36681825e4cf54ad0612028dca186295ee3282d5",
+    "src/client/PoseMixer.lua": "d87a83a76e325d1b704fbd4bdf3d8553b182eebca2c6aaff8dd6d45595121e15",
+    "src/client/ProgressionUI.lua": "5ec329384b6bec6f3d7109d3a8549b59bff8b7c149199ba1f46bfbdf92fdd848",
+    "src/client/RescueTouchLayout.lua": "35279361f49995cb8af8a74efb34cd306d0ec93177cf1b93c4232b1523597ba3",
+    "src/client/ReviveControl.lua": "41dc65f1e14f0050d441f0f4cd38fb75d452cbabae9ed8856278c7a89d591e40",
+    "src/client/ReviveHUD.lua": "527258dbab7d9f646eb176f11d3d9db5f272bd8f866fb7b34d20f86222576984",
+    "src/client/RiskFeedback.lua": "2db35775de36c20320207dc106153d8a301f819122e8162d7d170ed06cb85366",
+    "src/client/StageAudio.lua": "aba56849cdf306bca338b2c1beb763ff9c44be091748c0006ef1d21d19eff8af",
+    "src/server/AchievementPolicy.lua": "11a0df02d19b150cae9c4212b44554b531ea954682f05c6939e52c9275cd3dda",
+    "src/server/AchievementService.lua": "5ef7e2ec07f4735aa42a06130533918a01be58de7d4779ab8a5a13529a2be340",
+    "src/server/ActionDiversity.lua": "d509965643025c829f2540cac447b8b0dc0fbb21a7498340bc9857704b21d31d",
+    "src/server/AnalyticsJournal.lua": "0b653d31bbea88c1017fe3b493ec20e96d9e24fb4c1053e2823c57409740a29b",
+    "src/server/AreaTraversalPolicy.lua": "2db571ed5de21440d3323d6d6366f7f8b3e9aa7909c226aac0aaec5ef5e7f982",
+    "src/server/ArtAssetsInstaller.lua": "be36d715d5d2b0cb37298d0cc6dc2288d915e6bcb628045e021ca1ba3c7ce28c",
+    "src/server/AssetInstaller.lua": "54e19748afa00a6621ea36144703f6f1f3e6f6d969c272c55ff8e90ae94a8c04",
+    "src/server/AttackDirector.lua": "1755d1c3305904e0d0dbc869d9efc2e4c99bec8c2b399b146f7cdcf0a2ea57d0",
+    "src/server/BoonPolicy.lua": "730bd11fb020f0fd1021ba56f62f98ea4fc8587c4e3194c98c1c0bbe8d1d1402",
+    "src/server/Bootstrap.server.lua": "3da1bda72896f1e8a7d1077a9d5434b19d0288e668cc4a9cc3680197ba061913",
+    "src/server/CameraViewPolicy.lua": "156e1715111307f79cee814f6efeb61f5cab91eb9d7d5ff6c872716fd0dc79c0",
+    "src/server/CampaignAdmission.lua": "529935fcc7e654ff0bca676d9d4b18cf0b1ccfcfd1c29b6541c60422468f06cf",
+    "src/server/CampaignRewardBook.lua": "5f33df7b6e3bbd8b70795ccbec90088310f3ab68c4e5aa504189aa8bcb57fd69",
+    "src/server/CampaignSession.lua": "754505ba41a2bb973fd59e465d6d26831ca14b6e5ea7fd62af1a8d5163f92bdd",
+    "src/server/CharacterFactory.lua": "a8f392b9e3375aa67806123d87460ca938bee9fc4164d5128868d56f5f797f82",
+    "src/server/CombatModifiers.lua": "61d7f3a5e3107f38e328c5011adff42658846721e9b025370c3155bca5682c8c",
+    "src/server/CombatService.lua": "51eb68d19c5104cae361dce19a9e7a4769440ea7dd68c6788dd6cc585813a972",
+    "src/server/CombatTelemetry.lua": "8b0ca92897fcf930edaf32bce57374fdcc3cd78f62ba7595f21089e82ebbf6cc",
+    "src/server/DashMotion.lua": "7acf99d3b157ba2056eb6c54d2fbe9802626eeae179b231a40d7b90e3aab15c5",
+    "src/server/DeparturePreparation.lua": "488e0285d1f2d1208a0af70758cdab7bafe6b6ee88d0ec32c272c249957bc303",
+    "src/server/DestructionService.lua": "d3c560b99e719981472daf020c81027b2ae5a235493c421c1347841408cb5935",
+    "src/server/DifficultyPolicy.lua": "82ec0c352e0dd9a06041e27800ef5beca7158d639a158c3dc199aac53fffefd7",
+    "src/server/DistrictLedger.lua": "4a3899206605aaa1d0b973dc49689b840f7da2efb47ee725656d691ccc8f5240",
+    "src/server/EncounterService.lua": "2945ea62a765ac7c221b8fbfea4b819c42ce416a96e79cbf586c3310360bd3ad",
+    "src/server/EnemyAI.lua": "9df9c5a1cfcd9f5d86857a18076ba82be592ca499f8fcb18858d62d2c85b5f4d",
+    "src/server/EnemyFactory.lua": "fe004924c6dc36d19a3d90b4a1d0ffb4bb2c2cf92b68de9d2dfd178144e1738f",
+    "src/server/EnemyFootwork.lua": "1083e76bcb992f408868b7d721a3f30889d46f3ecf02ca2103651abb6ed2195a",
+    "src/server/EnemyMoves.lua": "21d5b1c5462095cd49f7a544ed1621a4f480fbe22435bf67d7727ea116c8f04c",
+    "src/server/EnemyOpportunityDiagnostics.lua": "67462a944cc205f6dc2de977e4d31dc36992ff527cb34681c4fc8631655f6b02",
+    "src/server/EnemyWavePlanner.lua": "c1ca197d51bacf21cf7c0e5774e9f7b3a4a4f42858a369d46b8bdac8500af3f1",
+    "src/server/LaunchAnalytics.lua": "1df927dfb16d60a94aa5c4b4c15ebd6e15073f7a92fcd889075d45645fc53b08",
+    "src/server/MatchmakingAdapter.lua": "0e97a0875a60e784aa6c7b2aa2517b5e93243d269168ed1e2f8568bf1224d33b",
+    "src/server/MatchmakingService.lua": "ade658dc18eb1e24931a49cb8c0e69384cdf992bed096fd090e77b0f9c7ecda4",
+    "src/server/PickupRegistry.lua": "24a94da65f2f7736800ed05cd5a96cf53f289a4f1d2437a7d7f365be5f4ef518",
+    "src/server/PickupVisuals.lua": "143a170da3d7f60af964392892a47761c6bf07a3a5fd689aafdffa44c679908f",
+    "src/server/PressurePolicy.lua": "ae4fdbc29b5bae5fab7ce0d5a34fcf8a7ebb2bfad42ef1b54ea2dd92d3c18edd",
+    "src/server/ProfileStore.lua": "490558e5bcea1f8dc76fd36c34dbba0e185d3d1410820e698e0bbf5b39b2b7b8",
+    "src/server/ProgressionService.lua": "2b065a07f6e8bf8b5acb2180905e572245afab6b45f5790029d330b9dbf1e353",
+    "src/server/ReturnPartyService.lua": "e8f98c08b42bb3b2094ce5aaa0d50208380678ded71b981c1698c9a11bf3a6e8",
+    "src/server/RewardPolicy.lua": "1606955efabf40787043bfef9719a76e186c47b86862ee618e7657dda82bd697",
+    "src/server/RiskPolicy.lua": "885873f99c0d26c0cd09f8df510acf81a948fb268024d8cebe3d52fe30926fcc",
+    "src/server/ScorePickupService.lua": "d005f4db6048bed686266062a2111aaf426c5b7c05af621489be7a8681ba3f2b",
+    "src/server/StylePolicy.lua": "e8f70587007cc7e03553ef7ce2198f31c28ca48b8c8ecbe8ca72bdb09f4fa411",
+    "src/server/SurvivalPolicy.lua": "405a0369d977e164b5e0d33f846412f4a37497e8a866d6cb4eed0090bee2e8c4",
+    "src/server/TeleportCoordinator.lua": "c56a4a87cb68429538dc4bade7a2537a5d627b3360ec13e8cc671a6acde3418d",
+    "src/server/WorldBuilder.lua": "0c18470b0cb1374a5eca4b2277c2edf7bc90a5a1bfc2e9c1e4ea41336f0a0e9d",
+    "src/shared/AchievementConfig.lua": "5c1cbfbbb4ce5e0539f93b6ba5d3618e6a097c8c83baad91b762b9ae67a0d49d",
+    "src/shared/ArenaMath.lua": "fc2c82cbc6443f46f7bc2820d1586bef9d98faf2175b95f0f25b2c13fd433a2b",
+    "src/shared/CameraBounds.lua": "0ae58452f3d594610a8f68d7fd136e7f90989c705e142f495038dcc77823785b",
+    "src/shared/CameraVisibility.lua": "b5bc2701c7466d1573f202f05c2007ba44262b8d0b2e3acc73500141c64d2eef",
+    "src/shared/CharacterArt.lua": "60a2dc29cd24977c30236d9ea4d6d453fbdd61bf70fea6485dc1a9732654e187",
+    "src/shared/CombatMath.lua": "2235a3920f5d1c5794f112983510b298fddf3203422a74731576a36774bfae70",
+    "src/shared/Config.lua": "9cd56fc033c9621d328f68729f4f739299f319b4cf30c76a1f0919a6d91163d7",
+    "src/shared/EnemyArchetypes.lua": "b85c9446a9c02d7ec72fe87e638c3695ec92a802ccd9c3ab0cf67f08d6d509c9",
+    "src/shared/HeatConfig.lua": "1cb935d3464fe3515d9cdbcc63f1b5a8c619f4e75bac0b13fd33000ebf9e701f",
+    "src/shared/PlaceIds.lua": "d9d39007f18663bb18657d1fea9e968e83f8591c2b4c89065728fe9aef603e1e",
+    "src/shared/ProgressionConfig.lua": "53fb3ae534e0585186a429a4241a979e1e862464dc0c0bc2f927d69aed767127",
+    "src/shared/ToolboxAnimations.lua": "f36139a1a62eccceca4017f5666c75d5e7fb3e001f89ffbb607a4bfb22555be7",
+    "src/shared/ToolboxHitbox.lua": "436ad700b86cfd8b3732b2ba59c0762e9353205d57546db0ad74ad1a6e963611",
+    "src/hub/client/Deploy.client.lua": "877ba02c7a83bc53474b6942b38eac3a54eb02e85e68f44cf9bd5b885757f439",
+    "src/hub/client/HeatDisplay.lua": "c99954fcdce4fef8ae7f202d48161bfa92229385d141ceca162575e9467ff6f0",
+    "src/hub/server/Bootstrap.server.lua": "3cf3e780fb34c78e790b2d5346beb092bf8746b5eb75ddf0c81cbcb552f72b9c",
+    "src/hub/server/HubService.lua": "d70553fed53541e3e7aab594235e98bfee62a2f6d3c0c962eb98220421eb62fb",
+    "src/hub/server/HubSnapshotCache.lua": "daacb9845958db94bd46e3d27272c1b7cfbf0fa30ef8b5d78ab064d75abdb4bc",
+    "src/hub/server/HubWorld.lua": "e83fbf8489ff6cb2e67b9ef900ba6181827c747b478963d6d43f02e2b6b0d506",
+    "src/hub/server/InvitationCache.lua": "3da73844fd0d1b757102da127075c1b8635946c69257b53973145380f823698d"
+  }
+}

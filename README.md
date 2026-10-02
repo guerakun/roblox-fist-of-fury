@@ -7,10 +7,10 @@ An original anime-styled Roblox co-op beat-em-up across controlled 3D arenas in 
 ## Play
 Open [places/CurtainBreak-ThirdPerson.rbxl](places/CurtainBreak-ThirdPerson.rbxl) in Roblox Studio and press Play to generate the world. Choose a hero, then press Enter / READY. Every connected player must ready up.
 
-- Hold the right mouse button and drag to rotate the camera; use the scroll wheel to zoom.
+- Hold the right mouse button and drag to rotate the camera; use the scroll wheel to zoom. A short right-button tap requests Heavy.
 - WASD moves relative to the camera across the full arena floor; equal cardinal speed and normalized diagonals. Space jumps / requests air recovery.
-- Mouse1 or J light combo, K heavy launcher, L special.
-- Q dash, F hold block, E recovery.
+- Left mouse button light combo; right mouse tap heavy launcher; E hero special. J / K / L remain Light / Heavy / Special aliases.
+- Q dash, F hold block, Space ground jump / air recovery.
 - 1 Rook Calder (Gale), 2 Bo Marlowe (Piston), 3 Isla Veyra (Tide) in safe areas. Candidate display names await owner approval.
 - P opens chapter rewards, coin cosmetics and earned boons; O opens settings.
 - Clear each enclosed area to open its exit, then move right together to the next rally marker. Each district has two enemy groups, a miniboss and a boss.
@@ -59,3 +59,5 @@ Earlier local co-op observations remain in [VALIDATION](docs/VALIDATION.md). Ret
 The earlier game used a narrow foreground/background lane, a party-following side-view camera, and skirmish/miniboss/skirmish/boss ordering. Those designs and their measurements remain preserved in the dated notes and Git history. The owner superseded them with full XZ arenas on 2026-10-02.
 
 The initial fixed elevated 3D camera was superseded by the owner's normal rotatable third-person request (WO-3D.2). Its earlier fixed-camera evidence is retained as history, not proof of the native camera or expanded surroundings.
+
+WO-3D.3 changes the primary mouse/keyboard combat layout and attack presentation timing. The current source uses server-accepted action timing, a shorter dash with braking, and slower movement during attacks; see [CONTROLS](docs/CONTROLS.md). These changes still require the root-run checks and hands-on feel review recorded in PROGRESS; this note does not claim that animation smoothness or control feel is verified. The previous E recovery / L special primary layout is retained as history.

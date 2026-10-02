@@ -5,7 +5,9 @@ return function(Mode)
     local function check(value,message)n+=1 assert(value,message)end
     local mode=Mode.new({keyboard=true,touch=true,gamepad=true})
     check(mode:Get()=="Keyboard","Touch capability does not force touch layout")
-    check(mode:Captions()[1]=="J"and mode:Captions()[5]=="HOLD F","Keyboard captions")
+    check(mode:Captions()[1]=="LMB / J"and mode:Captions()[5]=="HOLD F","Keyboard captions")
+    check(mode:Captions()[3]=="E / L","E primary Special with legacy L alias")
+    check(mode:Captions()[6]=="SPACE","Space keyboard air recovery")
     local transitions={}
     local sub=mode:Subscribe(function(value,previous)table.insert(transitions,{value,previous})end)
     mode:Observe("MouseMovement","Unknown",90)check(mode:Get()=="Keyboard","Mouse move ignored")
