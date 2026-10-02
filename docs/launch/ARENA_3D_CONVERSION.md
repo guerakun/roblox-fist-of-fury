@@ -1,6 +1,6 @@
 # Controlled 3D arena conversion
 
-Owner-directed scope change, 2026-10-02. Source implemented and scoped Studio checks executed; playable save is produced by root after the final action check. This is a prototype, not launch acceptance. Root owns Config/camera and all Studio runs; combat owns XZ hit logic, AI and encounter transitions; world owns geometry; presentation owns camera application, controls and visible tells.
+Owner-directed scope change, 2026-10-02. Source implemented and scoped Studio checks executed; playable campaign and hub rebuilt from source commit0ad61cc. This is a prototype, not launch acceptance. Root owns Config/camera and all Studio runs; combat owns XZ hit logic, AI and encounter transitions; world owns geometry; presentation owns camera application, controls and visible tells.
 
 ## Play space and progression
 
@@ -37,3 +37,9 @@ Full human fights, physical co-op arrivals/revive/retry, camera transition reada
 ## Preserved prior direction
 
 The original controlled side-view beat-em-up route, per-district continuous lane, third-area escalation and broad camera chase remain design history, not deleted ideas. Their saved images, HumanBot difficulty failure reports and tuning notes are preserved. The owner now requested a real3D arena experience; none of those earlier runs certify this new geometry, order or combat model.
+
+## Open this save
+
+Open [CurtainBreak3D.rbxl](../../places/CurtainBreak3D.rbxl) in Studio and press Play. The world is generated when simulation starts; Edit mode begins empty. Choose a hero, click into the game viewport, then press Enter or READY. The canonical [CurtainBreak.rbxl](../../places/CurtainBreak.rbxl) is byte-identical. [CurtainBreak-SideView.rbxl](../../places/CurtainBreak-SideView.rbxl) preserves the previous artifact for comparison. Build provenance and SHA256 hashes are in [arena-3d-build.json](evidence/arena-3d-build.json). Both campaign and hub were rebuilt; live teleport validation is still pending.
+
+The current compact Studio viewport still crowds hero space with HUD elements. This is a testable direction, not a visual-polish or launch-ready acceptance. Next work order is WO-3D.2: hands-on Normal fights and physical co-op gate/rescue/retry checks, followed by measured tuning and HUD polish.
