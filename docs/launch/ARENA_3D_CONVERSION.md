@@ -20,13 +20,15 @@ Visibility is symmetric for player/NPC hits: an NPC hidden from a player's accep
 
 ## Current save and actual validation
 
+Saved source: c531638; campaign and hub rebuilt from that committed snapshot.
+
 Open [CurtainBreak-ThirdPerson.rbxl](../../places/CurtainBreak-ThirdPerson.rbxl) after closing the older open copy. Press Play, choose a hero, click the game viewport and Ready. Hold right mouse and drag to rotate; scroll to zoom. WASD follows the camera. The canonical CurtainBreak.rbxl and CurtainBreak3D.rbxl are refreshed aliases. An already-open Studio place does not reload changed disk contents automatically.
 
 Scoped current checks:72camera geometry,12receipt lifecycle,190relative movement,11native configuration. Actual client confirmed Custom camera/Humanoid subject/zoom8-28 and no presentation transform overwrites. Four scripted headings moved10.31-10.69studs with native follow error0.002-0.024studs. A CityCornerShop perimeter probe reduced native distance16to10.555studs at playerZ34, with the near-plane center line unobstructed. Initial fixture incorrectly tested camera origin; corrected to actual near-plane center. This is one wall/angle, not whole-plane or all-angle certification.
 
 The actual Main reporter/server fixture passed front/back visibility swaps after180degree camera rotation, visible/offscreen hit eligibility in both directions, stale incoming/outgoing rejection, stale Special with no cooldown cost, refresh resume and camera cleanup. Its camera orientation is scripted; physical mouse/controller/touch gestures remain unverified. The scripted full route passed12areas/9traverses/2district transfers in74.8969seconds, clearing enemies and relocating the party deliberately. It is not a full human combat/co-op test. All83production campaign sources matched the tested tree with zero compile errors; IP gate261files/zero hits.
 
-See [native-third-person-validation.json](evidence/native-third-person-validation.json) and the following native-third-person-build.json manifest for exact scope and saved source provenance. Human combat feel, physical co-op rescue/retry, compactHUD readability, device performance and existing launch gates remain open. The earlier fixed-camera figures below are preserved history.
+See [native-third-person-validation.json](evidence/native-third-person-validation.json) and [native-third-person-build.json](evidence/native-third-person-build.json) for exact scope and saved source provenance. Human combat feel, physical co-op rescue/retry, compactHUD readability, device performance and existing launch gates remain open. The earlier fixed-camera figures below are preserved history.
 
 ## Preserved WO-3D.1 fixed-camera prototype
 
